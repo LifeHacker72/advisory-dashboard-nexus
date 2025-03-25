@@ -4,7 +4,6 @@ import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import Sidebar from "./Sidebar";
 import { Bell, User, Search } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -55,16 +54,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-border bg-background/95 backdrop-blur-md px-6">
           <div className="flex-1">
             <h1 className="text-xl font-semibold tracking-tight">{pageTitle}</h1>
-          </div>
-          
-          <div className="hidden md:flex items-center gap-1 md:gap-2">
-            <Tabs defaultValue="all">
-              <TabsList className="h-8">
-                <TabsTrigger value="all" className="text-xs">All</TabsTrigger>
-                <TabsTrigger value="active" className="text-xs">Active</TabsTrigger>
-                <TabsTrigger value="archived" className="text-xs">Archived</TabsTrigger>
-              </TabsList>
-            </Tabs>
           </div>
           
           <div className="flex items-center gap-2">

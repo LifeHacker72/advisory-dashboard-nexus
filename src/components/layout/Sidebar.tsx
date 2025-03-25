@@ -9,7 +9,6 @@ import {
   LayoutDashboard, 
   ChevronLeft, 
   ChevronRight, 
-  Settings, 
   LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -122,18 +121,6 @@ export default function Sidebar() {
       
       <div className="mt-auto border-t border-sidebar-border p-2">
         <div className="space-y-2">
-          <Link 
-            to="/settings" 
-            className={cn(
-              "flex items-center rounded-md px-3 py-2 text-sm transition-colors",
-              "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              "text-sidebar-foreground",
-              collapsed ? "justify-center" : "justify-start"
-            )}
-          >
-            <Settings className={cn("h-5 w-5", collapsed ? "mx-0" : "mr-2")} />
-            {!collapsed && <span>Settings</span>}
-          </Link>
           <button 
             className={cn(
               "w-full flex items-center rounded-md px-3 py-2 text-sm transition-colors",

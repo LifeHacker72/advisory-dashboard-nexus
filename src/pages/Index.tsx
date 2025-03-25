@@ -1,45 +1,83 @@
 
-import { Users, UserCog, UserPlus, ListTodo, CalendarDays, DollarSign, TrendingUp, Users2 } from "lucide-react";
+import { Users, UserCog, UserPlus, ListTodo, CalendarDays, PhoneCall, Brain } from "lucide-react";
 import DashboardLayout from "@/components/layout/Dashboard";
 import { MetricCard } from "@/components/shared/MetricCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 
-const recentActivities = [
+const openTasks = [
   {
     id: 1,
-    user: "John Smith",
-    action: "New client activated",
-    time: "2 hours ago",
-    status: "success",
+    client: "John Smith",
+    summary: "Update investment portfolio based on market changes",
+    dueDate: "Jul 12, 2023",
+    priority: "high",
   },
   {
     id: 2,
-    user: "Sarah Johnson",
-    action: "Added as new advisor",
-    time: "4 hours ago",
-    status: "info",
+    client: "Sarah Johnson",
+    summary: "Review retirement planning options discussed in last call",
+    dueDate: "Jul 15, 2023",
+    priority: "medium",
   },
   {
     id: 3,
-    user: "Robert Davis",
-    action: "Completed onboarding",
-    time: "1 day ago",
-    status: "success",
+    client: "Robert Davis",
+    summary: "Send tax planning document as requested",
+    dueDate: "Jul 18, 2023",
+    priority: "medium",
   },
   {
     id: 4,
-    user: "Michael Wilson",
-    action: "Membership renewal",
-    time: "2 days ago",
-    status: "warning",
+    client: "Michael Wilson",
+    summary: "Follow up on insurance policy questions",
+    dueDate: "Jul 20, 2023",
+    priority: "low",
   },
   {
     id: 5,
-    user: "Lisa Anderson",
-    action: "Meeting scheduled",
-    time: "3 days ago",
-    status: "info",
+    client: "Lisa Anderson",
+    summary: "Schedule quarterly review meeting",
+    dueDate: "Jul 22, 2023",
+    priority: "high",
+  },
+];
+
+const upcomingCalls = [
+  {
+    id: 1,
+    client: "Emma Thompson",
+    type: "Quarterly Review",
+    date: "Today",
+    time: "11:00 AM",
+  },
+  {
+    id: 2,
+    client: "James Wilson",
+    type: "Initial Consultation",
+    date: "Today",
+    time: "2:30 PM",
+  },
+  {
+    id: 3,
+    client: "Michael Scott",
+    type: "Portfolio Review",
+    date: "Tomorrow",
+    time: "10:00 AM",
+  },
+  {
+    id: 4,
+    client: "Jennifer Davis",
+    type: "Retirement Planning",
+    date: "Wed, Jul 12",
+    time: "1:45 PM",
+  },
+  {
+    id: 5,
+    client: "Robert Brown",
+    type: "Tax Strategy",
+    date: "Thu, Jul 13",
+    time: "9:30 AM",
   },
 ];
 
@@ -68,7 +106,7 @@ export default function Index() {
             variant="success"
           />
           <MetricCard 
-            title="Pending Activations" 
+            title="Pending Onboarding" 
             value="8" 
             trend={{ value: 3, isPositive: false, label: "vs last month" }}
             icon={<UserPlus className="h-5 w-5 text-amber-600" />}
@@ -86,160 +124,64 @@ export default function Index() {
         <div className="grid gap-4 md:grid-cols-7">
           <Card className="md:col-span-4 glass-card">
             <CardHeader className="pb-2">
-              <CardTitle>Monthly Overview</CardTitle>
-              <CardDescription>Client acquisitions and renewals</CardDescription>
+              <CardTitle className="flex items-center">
+                <PhoneCall className="h-5 w-5 mr-2 text-primary" />
+                Upcoming Calls
+              </CardTitle>
+              <CardDescription>Next 5 scheduled client calls</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] flex items-center justify-center text-muted-foreground">
-                Chart will be displayed here
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="md:col-span-3 glass-card">
-            <CardHeader className="pb-2">
-              <CardTitle>Recent Activity</CardTitle>
-              <CardDescription>Latest updates from your team</CardDescription>
-            </CardHeader>
-            <CardContent className="px-2">
-              <div className="space-y-4">
-                {recentActivities.map((activity) => (
-                  <div key={activity.id} className="flex items-start p-2 hover:bg-accent/50 rounded-md transition-colors">
-                    <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center mr-3 mt-0.5">
-                      {activity.status === "success" && <Users2 className="h-5 w-5 text-green-600" />}
-                      {activity.status === "info" && <CalendarDays className="h-5 w-5 text-blue-600" />}
-                      {activity.status === "warning" && <DollarSign className="h-5 w-5 text-amber-600" />}
+              <div className="space-y-3">
+                {upcomingCalls.map((call) => (
+                  <div key={call.id} className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors">
+                    <div className="space-y-1">
+                      <p className="font-medium">{call.client}</p>
+                      <p className="text-sm text-muted-foreground">{call.type}</p>
                     </div>
-                    <div className="space-y-1 flex-1">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium">{activity.user}</p>
-                        <StatusBadge 
-                          variant={
-                            activity.status === "success" ? "success" : 
-                            activity.status === "info" ? "info" : "warning"
-                          }
-                        >
-                          {activity.status === "success" ? "New" : 
-                           activity.status === "info" ? "Update" : "Renewal"}
-                        </StatusBadge>
-                      </div>
-                      <p className="text-sm text-muted-foreground">{activity.action}</p>
-                      <p className="text-xs text-muted-foreground">{activity.time}</p>
+                    <div className="text-right">
+                      <StatusBadge 
+                        variant={call.date === "Today" ? "primary" : "outline"}
+                      >
+                        {call.date}
+                      </StatusBadge>
+                      <p className="text-sm mt-1">{call.time}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
-        </div>
-        
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="glass-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center">
-                <CalendarDays className="h-5 w-5 mr-2 text-primary" />
-                Upcoming Sessions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="rounded-lg border border-border p-3">
-                  <div className="flex justify-between">
-                    <p className="font-medium">Client Onboarding</p>
-                    <StatusBadge variant="primary">Today</StatusBadge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">James Wilson • 11:00 AM</p>
-                </div>
-                <div className="rounded-lg border border-border p-3">
-                  <div className="flex justify-between">
-                    <p className="font-medium">Quarterly Review</p>
-                    <StatusBadge variant="outline">Tomorrow</StatusBadge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Emma Thompson • 2:30 PM</p>
-                </div>
-                <div className="rounded-lg border border-border p-3">
-                  <div className="flex justify-between">
-                    <p className="font-medium">Investment Planning</p>
-                    <StatusBadge variant="outline">Wed, Jul 12</StatusBadge>
-                  </div>
-                  <p className="text-sm text-muted-foreground">Michael Scott • 10:00 AM</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
           
-          <Card className="glass-card">
+          <Card className="md:col-span-3 glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
-                <TrendingUp className="h-5 w-5 mr-2 text-green-600" />
-                Performance Metrics
+                <Brain className="h-5 w-5 mr-2 text-primary" />
+                Open Tasks List
               </CardTitle>
+              <CardDescription>AI-generated from call transcripts</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-2">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm">Client Retention</p>
-                  <p className="text-sm font-medium">92%</p>
-                </div>
-                <div className="h-2 rounded-full bg-secondary">
-                  <div className="h-2 rounded-full bg-green-500" style={{ width: "92%" }}></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm">Advisor Productivity</p>
-                  <p className="text-sm font-medium">85%</p>
-                </div>
-                <div className="h-2 rounded-full bg-secondary">
-                  <div className="h-2 rounded-full bg-blue-500" style={{ width: "85%" }}></div>
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-sm">Client Satisfaction</p>
-                  <p className="text-sm font-medium">96%</p>
-                </div>
-                <div className="h-2 rounded-full bg-secondary">
-                  <div className="h-2 rounded-full bg-primary" style={{ width: "96%" }}></div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card className="glass-card">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center">
-                <DollarSign className="h-5 w-5 mr-2 text-amber-600" />
-                Revenue Insights
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Monthly Recurring</p>
-                  <p className="text-xl font-semibold">$52,400</p>
-                </div>
-                <div className="rounded-full p-2 bg-green-500/10">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Annual Growth</p>
-                  <p className="text-xl font-semibold">23%</p>
-                </div>
-                <div className="rounded-full p-2 bg-green-500/10">
-                  <TrendingUp className="h-4 w-4 text-green-600" />
-                </div>
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Average Contract</p>
-                  <p className="text-xl font-semibold">$9,840</p>
-                </div>
-                <div className="rounded-full p-2 bg-amber-500/10">
-                  <TrendingUp className="h-4 w-4 text-amber-600" />
-                </div>
+            <CardContent className="px-2">
+              <div className="space-y-4">
+                {openTasks.map((task) => (
+                  <div key={task.id} className="flex items-start p-2 hover:bg-accent/50 rounded-md transition-colors">
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-medium">{task.client}</p>
+                        <StatusBadge 
+                          variant={
+                            task.priority === "high" ? "danger" : 
+                            task.priority === "medium" ? "warning" : "success"
+                          }
+                        >
+                          {task.priority === "high" ? "High" : 
+                           task.priority === "medium" ? "Medium" : "Low"}
+                        </StatusBadge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{task.summary}</p>
+                      <p className="text-xs text-muted-foreground">Due: {task.dueDate}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
