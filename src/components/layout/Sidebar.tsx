@@ -72,10 +72,11 @@ export default function Sidebar() {
       <div className="flex h-16 items-center border-b border-sidebar-border px-4">
         <div className={cn("flex items-center gap-2 transition-all", 
           collapsed ? "opacity-0 invisible" : "opacity-100 visible")}>
-          <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground text-lg font-bold">A</span>
-          </div>
-          <span className="font-semibold">Advisory Dashboard</span>
+          <img 
+            src="/lovable-uploads/41ecb4d5-7496-44d5-b398-b0b1022b150f.png" 
+            alt="Turtle Logo" 
+            className="h-8" 
+          />
         </div>
         <button 
           onClick={() => setCollapsed(!collapsed)}

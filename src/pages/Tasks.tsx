@@ -4,131 +4,181 @@ import DashboardLayout from "@/components/layout/Dashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/shared/DataTable";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { CheckCircle2, AlertCircle, Clock, Calendar, Users, UserCog } from "lucide-react";
+import { 
+  CheckCircle2, 
+  AlertCircle, 
+  Clock, 
+  Calendar, 
+  Users, 
+  UserCog, 
+  ClipboardList, 
+  FileText 
+} from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface Task {
   id: number;
-  title: string;
-  description: string;
-  assignedTo: string;
   client: string;
+  advisor: string;
+  meetingNumber: number;
+  actionItems: string[];
+  detailedNotes: string;
   dueDate: string;
   priority: "high" | "medium" | "low";
   status: "pending" | "in_progress" | "completed" | "overdue";
-  category: "client_onboarding" | "document_review" | "meeting" | "follow_up" | "administrative";
 }
 
 const tasks: Task[] = [
   {
     id: 1,
-    title: "Complete financial assessment",
-    description: "Conduct comprehensive financial assessment for new client",
-    assignedTo: "Emily Richardson",
     client: "Thomas Anderson",
+    advisor: "Emily Richardson",
+    meetingNumber: 3,
+    actionItems: [
+      "Review investment portfolio allocation",
+      "Prepare tax planning documents",
+      "Schedule follow-up call for next quarter"
+    ],
+    detailedNotes: "Client expressed interest in sustainable investing options. Discussed potential reallocation of 30% of portfolio to ESG funds. Need to prepare comparison report of performance for similar ESG vs. traditional funds.",
     dueDate: "2023-07-15",
     priority: "high",
-    status: "pending",
-    category: "client_onboarding",
+    status: "pending"
   },
   {
     id: 2,
-    title: "Review investment portfolio",
-    description: "Quarterly review of client's investment portfolio",
-    assignedTo: "Daniel Morgan",
     client: "Sarah Williams",
+    advisor: "Daniel Morgan",
+    meetingNumber: 5,
+    actionItems: [
+      "Update retirement projections",
+      "Research college savings options for children",
+      "Review insurance coverage"
+    ],
+    detailedNotes: "Client concerned about rising education costs. Recommended 529 plan for two children (ages 10 and 12). Spouse recently changed jobs, so need to review new benefits package and identify any coverage gaps.",
     dueDate: "2023-07-20",
     priority: "medium",
-    status: "in_progress",
-    category: "document_review",
+    status: "in_progress"
   },
   {
     id: 3,
-    title: "Annual planning meeting",
-    description: "Schedule and prepare for annual planning meeting",
-    assignedTo: "James Wilson",
     client: "Michael Brown",
+    advisor: "James Wilson",
+    meetingNumber: 1,
+    actionItems: [
+      "Complete risk assessment questionnaire",
+      "Gather existing financial documents",
+      "Set up client portal access"
+    ],
+    detailedNotes: "Initial meeting with new client. Recently divorced and needs comprehensive financial plan update. Current priorities include reassessing retirement goals and updating estate planning documents.",
     dueDate: "2023-07-10",
     priority: "high",
-    status: "overdue",
-    category: "meeting",
+    status: "overdue"
   },
   {
     id: 4,
-    title: "Update retirement plan",
-    description: "Update client's retirement plan with new information",
-    assignedTo: "Sophia Chen",
     client: "Jennifer Davis",
+    advisor: "Sophia Chen",
+    meetingNumber: 7,
+    actionItems: [
+      "Update beneficiary information",
+      "Review recent portfolio performance",
+      "Discuss charitable giving strategies"
+    ],
+    detailedNotes: "Client interested in establishing donor-advised fund for charitable giving. Recently received inheritance and wants to discuss tax-efficient strategies for managing these additional assets.",
     dueDate: "2023-07-25",
     priority: "medium",
-    status: "pending",
-    category: "document_review",
+    status: "pending"
   },
   {
     id: 5,
-    title: "Tax planning session",
-    description: "Prepare for and conduct tax planning session",
-    assignedTo: "Robert Johnson",
     client: "Lisa Anderson",
+    advisor: "Robert Johnson",
+    meetingNumber: 2,
+    actionItems: [
+      "Create cash flow projection",
+      "Review debt reduction strategies",
+      "Evaluate employee stock options"
+    ],
+    detailedNotes: "Client recently promoted to executive position with significant stock compensation. Need to develop strategy for diversification while minimizing tax impact. Also concerned about educational funding for teenager planning to attend college in 3 years.",
     dueDate: "2023-07-18",
     priority: "medium",
-    status: "in_progress",
-    category: "meeting",
+    status: "in_progress"
   },
   {
     id: 6,
-    title: "Contract renewal",
-    description: "Process client's annual contract renewal",
-    assignedTo: "Olivia Martinez",
     client: "David Brown",
+    advisor: "Olivia Martinez",
+    meetingNumber: 4,
+    actionItems: [
+      "Update estate planning documents",
+      "Review life insurance needs",
+      "Discuss long-term care options"
+    ],
+    detailedNotes: "Client recently turned 60 and wants to revisit estate plan. Has concerns about aging parents and potential caregiving responsibilities. Discussed importance of having proper legal documents in place for both client and parents.",
     dueDate: "2023-07-05",
     priority: "high",
-    status: "overdue",
-    category: "administrative",
+    status: "overdue"
   },
   {
     id: 7,
-    title: "Follow-up call",
-    description: "Schedule follow-up call regarding recent changes",
-    assignedTo: "Daniel Morgan",
     client: "Robert Davis",
+    advisor: "Daniel Morgan",
+    meetingNumber: 6,
+    actionItems: [
+      "Rebalance investment portfolio",
+      "Review tax loss harvesting opportunities",
+      "Update retirement income projections"
+    ],
+    detailedNotes: "Annual review meeting. Portfolio has drifted from target allocation due to market performance. Identified several tax loss harvesting opportunities to offset capital gains from business sale earlier in the year.",
     dueDate: "2023-07-12",
     priority: "low",
-    status: "completed",
-    category: "follow_up",
+    status: "completed"
   },
   {
     id: 8,
-    title: "Document collection",
-    description: "Collect and review necessary documents for onboarding",
-    assignedTo: "Emily Richardson",
     client: "Walter White",
+    advisor: "Emily Richardson",
+    meetingNumber: 1,
+    actionItems: [
+      "Complete risk profile assessment",
+      "Gather existing financial statements",
+      "Set up automatic investments"
+    ],
+    detailedNotes: "Initial meeting with new client. Recently retired and rolled over 401(k) to IRA. Primary concern is generating reliable retirement income while preserving principal. Conservative risk tolerance - prioritizes capital preservation over growth.",
     dueDate: "2023-07-22",
     priority: "medium",
-    status: "pending",
-    category: "client_onboarding",
+    status: "pending"
   },
   {
     id: 9,
-    title: "Insurance policy review",
-    description: "Review client's insurance policies and recommend changes",
-    assignedTo: "James Wilson",
     client: "Elizabeth Wilson",
+    advisor: "James Wilson",
+    meetingNumber: 8,
+    actionItems: [
+      "Update financial plan projections",
+      "Review asset allocation strategy",
+      "Discuss Roth conversion opportunities"
+    ],
+    detailedNotes: "Client planning early retirement in 2 years. Discussed Roth conversion ladder strategy to optimize tax situation before required minimum distributions begin. Needs updated cash flow projections based on new retirement date.",
     dueDate: "2023-07-28",
     priority: "medium",
-    status: "pending",
-    category: "document_review",
+    status: "pending"
   },
   {
     id: 10,
-    title: "CRM data update",
-    description: "Update client information in CRM system",
-    assignedTo: "Sophia Chen",
     client: "Multiple",
+    advisor: "Sophia Chen",
+    meetingNumber: 2,
+    actionItems: [
+      "Update contact information",
+      "Verify account preferences",
+      "Send welcome package materials"
+    ],
+    detailedNotes: "Administrative follow-up for recently onboarded clients. Need to verify all paperwork is complete and that clients have successfully accessed their online portals. Schedule individual welcome calls for next week.",
     dueDate: "2023-07-14",
     priority: "low",
-    status: "completed",
-    category: "administrative",
-  },
+    status: "completed"
+  }
 ];
 
 export default function Tasks() {
@@ -151,75 +201,70 @@ export default function Tasks() {
   
   const columns = [
     {
-      key: "title",
-      title: "Task",
-      sortable: true,
-      render: (task: Task) => (
-        <div>
-          <div className="font-medium">{task.title}</div>
-          <div className="text-xs text-muted-foreground">{task.description}</div>
-        </div>
-      ),
-    },
-    {
       key: "client",
       title: "Client",
       sortable: true,
     },
     {
-      key: "assignedTo",
-      title: "Assigned To",
+      key: "advisor",
+      title: "Advisor",
       sortable: true,
     },
     {
-      key: "dueDate",
-      title: "Due Date",
+      key: "meetingNumber",
+      title: "Meeting Number",
       sortable: true,
+      render: (task: Task) => (
+        <div className="text-center">{task.meetingNumber}</div>
+      ),
+    },
+    {
+      key: "actionItems",
+      title: "Action Items",
       render: (task: Task) => {
-        const dueDate = new Date(task.dueDate);
-        const today = new Date();
-        const isOverdue = dueDate < today && task.status !== "completed";
-        
         return (
-          <div className={isOverdue ? "text-destructive" : ""}>
-            {dueDate.toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
-          </div>
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="flex items-center gap-1 text-primary hover:underline">
+                <ClipboardList className="h-4 w-4" /> {task.actionItems.length} items
+              </button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Action Items for {task.client}</DialogTitle>
+              </DialogHeader>
+              <div className="mt-4">
+                <ul className="list-disc pl-5 space-y-2">
+                  {task.actionItems.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </DialogContent>
+          </Dialog>
         );
       },
     },
     {
-      key: "priority",
-      title: "Priority",
+      key: "detailedNotes",
+      title: "Detailed Notes",
       render: (task: Task) => {
-        let variant:
-          | "default"
-          | "primary"
-          | "success"
-          | "warning"
-          | "danger"
-          | "info"
-          | "outline" = "default";
-        
-        switch (task.priority) {
-          case "high":
-            variant = "danger";
-            break;
-          case "medium":
-            variant = "warning";
-            break;
-          case "low":
-            variant = "success";
-            break;
-        }
-        
         return (
-          <StatusBadge variant={variant}>
-            {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)}
-          </StatusBadge>
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="flex items-center gap-1 text-primary hover:underline">
+                <FileText className="h-4 w-4" /> View Notes
+              </button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Detailed Notes for {task.client}</DialogTitle>
+              </DialogHeader>
+              <div className="mt-4 bg-muted/30 p-4 rounded-md">
+                <p>{task.detailedNotes}</p>
+              </div>
+            </DialogContent>
+          </Dialog>
         );
       },
     },
@@ -263,37 +308,6 @@ export default function Tasks() {
               : task.status.charAt(0).toUpperCase() + task.status.slice(1)}
           </StatusBadge>
         );
-      },
-    },
-    {
-      key: "category",
-      title: "Category",
-      render: (task: Task) => {
-        let label = "";
-        let icon = null;
-        
-        switch (task.category) {
-          case "client_onboarding":
-            label = "Onboarding";
-            icon = <Users className="h-3.5 w-3.5 mr-1" />;
-            break;
-          case "document_review":
-            label = "Review";
-            break;
-          case "meeting":
-            label = "Meeting";
-            icon = <Calendar className="h-3.5 w-3.5 mr-1" />;
-            break;
-          case "follow_up":
-            label = "Follow-up";
-            break;
-          case "administrative":
-            label = "Admin";
-            icon = <UserCog className="h-3.5 w-3.5 mr-1" />;
-            break;
-        }
-        
-        return <StatusBadge variant="outline" icon={icon}>{label}</StatusBadge>;
       },
     },
   ];
@@ -343,7 +357,7 @@ export default function Tasks() {
           <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
-                <Clock className="h-5 w-5 mr-2 text-blue-500" />
+                <Clock className="h-5 w-5 mr-2 text-primary" />
                 In Progress
               </CardTitle>
               <CardDescription>Tasks being worked on</CardDescription>
