@@ -1,30 +1,60 @@
 
 import { useState } from "react";
+import { format } from "date-fns";
 import DashboardLayout from "@/components/layout/Dashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/shared/DataTable";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { 
   CheckCircle2, 
-  AlertCircle, 
   Clock, 
   Calendar, 
-  Users, 
   UserCog, 
   ClipboardList, 
   FileText,
-  Link as LinkIcon
+  Link as LinkIcon,
+  CalendarPlus,
+  Plus
 } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger, 
+  DialogFooter 
+} from "@/components/ui/dialog";
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Meeting {
   id: number;
   client: string;
   advisor: string;
   meetingNumber: number;
+  date: string;
   actionItems: string[];
   detailedNotes: string;
   recordingLink?: string;
+}
+
+interface MeetingFormData {
+  client: string;
+  advisor: string;
+  date: string;
+  detailedNotes: string;
+  actionItems: string;
 }
 
 const meetings: Meeting[] = [
@@ -32,6 +62,7 @@ const meetings: Meeting[] = [
     id: 1,
     client: "Thomas Anderson",
     advisor: "Emily Richardson",
+    date: "2024-03-15",
     meetingNumber: 3,
     actionItems: [
       "Review investment portfolio allocation",
@@ -45,6 +76,7 @@ const meetings: Meeting[] = [
     id: 2,
     client: "Sarah Williams",
     advisor: "Daniel Morgan",
+    date: "2024-03-20",
     meetingNumber: 5,
     actionItems: [
       "Update retirement projections",
@@ -58,6 +90,7 @@ const meetings: Meeting[] = [
     id: 3,
     client: "Michael Brown",
     advisor: "James Wilson",
+    date: "2024-03-25",
     meetingNumber: 1,
     actionItems: [
       "Complete risk assessment questionnaire",
@@ -70,6 +103,7 @@ const meetings: Meeting[] = [
     id: 4,
     client: "Jennifer Davis",
     advisor: "Sophia Chen",
+    date: "2024-03-28",
     meetingNumber: 7,
     actionItems: [
       "Update beneficiary information",
@@ -83,6 +117,7 @@ const meetings: Meeting[] = [
     id: 5,
     client: "Lisa Anderson",
     advisor: "Robert Johnson",
+    date: "2024-04-01",
     meetingNumber: 2,
     actionItems: [
       "Create cash flow projection",
@@ -96,6 +131,7 @@ const meetings: Meeting[] = [
     id: 6,
     client: "David Brown",
     advisor: "Olivia Martinez",
+    date: "2024-04-05",
     meetingNumber: 4,
     actionItems: [
       "Update estate planning documents",
@@ -108,6 +144,7 @@ const meetings: Meeting[] = [
     id: 7,
     client: "Robert Davis",
     advisor: "Daniel Morgan",
+    date: "2024-04-08",
     meetingNumber: 6,
     actionItems: [
       "Rebalance investment portfolio",
@@ -121,6 +158,7 @@ const meetings: Meeting[] = [
     id: 8,
     client: "Walter White",
     advisor: "Emily Richardson",
+    date: "2024-04-10",
     meetingNumber: 1,
     actionItems: [
       "Complete risk profile assessment",
@@ -134,6 +172,7 @@ const meetings: Meeting[] = [
     id: 9,
     client: "Elizabeth Wilson",
     advisor: "James Wilson",
+    date: "2024-04-12",
     meetingNumber: 8,
     actionItems: [
       "Update financial plan projections",
@@ -146,6 +185,7 @@ const meetings: Meeting[] = [
     id: 10,
     client: "Multiple",
     advisor: "Sophia Chen",
+    date: "2024-04-15",
     meetingNumber: 2,
     actionItems: [
       "Update contact information",
@@ -160,6 +200,17 @@ const meetings: Meeting[] = [
 export default function Meetings() {
   const [selectedAdvisorFilter, setSelectedAdvisorFilter] = useState<string>("all");
   const [selectedClientFilter, setSelectedClientFilter] = useState<string>("all");
+  const [isAddingMeeting, setIsAddingMeeting] = useState(false);
+  
+  const form = useForm<MeetingFormData>({
+    defaultValues: {
+      client: "",
+      advisor: "",
+      date: new Date().toISOString().split('T')[0],
+      detailedNotes: "",
+      actionItems: ""
+    }
+  });
   
   const getFilteredMeetings = () => {
     return meetings.filter((meeting) => {
@@ -175,16 +226,39 @@ export default function Meetings() {
   const advisors = [...new Set(meetings.map(meeting => meeting.advisor))];
   const clients = [...new Set(meetings.map(meeting => meeting.client))];
   
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return format(date, "MMM dd, yyyy");
+  };
+  
   const columns = [
     {
       key: "client",
       title: "Client",
       sortable: true,
+      render: (meeting: Meeting) => (
+        <span className="hover:underline cursor-pointer" onClick={() => setSelectedClientFilter(meeting.client)}>
+          {meeting.client}
+        </span>
+      )
     },
     {
       key: "advisor",
       title: "Advisor",
       sortable: true,
+      render: (meeting: Meeting) => (
+        <span className="hover:underline cursor-pointer" onClick={() => setSelectedAdvisorFilter(meeting.advisor)}>
+          {meeting.advisor}
+        </span>
+      )
+    },
+    {
+      key: "date",
+      title: "Date",
+      sortable: true,
+      render: (meeting: Meeting) => (
+        <div>{formatDate(meeting.date)}</div>
+      ),
     },
     {
       key: "meetingNumber",
@@ -218,10 +292,10 @@ export default function Meetings() {
                     <li key={index} className="flex justify-between items-start gap-2">
                       <span>{item}</span>
                       <div className="flex gap-1">
-                        <button className="text-primary hover:text-primary/80 p-1">
+                        <button className="text-primary hover:text-primary/80 h-7 w-7 p-0 flex items-center justify-center rounded-md hover:bg-accent">
                           <CheckCircle2 className="h-4 w-4" />
                         </button>
-                        <button className="text-primary hover:text-primary/80 p-1">
+                        <button className="text-primary hover:text-primary/80 h-7 w-7 p-0 flex items-center justify-center rounded-md hover:bg-accent">
                           <FileText className="h-4 w-4" />
                         </button>
                       </div>
@@ -274,6 +348,12 @@ export default function Meetings() {
     }
   ];
 
+  const handleSubmit = (data: MeetingFormData) => {
+    console.log("Creating new meeting:", data);
+    setIsAddingMeeting(false);
+    form.reset();
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
@@ -284,8 +364,12 @@ export default function Meetings() {
               Review past client meetings and their action items
             </p>
           </div>
-          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full md:w-auto">
-            Record New Meeting
+          <button 
+            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full md:w-auto"
+            onClick={() => setIsAddingMeeting(true)}
+          >
+            <CalendarPlus className="mr-2 h-4 w-4" />
+            Add New Meeting
           </button>
         </div>
         
@@ -331,6 +415,160 @@ export default function Meetings() {
           keyExtractor={(meeting) => meeting.id}
           searchPlaceholder="Search meetings..."
         />
+        
+        {/* Add Meeting Dialog */}
+        <Dialog open={isAddingMeeting} onOpenChange={setIsAddingMeeting}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Meeting</DialogTitle>
+              <DialogDescription>
+                Record details of a client meeting
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="client"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Client</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button variant="outline" className="w-full justify-between">
+                              {field.value || "Select client"}
+                              <span>▼</span>
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0">
+                          <div className="space-y-1 p-2">
+                            <Input
+                              placeholder="Search clients..."
+                              className="mb-2"
+                            />
+                            {clients.map(client => (
+                              <Button
+                                key={client}
+                                variant="ghost"
+                                className="w-full justify-start font-normal"
+                                onClick={() => {
+                                  form.setValue("client", client);
+                                }}
+                              >
+                                {client}
+                              </Button>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="advisor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Advisor</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button variant="outline" className="w-full justify-between">
+                              {field.value || "Select advisor"}
+                              <span>▼</span>
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0">
+                          <div className="space-y-1 p-2">
+                            <Input
+                              placeholder="Search advisors..."
+                              className="mb-2"
+                            />
+                            {advisors.map(advisor => (
+                              <Button
+                                key={advisor}
+                                variant="ghost"
+                                className="w-full justify-start font-normal"
+                                onClick={() => {
+                                  form.setValue("advisor", advisor);
+                                }}
+                              >
+                                {advisor}
+                              </Button>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="date"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Meeting Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="detailedNotes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Detailed Notes</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Enter meeting notes"
+                          className="min-h-[120px]"
+                          {...field}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="actionItems"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Action Items</FormLabel>
+                      <FormControl>
+                        <div className="space-y-2">
+                          <Textarea 
+                            placeholder="Enter action items, one per line"
+                            className="min-h-[80px]"
+                            {...field}
+                          />
+                          <p className="text-xs text-muted-foreground">Enter each action item on a new line. These will be converted to tasks.</p>
+                        </div>
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setIsAddingMeeting(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    Create Meeting
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );

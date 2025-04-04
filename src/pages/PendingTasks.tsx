@@ -10,14 +10,12 @@ import {
   AlertCircle, 
   Clock, 
   Calendar, 
-  Users, 
+  User,
   UserCog, 
-  ClipboardList, 
   Edit, 
   Trash2,
   LayoutGrid,
-  List,
-  User
+  List
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { 
@@ -25,10 +23,19 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle, 
-  DialogTrigger, 
   DialogFooter 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useForm } from "react-hook-form";
+import { 
+  Form, 
+  FormControl, 
+  FormField, 
+  FormItem, 
+  FormLabel 
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface Task {
   id: number;
@@ -176,18 +183,58 @@ const tasks: Task[] = [
 type ViewMode = "table" | "cards";
 type GroupBy = "none" | "owner" | "dueDate" | "advisor" | "client";
 
+interface TaskFormData {
+  task: string;
+  client: string;
+  advisor: string;
+  owner: string;
+  dueDate: string;
+}
+
 export default function PendingTasks() {
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [groupBy, setGroupBy] = useState<GroupBy>("none");
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [filterBy, setFilterBy] = useState<{type: string, value: string} | null>(null);
+  
+  const form = useForm<TaskFormData>({
+    defaultValues: {
+      task: "",
+      client: "",
+      advisor: "",
+      owner: "",
+      dueDate: new Date().toISOString().split('T')[0]
+    }
+  });
+
+  const resetForm = (task?: Task) => {
+    if (task) {
+      form.reset({
+        task: task.task,
+        client: task.client,
+        advisor: task.advisor,
+        owner: task.owner,
+        dueDate: task.dueDate
+      });
+    } else {
+      form.reset({
+        task: "",
+        client: "",
+        advisor: "",
+        owner: "",
+        dueDate: new Date().toISOString().split('T')[0]
+      });
+    }
+  };
   
   const getFilteredTasks = () => {
     return tasks.filter((task) => {
+      // Status filter
       const statusMatch = selectedStatusFilter === "all" || task.status === selectedStatusFilter;
       
-      // Apply any additional filters
+      // Additional filters
       if (filterBy) {
         if (filterBy.type === "advisor" && task.advisor !== filterBy.value) return false;
         if (filterBy.type === "client" && task.client !== filterBy.value) return false;
@@ -212,6 +259,15 @@ export default function PendingTasks() {
   const clearFilter = () => {
     setFilterBy(null);
   };
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    resetForm(task);
+  };
+
+  const onStatusCardClick = (status: string) => {
+    setSelectedStatusFilter(status);
+  };
   
   const columns = [
     {
@@ -219,24 +275,36 @@ export default function PendingTasks() {
       title: "Task",
       sortable: true,
       onClick: (task: Task) => setSelectedTask(task),
+      render: (task: Task) => (
+        <span className="cursor-pointer hover:underline">{task.task}</span>
+      ),
     },
     {
       key: "client",
       title: "Client",
       sortable: true,
       onClick: (task: Task) => setFilterBy({ type: "client", value: task.client }),
+      render: (task: Task) => (
+        <span className="cursor-pointer hover:underline">{task.client}</span>
+      ),
     },
     {
       key: "advisor",
       title: "Advisor",
       sortable: true,
       onClick: (task: Task) => setFilterBy({ type: "advisor", value: task.advisor }),
+      render: (task: Task) => (
+        <span className="cursor-pointer hover:underline">{task.advisor}</span>
+      ),
     },
     {
       key: "owner",
       title: "Owner",
       sortable: true,
       onClick: (task: Task) => setFilterBy({ type: "owner", value: task.owner }),
+      render: (task: Task) => (
+        <span className="cursor-pointer hover:underline">{task.owner}</span>
+      ),
     },
     {
       key: "status",
@@ -288,31 +356,23 @@ export default function PendingTasks() {
       render: (task: Task) => (
         <div className="flex items-center gap-2">
           {task.meetingNumber && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-1">
-                  <Calendar className="h-4 w-4" /> Meeting #{task.meetingNumber}
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Meeting #{task.meetingNumber} Details</DialogTitle>
-                </DialogHeader>
-                <div className="mt-4 space-y-2">
-                  <p><strong>Client:</strong> {task.client}</p>
-                  <p><strong>Advisor:</strong> {task.advisor}</p>
-                  <p><strong>Task:</strong> {task.task}</p>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+              <Calendar className="h-4 w-4" />
+              <span className="sr-only">Meeting {task.meetingNumber}</span>
+            </Button>
           )}
           
-          <Button variant="outline" size="sm">
-            <Edit className="h-4 w-4 mr-1" /> Edit
+          <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={(e) => {
+            e.stopPropagation();
+            handleEditTask(task);
+          }}>
+            <Edit className="h-4 w-4" />
+            <span className="sr-only">Edit</span>
           </Button>
           
-          <Button variant="outline" size="sm">
-            <Trash2 className="h-4 w-4 mr-1" /> Delete
+          <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
+            <Trash2 className="h-4 w-4" />
+            <span className="sr-only">Delete</span>
           </Button>
         </div>
       ),
@@ -356,6 +416,11 @@ export default function PendingTasks() {
   };
   
   const groupedTasks = getGroupedTasks();
+  
+  // A list of unique clients, advisors and owners for the form
+  const clients = [...new Set(tasks.map(task => task.client))];
+  const advisors = [...new Set(tasks.map(task => task.advisor))];
+  const owners = [...new Set(tasks.map(task => task.owner))];
 
   return (
     <DashboardLayout>
@@ -367,13 +432,23 @@ export default function PendingTasks() {
               Manage and track tasks for clients and advisors
             </p>
           </div>
-          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full md:w-auto">
+          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full md:w-auto" 
+            onClick={() => {
+              resetForm();
+              setEditingTask({} as Task);
+            }}>
             Create New Task
           </button>
         </div>
         
         <div className="grid gap-4 md:grid-cols-3">
-          <Card className="glass-card">
+          <Card 
+            className={cn(
+              "glass-card cursor-pointer hover-highlight",
+              selectedStatusFilter === "overdue" && "outline outline-1 outline-[#2edebe]"
+            )}
+            onClick={() => onStatusCardClick("overdue")}
+          >
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
                 <AlertCircle className="h-5 w-5 mr-2 text-destructive" />
@@ -386,7 +461,13 @@ export default function PendingTasks() {
             </CardContent>
           </Card>
           
-          <Card className="glass-card">
+          <Card 
+            className={cn(
+              "glass-card cursor-pointer hover-highlight",
+              selectedStatusFilter === "pending" && "outline outline-1 outline-[#2edebe]"
+            )}
+            onClick={() => onStatusCardClick("pending")}
+          >
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
                 <Clock className="h-5 w-5 mr-2 text-amber-500" />
@@ -399,7 +480,13 @@ export default function PendingTasks() {
             </CardContent>
           </Card>
           
-          <Card className="glass-card">
+          <Card 
+            className={cn(
+              "glass-card cursor-pointer hover-highlight",
+              selectedStatusFilter === "completed" && "outline outline-1 outline-[#2edebe]"
+            )}
+            onClick={() => onStatusCardClick("completed")}
+          >
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
                 <CheckCircle2 className="h-5 w-5 mr-2 text-emerald-500" />
@@ -504,18 +591,28 @@ export default function PendingTasks() {
                 <h3 className="text-lg font-medium">{group}</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                   {tasks.map((task) => (
-                    <Card key={task.id} className="overflow-hidden">
+                    <Card 
+                      key={task.id} 
+                      className="overflow-hidden hover-highlight cursor-pointer" 
+                      onClick={() => setSelectedTask(task)}
+                    >
                       <CardHeader className="pb-2">
                         <CardTitle 
-                          className="text-base truncate cursor-pointer hover:text-primary"
-                          onClick={() => setSelectedTask(task)}
+                          className="text-base truncate cursor-pointer hover:underline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedTask(task);
+                          }}
                         >
                           {task.task}
                         </CardTitle>
                         <CardDescription className="flex justify-between">
                           <span 
-                            className="cursor-pointer hover:text-primary"
-                            onClick={() => setFilterBy({ type: "client", value: task.client })}
+                            className="cursor-pointer hover:underline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFilterBy({ type: "client", value: task.client })
+                            }}
                           >
                             {task.client}
                           </span>
@@ -539,15 +636,21 @@ export default function PendingTasks() {
                       <CardContent>
                         <div className="space-y-2 text-sm">
                           <div 
-                            className="flex items-center cursor-pointer hover:text-primary"
-                            onClick={() => setFilterBy({ type: "advisor", value: task.advisor })}
+                            className="flex items-center cursor-pointer hover:underline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFilterBy({ type: "advisor", value: task.advisor })
+                            }}
                           >
                             <UserCog className="h-4 w-4 mr-2 text-muted-foreground" />
                             {task.advisor}
                           </div>
                           <div 
-                            className="flex items-center cursor-pointer hover:text-primary"
-                            onClick={() => setFilterBy({ type: "owner", value: task.owner })}
+                            className="flex items-center cursor-pointer hover:underline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setFilterBy({ type: "owner", value: task.owner })
+                            }}
                           >
                             <User className="h-4 w-4 mr-2 text-muted-foreground" />
                             {task.owner}
@@ -558,19 +661,28 @@ export default function PendingTasks() {
                           </div>
                           {task.meetingNumber && (
                             <div className="flex items-center">
-                              <ClipboardList className="h-4 w-4 mr-2 text-muted-foreground" />
+                              <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                               Meeting #{task.meetingNumber}
                             </div>
                           )}
                         </div>
                       </CardContent>
                       <div className="flex border-t">
-                        <button className="flex-1 p-2 hover:bg-accent transition-colors flex items-center justify-center text-primary">
+                        <button 
+                          className="flex-1 p-2 hover:bg-accent transition-colors flex items-center justify-center text-primary"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditTask(task);
+                          }}
+                        >
                           <Edit className="h-4 w-4 mr-1" />
                           Edit
                         </button>
                         <div className="w-px bg-border" />
-                        <button className="flex-1 p-2 hover:bg-accent transition-colors flex items-center justify-center text-primary">
+                        <button 
+                          className="flex-1 p-2 hover:bg-accent transition-colors flex items-center justify-center text-primary"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <Trash2 className="h-4 w-4 mr-1" />
                           Delete
                         </button>
@@ -612,15 +724,39 @@ export default function PendingTasks() {
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground w-20">Client:</span>
-                    <span>{selectedTask.client}</span>
+                    <span 
+                      className="hover:underline cursor-pointer"
+                      onClick={() => {
+                        setFilterBy({ type: "client", value: selectedTask.client });
+                        setSelectedTask(null);
+                      }}
+                    >
+                      {selectedTask.client}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground w-20">Advisor:</span>
-                    <span>{selectedTask.advisor}</span>
+                    <span 
+                      className="hover:underline cursor-pointer"
+                      onClick={() => {
+                        setFilterBy({ type: "advisor", value: selectedTask.advisor });
+                        setSelectedTask(null);
+                      }}
+                    >
+                      {selectedTask.advisor}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground w-20">Owner:</span>
-                    <span>{selectedTask.owner}</span>
+                    <span 
+                      className="hover:underline cursor-pointer"
+                      onClick={() => {
+                        setFilterBy({ type: "owner", value: selectedTask.owner });
+                        setSelectedTask(null);
+                      }}
+                    >
+                      {selectedTask.owner}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-muted-foreground w-20">Due Date:</span>
@@ -635,7 +771,10 @@ export default function PendingTasks() {
                 </div>
                 
                 <DialogFooter>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => {
+                    handleEditTask(selectedTask);
+                    setSelectedTask(null);
+                  }}>
                     <Edit className="h-4 w-4 mr-1" /> Edit
                   </Button>
                   <Button variant="outline" size="sm">
@@ -644,6 +783,173 @@ export default function PendingTasks() {
                 </DialogFooter>
               </div>
             )}
+          </DialogContent>
+        </Dialog>
+        
+        {/* Task Edit Dialog */}
+        <Dialog open={!!editingTask} onOpenChange={(open) => !open && setEditingTask(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{editingTask?.id ? "Edit Task" : "Create New Task"}</DialogTitle>
+            </DialogHeader>
+            <Form {...form}>
+              <form className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="task"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Task</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Task description" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="client"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Client</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button variant="outline" className="w-full justify-between">
+                              {field.value || "Select client"}
+                              <span>▼</span>
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0">
+                          <div className="space-y-1 p-2">
+                            <Input
+                              placeholder="Search clients..."
+                              className="mb-2"
+                            />
+                            {clients.map(client => (
+                              <Button
+                                key={client}
+                                variant="ghost"
+                                className="w-full justify-start font-normal"
+                                onClick={() => {
+                                  form.setValue("client", client);
+                                }}
+                              >
+                                {client}
+                              </Button>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="advisor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Advisor</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button variant="outline" className="w-full justify-between">
+                              {field.value || "Select advisor"}
+                              <span>▼</span>
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0">
+                          <div className="space-y-1 p-2">
+                            <Input
+                              placeholder="Search advisors..."
+                              className="mb-2"
+                            />
+                            {advisors.map(advisor => (
+                              <Button
+                                key={advisor}
+                                variant="ghost"
+                                className="w-full justify-start font-normal"
+                                onClick={() => {
+                                  form.setValue("advisor", advisor);
+                                }}
+                              >
+                                {advisor}
+                              </Button>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="owner"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Owner</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button variant="outline" className="w-full justify-between">
+                              {field.value || "Select owner"}
+                              <span>▼</span>
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-0">
+                          <div className="space-y-1 p-2">
+                            <Input
+                              placeholder="Search owners..."
+                              className="mb-2"
+                            />
+                            {owners.map(owner => (
+                              <Button
+                                key={owner}
+                                variant="ghost"
+                                className="w-full justify-start font-normal"
+                                onClick={() => {
+                                  form.setValue("owner", owner);
+                                }}
+                              >
+                                {owner}
+                              </Button>
+                            ))}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Due Date</FormLabel>
+                      <FormControl>
+                        <Input type="date" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => setEditingTask(null)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    {editingTask?.id ? "Update Task" : "Create Task"}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
           </DialogContent>
         </Dialog>
         

@@ -91,7 +91,7 @@ export function DataTable<T>({
         </div>
       </div>
       
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto p-2">
         <table className="w-full">
           <thead className="bg-muted/50">
             <tr>
@@ -122,7 +122,7 @@ export function DataTable<T>({
             </tr>
           </thead>
           
-          <tbody className="divide-y">
+          <tbody className="divide-y-0 space-y-2">
             {isLoading ? (
               Array.from({ length: 5 }).map((_, index) => (
                 <tr key={index}>
@@ -147,17 +147,24 @@ export function DataTable<T>({
                 <tr
                   key={keyExtractor(item)}
                   className={cn(
-                    "bg-card hover:bg-accent/5 transition-colors mb-2",
+                    "rounded-md bg-card hover:bg-accent/5 hover:outline hover:outline-1 hover:outline-[#2edebe] transition-colors mb-3",
                     onRowClick && "cursor-pointer",
-                    index < filteredData.length - 1 && "border-b-8 border-background"
                   )}
                   onClick={() => onRowClick && onRowClick(item)}
                 >
                   {columns.map((column) => (
                     <td 
                       key={column.key} 
-                      className="px-4 py-3 text-sm"
-                      onClick={() => column.onClick && column.onClick(item)}
+                      className={cn(
+                        "px-4 py-3 text-sm",
+                        column.onClick && "cursor-pointer hover:underline"
+                      )}
+                      onClick={(e) => {
+                        if (column.onClick) {
+                          e.stopPropagation();
+                          column.onClick(item);
+                        }
+                      }}
                     >
                       {column.render ? (
                         column.render(item)
