@@ -28,6 +28,7 @@ import {
   DialogTrigger, 
   DialogFooter 
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface Task {
   id: number;
@@ -179,10 +180,20 @@ export default function PendingTasks() {
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("all");
   const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [groupBy, setGroupBy] = useState<GroupBy>("none");
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [filterBy, setFilterBy] = useState<{type: string, value: string} | null>(null);
   
   const getFilteredTasks = () => {
     return tasks.filter((task) => {
       const statusMatch = selectedStatusFilter === "all" || task.status === selectedStatusFilter;
+      
+      // Apply any additional filters
+      if (filterBy) {
+        if (filterBy.type === "advisor" && task.advisor !== filterBy.value) return false;
+        if (filterBy.type === "client" && task.client !== filterBy.value) return false;
+        if (filterBy.type === "owner" && task.owner !== filterBy.value) return false;
+      }
+      
       return statusMatch;
     });
   };
@@ -198,26 +209,34 @@ export default function PendingTasks() {
     return format(date, "MMM dd, yyyy");
   };
   
+  const clearFilter = () => {
+    setFilterBy(null);
+  };
+  
   const columns = [
     {
       key: "task",
       title: "Task",
       sortable: true,
+      onClick: (task: Task) => setSelectedTask(task),
     },
     {
       key: "client",
       title: "Client",
       sortable: true,
+      onClick: (task: Task) => setFilterBy({ type: "client", value: task.client }),
     },
     {
       key: "advisor",
       title: "Advisor",
       sortable: true,
+      onClick: (task: Task) => setFilterBy({ type: "advisor", value: task.advisor }),
     },
     {
       key: "owner",
       title: "Owner",
       sortable: true,
+      onClick: (task: Task) => setFilterBy({ type: "owner", value: task.owner }),
     },
     {
       key: "status",
@@ -264,16 +283,16 @@ export default function PendingTasks() {
       ),
     },
     {
-      key: "meeting",
-      title: "Meeting",
+      key: "actions",
+      title: "Actions",
       render: (task: Task) => (
-        <div>
-          {task.meetingNumber ? (
+        <div className="flex items-center gap-2">
+          {task.meetingNumber && (
             <Dialog>
               <DialogTrigger asChild>
-                <button className="flex items-center gap-1 text-primary hover:underline">
+                <Button variant="outline" size="sm" className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" /> Meeting #{task.meetingNumber}
-                </button>
+                </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
@@ -286,25 +305,15 @@ export default function PendingTasks() {
                 </div>
               </DialogContent>
             </Dialog>
-          ) : (
-            <span className="text-muted-foreground">Not associated</span>
           )}
-        </div>
-      ),
-    },
-    {
-      key: "actions",
-      title: "Actions",
-      render: (task: Task) => (
-        <div className="flex items-center gap-2">
-          <button className="h-8 w-8 rounded-md hover:bg-accent transition-colors flex items-center justify-center text-primary">
-            <Edit className="h-4 w-4" />
-            <span className="sr-only">Edit</span>
-          </button>
-          <button className="h-8 w-8 rounded-md hover:bg-accent transition-colors flex items-center justify-center text-primary">
-            <Trash2 className="h-4 w-4" />
-            <span className="sr-only">Delete</span>
-          </button>
+          
+          <Button variant="outline" size="sm">
+            <Edit className="h-4 w-4 mr-1" /> Edit
+          </Button>
+          
+          <Button variant="outline" size="sm">
+            <Trash2 className="h-4 w-4 mr-1" /> Delete
+          </Button>
         </div>
       ),
     },
@@ -440,6 +449,20 @@ export default function PendingTasks() {
                 <option value="client">Client</option>
               </select>
             </div>
+            
+            {filterBy && (
+              <div className="flex items-center gap-2">
+                <div className="text-sm bg-accent px-3 py-1 rounded-md flex items-center">
+                  Filtered by {filterBy.type}: <span className="font-medium ml-1">{filterBy.value}</span>
+                  <button 
+                    onClick={clearFilter}
+                    className="ml-2 text-muted-foreground hover:text-foreground"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="flex items-center gap-2">
@@ -472,6 +495,7 @@ export default function PendingTasks() {
             data={filteredTasks}
             keyExtractor={(task) => task.id}
             searchPlaceholder="Search tasks..."
+            onRowClick={(task) => setSelectedTask(task)}
           />
         ) : (
           <div className="space-y-6">
@@ -482,9 +506,19 @@ export default function PendingTasks() {
                   {tasks.map((task) => (
                     <Card key={task.id} className="overflow-hidden">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-base truncate">{task.task}</CardTitle>
+                        <CardTitle 
+                          className="text-base truncate cursor-pointer hover:text-primary"
+                          onClick={() => setSelectedTask(task)}
+                        >
+                          {task.task}
+                        </CardTitle>
                         <CardDescription className="flex justify-between">
-                          <span>{task.client}</span>
+                          <span 
+                            className="cursor-pointer hover:text-primary"
+                            onClick={() => setFilterBy({ type: "client", value: task.client })}
+                          >
+                            {task.client}
+                          </span>
                           {task.status === "completed" && (
                             <StatusBadge variant="success" icon={<CheckCircle2 className="h-3 w-3 mr-1" />}>
                               Completed
@@ -504,11 +538,17 @@ export default function PendingTasks() {
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-2 text-sm">
-                          <div className="flex items-center">
+                          <div 
+                            className="flex items-center cursor-pointer hover:text-primary"
+                            onClick={() => setFilterBy({ type: "advisor", value: task.advisor })}
+                          >
                             <UserCog className="h-4 w-4 mr-2 text-muted-foreground" />
                             {task.advisor}
                           </div>
-                          <div className="flex items-center">
+                          <div 
+                            className="flex items-center cursor-pointer hover:text-primary"
+                            onClick={() => setFilterBy({ type: "owner", value: task.owner })}
+                          >
                             <User className="h-4 w-4 mr-2 text-muted-foreground" />
                             {task.owner}
                           </div>
@@ -542,6 +582,71 @@ export default function PendingTasks() {
             ))}
           </div>
         )}
+        
+        {/* Task Detail Dialog */}
+        <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Task Details</DialogTitle>
+            </DialogHeader>
+            {selectedTask && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-lg">{selectedTask.task}</h3>
+                  <StatusBadge 
+                    variant={
+                      selectedTask.status === "completed" ? "success" : 
+                      selectedTask.status === "pending" ? "warning" : 
+                      "danger"
+                    }
+                    icon={
+                      selectedTask.status === "completed" ? <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> : 
+                      selectedTask.status === "pending" ? <Clock className="h-3.5 w-3.5 mr-1" /> : 
+                      <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                    }
+                  >
+                    {selectedTask.status.charAt(0).toUpperCase() + selectedTask.status.slice(1)}
+                  </StatusBadge>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground w-20">Client:</span>
+                    <span>{selectedTask.client}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground w-20">Advisor:</span>
+                    <span>{selectedTask.advisor}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground w-20">Owner:</span>
+                    <span>{selectedTask.owner}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-muted-foreground w-20">Due Date:</span>
+                    <span>{formatDate(selectedTask.dueDate)}</span>
+                  </div>
+                  {selectedTask.meetingNumber && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-muted-foreground w-20">Meeting:</span>
+                      <span>#{selectedTask.meetingNumber}</span>
+                    </div>
+                  )}
+                </div>
+                
+                <DialogFooter>
+                  <Button variant="outline" size="sm">
+                    <Edit className="h-4 w-4 mr-1" /> Edit
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    <Trash2 className="h-4 w-4 mr-1" /> Delete
+                  </Button>
+                </DialogFooter>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
+        
       </div>
     </DashboardLayout>
   );

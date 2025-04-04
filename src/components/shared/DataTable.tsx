@@ -1,14 +1,14 @@
 
 import { useState } from "react";
-import { ArrowDown, ArrowUp, Search, Filter, MoreHorizontal } from "lucide-react";
+import { ArrowDown, ArrowUp, Search, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { StatusBadge } from "@/components/shared/StatusBadge";
 
 interface Column<T> {
   key: string;
   title: string;
   render?: (item: T) => React.ReactNode;
   sortable?: boolean;
+  onClick?: (item: T) => void;
 }
 
 interface DataTableProps<T> {
@@ -119,9 +119,6 @@ export function DataTable<T>({
                   </div>
                 </th>
               ))}
-              <th className="px-4 py-3 text-right w-10">
-                <span className="sr-only">Actions</span>
-              </th>
             </tr>
           </thead>
           
@@ -134,30 +131,34 @@ export function DataTable<T>({
                       <div className="h-4 bg-muted animate-pulse rounded"></div>
                     </td>
                   ))}
-                  <td className="px-4 py-3"></td>
                 </tr>
               ))
             ) : filteredData.length === 0 ? (
               <tr>
                 <td
-                  colSpan={columns.length + 1}
+                  colSpan={columns.length}
                   className="px-4 py-8 text-center text-sm text-muted-foreground"
                 >
                   No results found
                 </td>
               </tr>
             ) : (
-              filteredData.map((item) => (
+              filteredData.map((item, index) => (
                 <tr
                   key={keyExtractor(item)}
                   className={cn(
-                    "bg-card hover:bg-accent/5 transition-colors",
-                    onRowClick && "cursor-pointer"
+                    "bg-card hover:bg-accent/5 transition-colors mb-2",
+                    onRowClick && "cursor-pointer",
+                    index < filteredData.length - 1 && "border-b-8 border-background"
                   )}
                   onClick={() => onRowClick && onRowClick(item)}
                 >
                   {columns.map((column) => (
-                    <td key={column.key} className="px-4 py-3 text-sm">
+                    <td 
+                      key={column.key} 
+                      className="px-4 py-3 text-sm"
+                      onClick={() => column.onClick && column.onClick(item)}
+                    >
                       {column.render ? (
                         column.render(item)
                       ) : (
@@ -166,12 +167,6 @@ export function DataTable<T>({
                       )}
                     </td>
                   ))}
-                  <td className="px-4 py-3 text-right">
-                    <button className="h-8 w-8 rounded-md hover:bg-accent transition-colors flex items-center justify-center">
-                      <MoreHorizontal className="h-4 w-4" />
-                      <span className="sr-only">Actions</span>
-                    </button>
-                  </td>
                 </tr>
               ))
             )}
