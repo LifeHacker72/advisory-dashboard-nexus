@@ -27,7 +27,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       case "/activation":
         setPageTitle("Client Activation");
         break;
-      case "/tasks":
+      case "/meetings":
+        setPageTitle("Meetings");
+        break;
+      case "/pending-tasks":
         setPageTitle("Pending Tasks");
         break;
       default:

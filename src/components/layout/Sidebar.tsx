@@ -9,7 +9,8 @@ import {
   LayoutDashboard, 
   ChevronLeft, 
   ChevronRight, 
-  LogOut
+  LogOut,
+  Calendar
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -44,8 +45,14 @@ const navItems: NavItem[] = [
     badge: 3,
   },
   {
+    title: "Meetings",
+    path: "/meetings",
+    icon: Calendar,
+    badge: 10,
+  },
+  {
     title: "Pending Tasks",
-    path: "/tasks",
+    path: "/pending-tasks",
     icon: ListTodo,
     badge: 12,
   },
