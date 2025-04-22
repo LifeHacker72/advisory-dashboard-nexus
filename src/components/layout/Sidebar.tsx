@@ -10,7 +10,8 @@ import {
   ChevronLeft, 
   ChevronRight, 
   LogOut,
-  Calendar
+  Calendar,
+  BookOpen
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,18 +29,18 @@ const navItems: NavItem[] = [
     icon: LayoutDashboard,
   },
   {
-    title: "Clients",
+    title: "Members",
     path: "/clients",
     icon: Users,
     badge: 24,
   },
   {
-    title: "Advisors",
+    title: "Turtle Advisors",
     path: "/advisors",
     icon: UserCog,
   },
   {
-    title: "Client Activation",
+    title: "Member Activation",
     path: "/activation",
     icon: UserPlus,
     badge: 3,
@@ -49,6 +50,12 @@ const navItems: NavItem[] = [
     path: "/meetings",
     icon: Calendar,
     badge: 10,
+  },
+  {
+    title: "Bookings",
+    path: "/bookings",
+    icon: BookOpen,
+    badge: 7,
   },
   {
     title: "Pending Tasks",
@@ -117,7 +124,7 @@ export default function Sidebar() {
                   <span className="animate-slide-in">{item.title}</span>
                 )}
                 {!collapsed && item.badge && (
-                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
+                  <span className="ml-auto flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-black">
                     {item.badge}
                   </span>
                 )}

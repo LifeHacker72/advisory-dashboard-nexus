@@ -9,6 +9,7 @@ import Clients from "./pages/Clients";
 import Advisors from "./pages/Advisors";
 import Activation from "./pages/Activation";
 import Meetings from "./pages/Meetings";
+import Bookings from "./pages/Bookings";
 import PendingTasks from "./pages/PendingTasks";
 import NotFound from "./pages/NotFound";
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/advisors" element={<Advisors />} />
           <Route path="/activation" element={<Activation />} />
           <Route path="/meetings" element={<Meetings />} />
+          <Route path="/bookings" element={<Bookings />} />
           <Route path="/pending-tasks" element={<PendingTasks />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

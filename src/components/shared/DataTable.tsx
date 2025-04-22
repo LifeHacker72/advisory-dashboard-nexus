@@ -125,7 +125,7 @@ export function DataTable<T>({
           <tbody className="divide-y-0 space-y-2">
             {isLoading ? (
               Array.from({ length: 5 }).map((_, index) => (
-                <tr key={index}>
+                <tr key={index} className="mb-2 bg-card hover-highlight rounded-md overflow-hidden">
                   {columns.map((column) => (
                     <td key={column.key} className="px-4 py-3">
                       <div className="h-4 bg-muted animate-pulse rounded"></div>
@@ -147,7 +147,7 @@ export function DataTable<T>({
                 <tr
                   key={keyExtractor(item)}
                   className={cn(
-                    "rounded-md bg-card hover:bg-accent/5 hover:outline hover:outline-1 hover:outline-[#2edebe] transition-colors mb-3",
+                    "rounded-md bg-card hover:bg-accent/5 hover-highlight transition-colors mb-3",
                     onRowClick && "cursor-pointer",
                   )}
                   onClick={() => onRowClick && onRowClick(item)}
@@ -157,7 +157,7 @@ export function DataTable<T>({
                       key={column.key} 
                       className={cn(
                         "px-4 py-3 text-sm",
-                        column.onClick && "cursor-pointer hover:underline"
+                        column.onClick && "clickable"
                       )}
                       onClick={(e) => {
                         if (column.onClick) {
