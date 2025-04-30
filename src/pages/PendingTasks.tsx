@@ -4,317 +4,300 @@ import DashboardLayout from "@/components/layout/Dashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/shared/DataTable";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { cn } from "@/lib/utils";
 import { 
   CheckCircle2, 
   AlertCircle, 
   Clock, 
   Calendar, 
-  User,
+  Users, 
   UserCog, 
-  Edit, 
-  Trash2,
-  LayoutGrid,
-  List
+  ClipboardList, 
+  FileText, 
+  Edit
 } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
+  DialogDescription, 
   DialogHeader, 
   DialogTitle, 
-  DialogFooter 
+  DialogTrigger,
+  DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useForm } from "react-hook-form";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel 
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Task {
   id: number;
-  task: string;
   client: string;
   advisor: string;
-  owner: string;
-  status: "pending" | "overdue" | "completed";
+  meetingNumber: number;
+  actionItems: string[];
+  detailedNotes: string;
   dueDate: string;
-  meetingId?: number;
-  meetingNumber?: number;
+  priority: "high" | "medium" | "low";
+  status: "pending" | "in_progress" | "completed" | "overdue";
 }
 
 const tasks: Task[] = [
   {
     id: 1,
-    task: "Review investment portfolio allocation",
     client: "Thomas Anderson",
     advisor: "Emily Richardson",
-    owner: "Emily Richardson",
-    status: "pending",
-    dueDate: "2024-04-15",
-    meetingId: 1,
-    meetingNumber: 3
+    meetingNumber: 3,
+    actionItems: [
+      "Review investment portfolio allocation",
+      "Prepare tax planning documents",
+      "Schedule follow-up call for next quarter"
+    ],
+    detailedNotes: "Client expressed interest in sustainable investing options. Discussed potential reallocation of 30% of portfolio to ESG funds. Need to prepare comparison report of performance for similar ESG vs. traditional funds.",
+    dueDate: "2023-07-15",
+    priority: "high",
+    status: "pending"
   },
   {
     id: 2,
-    task: "Prepare tax planning documents",
-    client: "Thomas Anderson",
-    advisor: "Emily Richardson",
-    owner: "Michael Scott",
-    status: "overdue",
-    dueDate: "2024-04-01",
-    meetingId: 1,
-    meetingNumber: 3
+    client: "Sarah Williams",
+    advisor: "Daniel Morgan",
+    meetingNumber: 5,
+    actionItems: [
+      "Update retirement projections",
+      "Research college savings options for children",
+      "Review insurance coverage"
+    ],
+    detailedNotes: "Client concerned about rising education costs. Recommended 529 plan for two children (ages 10 and 12). Spouse recently changed jobs, so need to review new benefits package and identify any coverage gaps.",
+    dueDate: "2023-07-20",
+    priority: "medium",
+    status: "in_progress"
   },
   {
     id: 3,
-    task: "Update retirement projections",
-    client: "Sarah Williams",
-    advisor: "Daniel Morgan",
-    owner: "Daniel Morgan",
-    status: "pending",
-    dueDate: "2024-04-20",
-    meetingId: 2,
-    meetingNumber: 5
+    client: "Michael Brown",
+    advisor: "James Wilson",
+    meetingNumber: 1,
+    actionItems: [
+      "Complete risk assessment questionnaire",
+      "Gather existing financial documents",
+      "Set up client portal access"
+    ],
+    detailedNotes: "Initial meeting with new client. Recently divorced and needs comprehensive financial plan update. Current priorities include reassessing retirement goals and updating estate planning documents.",
+    dueDate: "2023-07-10",
+    priority: "high",
+    status: "overdue"
   },
   {
     id: 4,
-    task: "Research college savings options",
-    client: "Sarah Williams",
-    advisor: "Daniel Morgan",
-    owner: "Lisa Williams",
-    status: "completed",
-    dueDate: "2024-03-28",
-    meetingId: 2,
-    meetingNumber: 5
+    client: "Jennifer Davis",
+    advisor: "Sophia Chen",
+    meetingNumber: 7,
+    actionItems: [
+      "Update beneficiary information",
+      "Review recent portfolio performance",
+      "Discuss charitable giving strategies"
+    ],
+    detailedNotes: "Client interested in establishing donor-advised fund for charitable giving. Recently received inheritance and wants to discuss tax-efficient strategies for managing these additional assets.",
+    dueDate: "2023-07-25",
+    priority: "medium",
+    status: "pending"
   },
   {
     id: 5,
-    task: "Complete risk assessment questionnaire",
-    client: "Michael Brown",
-    advisor: "James Wilson",
-    owner: "James Wilson",
-    status: "pending",
-    dueDate: "2024-04-10",
-    meetingId: 3,
-    meetingNumber: 1
+    client: "Lisa Anderson",
+    advisor: "Robert Johnson",
+    meetingNumber: 2,
+    actionItems: [
+      "Create cash flow projection",
+      "Review debt reduction strategies",
+      "Evaluate employee stock options"
+    ],
+    detailedNotes: "Client recently promoted to executive position with significant stock compensation. Need to develop strategy for diversification while minimizing tax impact. Also concerned about educational funding for teenager planning to attend college in 3 years.",
+    dueDate: "2023-07-18",
+    priority: "medium",
+    status: "in_progress"
   },
   {
     id: 6,
-    task: "Update beneficiary information",
-    client: "Jennifer Davis",
-    advisor: "Sophia Chen",
-    owner: "Sophia Chen",
-    status: "pending",
-    dueDate: "2024-04-25",
-    meetingId: 4,
-    meetingNumber: 7
+    client: "David Brown",
+    advisor: "Olivia Martinez",
+    meetingNumber: 4,
+    actionItems: [
+      "Update estate planning documents",
+      "Review life insurance needs",
+      "Discuss long-term care options"
+    ],
+    detailedNotes: "Client recently turned 60 and wants to revisit estate plan. Has concerns about aging parents and potential caregiving responsibilities. Discussed importance of having proper legal documents in place for both client and parents.",
+    dueDate: "2023-07-05",
+    priority: "high",
+    status: "overdue"
   },
   {
     id: 7,
-    task: "Create cash flow projection",
-    client: "Lisa Anderson",
-    advisor: "Robert Johnson",
-    owner: "Robert Johnson",
-    status: "overdue",
-    dueDate: "2024-03-15",
-    meetingId: 5,
-    meetingNumber: 2
+    client: "Robert Davis",
+    advisor: "Daniel Morgan",
+    meetingNumber: 6,
+    actionItems: [
+      "Rebalance investment portfolio",
+      "Review tax loss harvesting opportunities",
+      "Update retirement income projections"
+    ],
+    detailedNotes: "Annual review meeting. Portfolio has drifted from target allocation due to market performance. Identified several tax loss harvesting opportunities to offset capital gains from business sale earlier in the year.",
+    dueDate: "2023-07-12",
+    priority: "low",
+    status: "completed"
   },
   {
     id: 8,
-    task: "Update estate planning documents",
-    client: "David Brown",
-    advisor: "Olivia Martinez",
-    owner: "John Smith",
-    status: "completed",
-    dueDate: "2024-03-05",
-    meetingId: 6,
-    meetingNumber: 4
+    client: "Walter White",
+    advisor: "Emily Richardson",
+    meetingNumber: 1,
+    actionItems: [
+      "Complete risk profile assessment",
+      "Gather existing financial statements",
+      "Set up automatic investments"
+    ],
+    detailedNotes: "Initial meeting with new client. Recently retired and rolled over 401(k) to IRA. Primary concern is generating reliable retirement income while preserving principal. Conservative risk tolerance - prioritizes capital preservation over growth.",
+    dueDate: "2023-07-22",
+    priority: "medium",
+    status: "pending"
   },
   {
     id: 9,
-    task: "Review tax loss harvesting opportunities",
-    client: "Robert Davis",
-    advisor: "Daniel Morgan",
-    owner: "Daniel Morgan",
-    status: "pending",
-    dueDate: "2024-04-12",
-    meetingId: 7,
-    meetingNumber: 6
+    client: "Elizabeth Wilson",
+    advisor: "James Wilson",
+    meetingNumber: 8,
+    actionItems: [
+      "Update financial plan projections",
+      "Review asset allocation strategy",
+      "Discuss Roth conversion opportunities"
+    ],
+    detailedNotes: "Client planning early retirement in 2 years. Discussed Roth conversion ladder strategy to optimize tax situation before required minimum distributions begin. Needs updated cash flow projections based on new retirement date.",
+    dueDate: "2023-07-28",
+    priority: "medium",
+    status: "pending"
   },
   {
     id: 10,
-    task: "Verify account preferences",
     client: "Multiple",
     advisor: "Sophia Chen",
-    owner: "Sophia Chen",
-    status: "completed",
-    dueDate: "2024-03-14",
-    meetingId: 10,
-    meetingNumber: 2
-  },
-  {
-    id: 11,
-    task: "Finalize quarterly report",
-    client: "Walter White",
-    advisor: "Emily Richardson",
-    owner: "Michael Scott",
-    status: "pending",
-    dueDate: "2024-04-30"
-  },
-  {
-    id: 12,
-    task: "Schedule client review meeting",
-    client: "Elizabeth Wilson",
-    advisor: "James Wilson",
-    owner: "James Wilson",
-    status: "overdue",
-    dueDate: "2024-04-02"
+    meetingNumber: 2,
+    actionItems: [
+      "Update contact information",
+      "Verify account preferences",
+      "Send welcome package materials"
+    ],
+    detailedNotes: "Administrative follow-up for recently onboarded clients. Need to verify all paperwork is complete and that clients have successfully accessed their online portals. Schedule individual welcome calls for next week.",
+    dueDate: "2023-07-14",
+    priority: "low",
+    status: "completed"
   }
 ];
 
-type ViewMode = "table" | "cards";
-type GroupBy = "none" | "owner" | "dueDate" | "advisor" | "client";
-
-interface TaskFormData {
-  task: string;
-  client: string;
-  advisor: string;
-  owner: string;
-  dueDate: string;
-}
-
 export default function PendingTasks() {
   const [selectedStatusFilter, setSelectedStatusFilter] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<ViewMode>("table");
-  const [groupBy, setGroupBy] = useState<GroupBy>("none");
+  const [selectedPriorityFilter, setSelectedPriorityFilter] = useState<string>("all");
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [filterBy, setFilterBy] = useState<{type: string, value: string} | null>(null);
+  const [showTaskDetails, setShowTaskDetails] = useState(false);
+  const [showEditTask, setShowEditTask] = useState(false);
   
-  const form = useForm<TaskFormData>({
-    defaultValues: {
-      task: "",
-      client: "",
-      advisor: "",
-      owner: "",
-      dueDate: new Date().toISOString().split('T')[0]
-    }
-  });
-
-  const resetForm = (task?: Task) => {
-    if (task) {
-      form.reset({
-        task: task.task,
-        client: task.client,
-        advisor: task.advisor,
-        owner: task.owner,
-        dueDate: task.dueDate
-      });
-    } else {
-      form.reset({
-        task: "",
-        client: "",
-        advisor: "",
-        owner: "",
-        dueDate: new Date().toISOString().split('T')[0]
-      });
-    }
+  const { toast } = useToast();
+  
+  const handleStatusChange = (taskId: number, newStatus: string) => {
+    // Do not open any dialog, just update status
+    toast({
+      title: "Status updated",
+      description: `Task #${taskId} status changed to ${newStatus}`,
+    });
+    
+    // Important: Stop event propagation to prevent opening the task details
+    return false; // Return false to indicate event should stop propagation
   };
   
   const getFilteredTasks = () => {
     return tasks.filter((task) => {
-      // Status filter
       const statusMatch = selectedStatusFilter === "all" || task.status === selectedStatusFilter;
-      
-      // Additional filters
-      if (filterBy) {
-        if (filterBy.type === "advisor" && task.advisor !== filterBy.value) return false;
-        if (filterBy.type === "client" && task.client !== filterBy.value) return false;
-        if (filterBy.type === "owner" && task.owner !== filterBy.value) return false;
-      }
-      
-      return statusMatch;
+      const priorityMatch = selectedPriorityFilter === "all" || task.priority === selectedPriorityFilter;
+      return statusMatch && priorityMatch;
     });
   };
   
   const filteredTasks = getFilteredTasks();
   
   const pendingTasks = tasks.filter((task) => task.status === "pending").length;
+  const inProgressTasks = tasks.filter((task) => task.status === "in_progress").length;
   const overdueTasks = tasks.filter((task) => task.status === "overdue").length;
-  const completedTasks = tasks.filter((task) => task.status === "completed").length;
   
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return format(date, "MMM dd, yyyy");
-  };
-  
-  const clearFilter = () => {
-    setFilterBy(null);
-  };
-
-  const handleEditTask = (task: Task) => {
-    setEditingTask(task);
-    resetForm(task);
-  };
-
-  const onStatusCardClick = (status: string) => {
-    setSelectedStatusFilter(status);
-  };
-  
-  const { toast } = useToast();
-  
-  const handleStatusChange = (taskId: number, newStatus: string) => {
-    // Do not open the task details dialog
-    toast({
-      title: "Status updated",
-      description: `Task #${taskId} status changed to ${newStatus}`,
-    });
-  };
-
   const columns = [
-    {
-      key: "task",
-      title: "Task",
-      sortable: true,
-      onClick: (task: Task) => setSelectedTask(task),
-      render: (task: Task) => (
-        <span className="cursor-pointer hover:underline">{task.task}</span>
-      ),
-    },
     {
       key: "client",
       title: "Client",
       sortable: true,
-      onClick: (task: Task) => setFilterBy({ type: "client", value: task.client }),
-      render: (task: Task) => (
-        <span className="cursor-pointer hover:underline">{task.client}</span>
-      ),
     },
     {
       key: "advisor",
       title: "Advisor",
       sortable: true,
-      onClick: (task: Task) => setFilterBy({ type: "advisor", value: task.advisor }),
+    },
+    {
+      key: "meetingNumber",
+      title: "Meeting Number",
+      sortable: true,
       render: (task: Task) => (
-        <span className="cursor-pointer hover:underline">{task.advisor}</span>
+        <div className="text-center">{task.meetingNumber}</div>
       ),
     },
     {
-      key: "owner",
-      title: "Owner",
-      sortable: true,
-      onClick: (task: Task) => setFilterBy({ type: "owner", value: task.owner }),
-      render: (task: Task) => (
-        <span className="cursor-pointer hover:underline">{task.owner}</span>
-      ),
+      key: "actionItems",
+      title: "Action Items",
+      render: (task: Task) => {
+        return (
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="flex items-center gap-1 text-primary hover:underline">
+                <ClipboardList className="h-4 w-4" /> {task.actionItems.length} items
+              </button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Action Items for {task.client}</DialogTitle>
+              </DialogHeader>
+              <div className="mt-4">
+                <ul className="list-disc pl-5 space-y-2">
+                  {task.actionItems.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </DialogContent>
+          </Dialog>
+        );
+      },
+    },
+    {
+      key: "detailedNotes",
+      title: "Detailed Notes",
+      render: (task: Task) => {
+        return (
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="flex items-center gap-1 text-primary hover:underline">
+                <FileText className="h-4 w-4" /> View Notes
+              </button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Detailed Notes for {task.client}</DialogTitle>
+              </DialogHeader>
+              <div className="mt-4 bg-muted/30 p-4 rounded-md">
+                <p>{task.detailedNotes}</p>
+              </div>
+            </DialogContent>
+          </Dialog>
+        );
+      },
     },
     {
       key: "status",
@@ -335,6 +318,10 @@ export default function PendingTasks() {
             variant = "success";
             icon = <CheckCircle2 className="h-3.5 w-3.5 mr-1" />;
             break;
+          case "in_progress":
+            variant = "info";
+            icon = <Clock className="h-3.5 w-3.5 mr-1" />;
+            break;
           case "overdue":
             variant = "danger";
             icon = <AlertCircle className="h-3.5 w-3.5 mr-1" />;
@@ -350,94 +337,41 @@ export default function PendingTasks() {
             variant={variant} 
             icon={icon} 
             selectable={true}
-            onStatusChange={(status) => handleStatusChange(task.id, status)}
+            onStatusChange={(status) => {
+              handleStatusChange(task.id, status);
+              return false; // Prevent propagation
+            }}
             currentStatus={task.status}
           >
-            {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+            {task.status === "in_progress"
+              ? "In Progress"
+              : task.status.charAt(0).toUpperCase() + task.status.slice(1)}
           </StatusBadge>
         );
       },
     },
     {
-      key: "dueDate",
-      title: "Due Date",
-      sortable: true,
-      render: (task: Task) => (
-        <div>{formatDate(task.dueDate)}</div>
-      ),
-    },
-    {
       key: "actions",
       title: "Actions",
       render: (task: Task) => (
-        <div className="flex items-center gap-2">
-          {task.meetingNumber && (
-            <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-              <Calendar className="h-4 w-4" />
-              <span className="sr-only">Meeting {task.meetingNumber}</span>
-            </Button>
-          )}
-          
-          <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={(e) => {
-            e.stopPropagation();
-            handleEditTask(task);
-          }}>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedTask(task);
+              setShowEditTask(true);
+            }}
+          >
             <Edit className="h-4 w-4" />
             <span className="sr-only">Edit</span>
-          </Button>
-          
-          <Button variant="outline" size="sm" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
-            <Trash2 className="h-4 w-4" />
-            <span className="sr-only">Delete</span>
           </Button>
         </div>
       ),
     },
   ];
-
-  // Group tasks by the selected groupBy option
-  const getGroupedTasks = () => {
-    if (groupBy === "none") return { "All Tasks": filteredTasks };
-    
-    const grouped: Record<string, Task[]> = {};
-    
-    filteredTasks.forEach(task => {
-      let groupKey = "";
-      
-      switch (groupBy) {
-        case "owner":
-          groupKey = task.owner;
-          break;
-        case "dueDate":
-          // Group by month/year
-          const date = new Date(task.dueDate);
-          groupKey = format(date, "MMMM yyyy");
-          break;
-        case "advisor":
-          groupKey = task.advisor;
-          break;
-        case "client":
-          groupKey = task.client;
-          break;
-      }
-      
-      if (!grouped[groupKey]) {
-        grouped[groupKey] = [];
-      }
-      
-      grouped[groupKey].push(task);
-    });
-    
-    return grouped;
-  };
   
-  const groupedTasks = getGroupedTasks();
-  
-  // A list of unique clients, advisors and owners for the form
-  const clients = [...new Set(tasks.map(task => task.client))];
-  const advisors = [...new Set(tasks.map(task => task.advisor))];
-  const owners = [...new Set(tasks.map(task => task.owner))];
-
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
@@ -445,26 +379,17 @@ export default function PendingTasks() {
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Pending Tasks</h2>
             <p className="text-muted-foreground">
-              Manage and track tasks for clients and advisors
+              Manage and track tasks for clients and advisors.
             </p>
           </div>
-          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full md:w-auto" 
-            onClick={() => {
-              resetForm();
-              setEditingTask({} as Task);
-            }}>
+          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 w-full md:w-auto">
             Create New Task
           </button>
         </div>
         
+        {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-3">
-          <Card 
-            className={cn(
-              "glass-card cursor-pointer hover-highlight",
-              selectedStatusFilter === "overdue" && "outline outline-1 outline-[#2edebe]"
-            )}
-            onClick={() => onStatusCardClick("overdue")}
-          >
+          <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
                 <AlertCircle className="h-5 w-5 mr-2 text-destructive" />
@@ -477,13 +402,7 @@ export default function PendingTasks() {
             </CardContent>
           </Card>
           
-          <Card 
-            className={cn(
-              "glass-card cursor-pointer hover-highlight",
-              selectedStatusFilter === "pending" && "outline outline-1 outline-[#2edebe]"
-            )}
-            onClick={() => onStatusCardClick("pending")}
-          >
+          <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
                 <Clock className="h-5 w-5 mr-2 text-amber-500" />
@@ -496,491 +415,242 @@ export default function PendingTasks() {
             </CardContent>
           </Card>
           
-          <Card 
-            className={cn(
-              "glass-card cursor-pointer hover-highlight",
-              selectedStatusFilter === "completed" && "outline outline-1 outline-[#2edebe]"
-            )}
-            onClick={() => onStatusCardClick("completed")}
-          >
+          <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center">
-                <CheckCircle2 className="h-5 w-5 mr-2 text-emerald-500" />
-                Completed
+                <Clock className="h-5 w-5 mr-2 text-primary" />
+                In Progress
               </CardTitle>
-              <CardDescription>Tasks finished</CardDescription>
+              <CardDescription>Tasks being worked on</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{completedTasks}</div>
+              <div className="text-3xl font-bold">{inProgressTasks}</div>
             </CardContent>
           </Card>
         </div>
         
-        <div className="flex flex-wrap gap-2 justify-between mb-4">
-          <div className="flex flex-wrap gap-2">
-            <div>
-              <label htmlFor="status-filter" className="text-sm font-medium mr-2">
-                Status:
-              </label>
-              <select
-                id="status-filter"
-                className="rounded-md border border-input bg-background px-3 py-1 text-sm"
-                value={selectedStatusFilter}
-                onChange={(e) => setSelectedStatusFilter(e.target.value)}
-              >
-                <option value="all">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="overdue">Overdue</option>
-                <option value="completed">Completed</option>
-              </select>
-            </div>
-            
-            <div>
-              <label htmlFor="group-by" className="text-sm font-medium mr-2">
-                Group By:
-              </label>
-              <select
-                id="group-by"
-                className="rounded-md border border-input bg-background px-3 py-1 text-sm"
-                value={groupBy}
-                onChange={(e) => setGroupBy(e.target.value as GroupBy)}
-              >
-                <option value="none">No Grouping</option>
-                <option value="owner">Owner</option>
-                <option value="dueDate">Due Date</option>
-                <option value="advisor">Advisor</option>
-                <option value="client">Client</option>
-              </select>
-            </div>
-            
-            {filterBy && (
-              <div className="flex items-center gap-2">
-                <div className="text-sm bg-accent px-3 py-1 rounded-md flex items-center">
-                  Filtered by {filterBy.type}: <span className="font-medium ml-1">{filterBy.value}</span>
-                  <button 
-                    onClick={clearFilter}
-                    className="ml-2 text-muted-foreground hover:text-foreground"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-            )}
+        {/* Filter controls */}
+        <div className="flex flex-wrap gap-2 mb-4">
+          <div>
+            <label htmlFor="status-filter" className="text-sm font-medium mr-2">
+              Status:
+            </label>
+            <select
+              id="status-filter"
+              className="rounded-md border border-input bg-background px-3 py-1 text-sm"
+              value={selectedStatusFilter}
+              onChange={(e) => setSelectedStatusFilter(e.target.value)}
+            >
+              <option value="all">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="overdue">Overdue</option>
+            </select>
           </div>
           
-          <div className="flex items-center gap-2">
-            <button 
-              className={cn(
-                "h-8 w-8 rounded-md flex items-center justify-center",
-                viewMode === "table" ? "bg-primary text-primary-foreground" : "hover:bg-accent"
-              )}
-              onClick={() => setViewMode("table")}
+          <div>
+            <label htmlFor="priority-filter" className="text-sm font-medium mr-2">
+              Priority:
+            </label>
+            <select
+              id="priority-filter"
+              className="rounded-md border border-input bg-background px-3 py-1 text-sm"
+              value={selectedPriorityFilter}
+              onChange={(e) => setSelectedPriorityFilter(e.target.value)}
             >
-              <List className="h-4 w-4" />
-              <span className="sr-only">Table View</span>
-            </button>
-            <button 
-              className={cn(
-                "h-8 w-8 rounded-md flex items-center justify-center",
-                viewMode === "cards" ? "bg-primary text-primary-foreground" : "hover:bg-accent"
-              )}
-              onClick={() => setViewMode("cards")}
-            >
-              <LayoutGrid className="h-4 w-4" />
-              <span className="sr-only">Card View</span>
-            </button>
+              <option value="all">All Priorities</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
           </div>
         </div>
         
-        {viewMode === "table" ? (
-          <DataTable
-            columns={columns}
-            data={filteredTasks}
-            keyExtractor={(task) => task.id}
-            searchPlaceholder="Search tasks..."
-            onRowClick={(task) => setSelectedTask(task)}
-            rowClassName="hover:outline hover:outline-1 hover:outline-[#2edebe] rounded-md" // Add hover highlight
-          />
-        ) : (
-          <div className="space-y-6">
-            {Object.entries(groupedTasks).map(([group, tasks]) => (
-              <div key={group} className="space-y-4">
-                <h3 className="text-lg font-medium">{group}</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {tasks.map((task) => (
-                    <Card 
-                      key={task.id} 
-                      className="overflow-hidden hover:outline hover:outline-1 hover:outline-[#2edebe] cursor-pointer" 
-                      onClick={() => setSelectedTask(task)}
-                    >
-                      <CardHeader className="pb-2">
-                        <CardTitle 
-                          className="text-base truncate cursor-pointer hover:underline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedTask(task);
-                          }}
-                        >
-                          {task.task}
-                        </CardTitle>
-                        <CardDescription className="flex justify-between">
-                          <span 
-                            className="cursor-pointer hover:underline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setFilterBy({ type: "client", value: task.client })
-                            }}
-                          >
-                            {task.client}
-                          </span>
-                          <StatusBadge 
-                            variant={
-                              task.status === "completed" ? "success" : 
-                              task.status === "pending" ? "warning" : 
-                              "danger"
-                            }
-                            icon={
-                              task.status === "completed" ? <CheckCircle2 className="h-3 w-3 mr-1" /> : 
-                              task.status === "pending" ? <Clock className="h-3 w-3 mr-1" /> : 
-                              <AlertCircle className="h-3 w-3 mr-1" />
-                            }
-                            selectable={true}
-                            onStatusChange={(status) => {
-                              handleStatusChange(task.id, status);
-                            }}
-                            currentStatus={task.status}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
-                          </StatusBadge>
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-2 text-sm">
-                          <div 
-                            className="flex items-center cursor-pointer hover:underline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setFilterBy({ type: "advisor", value: task.advisor })
-                            }}
-                          >
-                            <UserCog className="h-4 w-4 mr-2 text-muted-foreground" />
-                            {task.advisor}
-                          </div>
-                          <div 
-                            className="flex items-center cursor-pointer hover:underline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setFilterBy({ type: "owner", value: task.owner })
-                            }}
-                          >
-                            <User className="h-4 w-4 mr-2 text-muted-foreground" />
-                            {task.owner}
-                          </div>
-                          <div className="flex items-center">
-                            <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                            {formatDate(task.dueDate)}
-                          </div>
-                          {task.meetingNumber && (
-                            <div className="flex items-center">
-                              <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                              Meeting #{task.meetingNumber}
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                      <div className="flex border-t">
-                        <button 
-                          className="flex-1 p-2 hover:bg-accent transition-colors flex items-center justify-center text-primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditTask(task);
-                          }}
-                        >
-                          <Edit className="h-4 w-4 mr-1" />
-                          Edit
-                        </button>
-                        <div className="w-px bg-border" />
-                        <button 
-                          className="flex-1 p-2 hover:bg-accent transition-colors flex items-center justify-center text-primary"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Delete
-                        </button>
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* DataTable */}
+        <DataTable
+          columns={columns}
+          data={filteredTasks}
+          keyExtractor={(task) => task.id}
+          searchPlaceholder="Search tasks..."
+          onRowClick={(task) => {
+            setSelectedTask(task);
+            setShowTaskDetails(true);
+          }}
+        />
         
-        {/* Task Detail Dialog */}
-        <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
-          <DialogContent className="sm:max-w-md">
+        {/* Task Details Dialog */}
+        <Dialog open={showTaskDetails} onOpenChange={setShowTaskDetails}>
+          <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>Task Details</DialogTitle>
+              <DialogDescription>
+                View detailed information about this task
+              </DialogDescription>
             </DialogHeader>
+            
             {selectedTask && (
               <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Client</h3>
+                    <p>{selectedTask.client}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Advisor</h3>
+                    <p>{selectedTask.advisor}</p>
+                  </div>
+                </div>
+                
                 <div>
-                  <h3 className="font-semibold text-lg">{selectedTask.task}</h3>
-                  <StatusBadge 
-                    variant={
-                      selectedTask.status === "completed" ? "success" : 
-                      selectedTask.status === "pending" ? "warning" : 
-                      "danger"
-                    }
-                    icon={
-                      selectedTask.status === "completed" ? <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> : 
-                      selectedTask.status === "pending" ? <Clock className="h-3.5 w-3.5 mr-1" /> : 
-                      <AlertCircle className="h-3.5 w-3.5 mr-1" />
-                    }
-                    selectable={true}
-                    onStatusChange={(status) => {
-                      handleStatusChange(selectedTask.id, status);
-                      setSelectedTask({...selectedTask, status: status as "pending" | "overdue" | "completed"});
-                    }}
-                    currentStatus={selectedTask.status}
-                  >
-                    {selectedTask.status.charAt(0).toUpperCase() + selectedTask.status.slice(1)}
-                  </StatusBadge>
+                  <h3 className="text-sm font-medium text-muted-foreground">Due Date</h3>
+                  <p>{format(new Date(selectedTask.dueDate), "PPP")}</p>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Action Items</h3>
+                  <ul className="list-disc pl-5 space-y-1 mt-1">
+                    {selectedTask.actionItems.map((item, i) => (
+                      <li key={i}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground">Detailed Notes</h3>
+                  <p className="mt-1 text-sm whitespace-pre-wrap bg-muted/30 p-3 rounded-md">
+                    {selectedTask.detailedNotes}
+                  </p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Priority</h3>
+                    <p className="capitalize">{selectedTask.priority}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
+                    <p className="capitalize">{selectedTask.status.replace("_", " ")}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTaskDetails(false)}>
+                Close
+              </Button>
+              <Button 
+                onClick={() => {
+                  setShowTaskDetails(false);
+                  if (selectedTask) {
+                    setSelectedTask(selectedTask);
+                    setShowEditTask(true);
+                  }
+                }}
+              >
+                Edit
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Edit Task Dialog */}
+        <Dialog open={showEditTask} onOpenChange={setShowEditTask}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Task</DialogTitle>
+              <DialogDescription>
+                Make changes to task details
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedTask && (
+              <div className="space-y-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="client">Client</Label>
+                    <Input id="client" defaultValue={selectedTask.client} />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="advisor">Advisor</Label>
+                    <Input id="advisor" defaultValue={selectedTask.advisor} />
+                  </div>
                 </div>
                 
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground w-20">Client:</span>
-                    <span 
-                      className="hover:underline cursor-pointer"
-                      onClick={() => {
-                        setFilterBy({ type: "client", value: selectedTask.client });
-                        setSelectedTask(null);
-                      }}
-                    >
-                      {selectedTask.client}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground w-20">Advisor:</span>
-                    <span 
-                      className="hover:underline cursor-pointer"
-                      onClick={() => {
-                        setFilterBy({ type: "advisor", value: selectedTask.advisor });
-                        setSelectedTask(null);
-                      }}
-                    >
-                      {selectedTask.advisor}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground w-20">Owner:</span>
-                    <span 
-                      className="hover:underline cursor-pointer"
-                      onClick={() => {
-                        setFilterBy({ type: "owner", value: selectedTask.owner });
-                        setSelectedTask(null);
-                      }}
-                    >
-                      {selectedTask.owner}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground w-20">Due Date:</span>
-                    <span>{formatDate(selectedTask.dueDate)}</span>
-                  </div>
-                  {selectedTask.meetingNumber && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-muted-foreground w-20">Meeting:</span>
-                      <span>#{selectedTask.meetingNumber}</span>
-                    </div>
-                  )}
+                  <Label htmlFor="due-date">Due Date</Label>
+                  <Input id="due-date" type="date" defaultValue={selectedTask.dueDate} />
                 </div>
                 
-                <DialogFooter>
-                  <Button variant="outline" size="sm" onClick={() => {
-                    handleEditTask(selectedTask);
-                    setSelectedTask(null);
-                  }}>
-                    <Edit className="h-4 w-4 mr-1" /> Edit
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Trash2 className="h-4 w-4 mr-1" /> Delete
-                  </Button>
-                </DialogFooter>
+                <div className="space-y-2">
+                  <Label htmlFor="action-items">Action Items (one per line)</Label>
+                  <Textarea 
+                    id="action-items" 
+                    className="min-h-[100px]" 
+                    defaultValue={selectedTask.actionItems.join("\n")}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="notes">Detailed Notes</Label>
+                  <Textarea 
+                    id="notes" 
+                    className="min-h-[150px]" 
+                    defaultValue={selectedTask.detailedNotes}
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="priority">Priority</Label>
+                    <Select defaultValue={selectedTask.priority}>
+                      <SelectTrigger id="priority">
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="low">Low</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select defaultValue={selectedTask.status}>
+                      <SelectTrigger id="status">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="overdue">Overdue</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             )}
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditTask(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => {
+                  toast({
+                    title: "Task updated",
+                    description: "The task has been successfully updated",
+                  });
+                  setShowEditTask(false);
+                }}
+              >
+                Save Changes
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
-        
-        {/* Task Edit Dialog */}
-        <Dialog open={!!editingTask} onOpenChange={(open) => !open && setEditingTask(null)}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{editingTask?.id ? "Edit Task" : "Create New Task"}</DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="task"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Task</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Task description" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="client"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Client</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button variant="outline" className="w-full justify-between">
-                              {field.value || "Select client"}
-                              <span>▼</span>
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[200px] p-0">
-                          <div className="space-y-1 p-2">
-                            <Input
-                              placeholder="Search clients..."
-                              className="mb-2"
-                            />
-                            {clients.map(client => (
-                              <Button
-                                key={client}
-                                variant="ghost"
-                                className="w-full justify-start font-normal"
-                                onClick={() => {
-                                  form.setValue("client", client);
-                                }}
-                              >
-                                {client}
-                              </Button>
-                            ))}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="advisor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Advisor</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button variant="outline" className="w-full justify-between">
-                              {field.value || "Select advisor"}
-                              <span>▼</span>
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[200px] p-0">
-                          <div className="space-y-1 p-2">
-                            <Input
-                              placeholder="Search advisors..."
-                              className="mb-2"
-                            />
-                            {advisors.map(advisor => (
-                              <Button
-                                key={advisor}
-                                variant="ghost"
-                                className="w-full justify-start font-normal"
-                                onClick={() => {
-                                  form.setValue("advisor", advisor);
-                                }}
-                              >
-                                {advisor}
-                              </Button>
-                            ))}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="owner"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Owner</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button variant="outline" className="w-full justify-between">
-                              {field.value || "Select owner"}
-                              <span>▼</span>
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[200px] p-0">
-                          <div className="space-y-1 p-2">
-                            <Input
-                              placeholder="Search owners..."
-                              className="mb-2"
-                            />
-                            {owners.map(owner => (
-                              <Button
-                                key={owner}
-                                variant="ghost"
-                                className="w-full justify-start font-normal"
-                                onClick={() => {
-                                  form.setValue("owner", owner);
-                                }}
-                              >
-                                {owner}
-                              </Button>
-                            ))}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="dueDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Due Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => setEditingTask(null)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit">
-                    {editingTask?.id ? "Update Task" : "Create Task"}
-                  </Button>
-                </DialogFooter>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-        
       </div>
     </DashboardLayout>
   );

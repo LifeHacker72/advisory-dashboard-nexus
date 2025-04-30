@@ -1,93 +1,131 @@
-
-import { cva, type VariantProps } from "class-variance-authority";
+import React, { ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuItem
-} from "@/components/ui/dropdown-menu";
-import { CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Check } from "lucide-react";
 
-const statusBadgeVariants = cva(
-  "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-  {
-    variants: {
-      variant: {
-        default: "bg-secondary text-secondary-foreground",
-        primary: "bg-primary text-primary-foreground",
-        success: "bg-green-500/15 text-green-600 border border-green-500/20",
-        warning: "bg-amber-500/15 text-amber-600 border border-amber-500/20",
-        danger: "bg-destructive/15 text-destructive border border-destructive/20",
-        info: "bg-blue-500/15 text-blue-600 border border-blue-500/20",
-        outline: "border border-input bg-background text-foreground",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-);
+type StatusVariant = 
+  | "default"
+  | "primary"
+  | "success"
+  | "warning"
+  | "danger"
+  | "info"
+  | "outline";
 
-export interface StatusBadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof statusBadgeVariants> {
-  icon?: React.ReactNode;
+interface StatusBadgeProps {
+  children: ReactNode;
+  variant?: StatusVariant;
+  icon?: ReactNode;
+  className?: string;
   selectable?: boolean;
-  onStatusChange?: (status: string) => void;
+  onStatusChange?: (status: string) => boolean | void;
   currentStatus?: string;
 }
 
 export function StatusBadge({
-  className,
-  variant,
-  icon,
   children,
+  variant = "default",
+  icon,
+  className,
   selectable = false,
   onStatusChange,
-  currentStatus,
-  ...props
+  currentStatus
 }: StatusBadgeProps) {
-  if (!selectable) {
+  const [open, setOpen] = useState(false);
+  
+  const getVariantStyles = () => {
+    switch (variant) {
+      case "primary":
+        return "bg-primary/15 text-primary border border-primary/20";
+      case "success":
+        return "bg-green-500/15 text-green-600 border border-green-500/20";
+      case "warning":
+        return "bg-amber-500/15 text-amber-600 border border-amber-500/20";
+      case "danger":
+        return "bg-destructive/15 text-destructive border border-destructive/20";
+      case "info":
+        return "bg-blue-500/15 text-blue-600 border border-blue-500/20";
+      case "outline":
+        return "bg-background text-foreground border border-input";
+      default:
+        return "bg-muted text-muted-foreground border border-transparent";
+    }
+  };
+  
+  const handleStatusSelect = (status: string) => {
+    setOpen(false);
+    if (onStatusChange) {
+      const result = onStatusChange(status);
+      // If the handler returns false, prevent event propagation
+      return result;
+    }
+  };
+  
+  const statusOptions = [
+    { value: "pending", label: "Pending" },
+    { value: "in_progress", label: "In Progress" },
+    { value: "completed", label: "Completed" },
+    { value: "overdue", label: "Overdue" }
+  ];
+  
+  if (selectable) {
     return (
-      <div className={cn(statusBadgeVariants({ variant }), className)} {...props}>
-        {icon && <span className="mr-1">{icon}</span>}
-        {children}
-      </div>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild onClick={(e) => {
+          if (selectable) {
+            e.stopPropagation();
+          }
+        }}>
+          <button 
+            className={cn(
+              "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+              getVariantStyles(),
+              className
+            )}
+          >
+            {icon}
+            {children}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-40 p-0" onClick={(e) => e.stopPropagation()}>
+          <div className="flex flex-col">
+            {statusOptions.map((option) => (
+              <button
+                key={option.value}
+                className={cn(
+                  "flex items-center justify-between px-3 py-2 text-sm hover:bg-muted",
+                  currentStatus === option.value && "bg-muted/50"
+                )}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const result = handleStatusSelect(option.value);
+                  if (result === false) {
+                    e.stopPropagation();
+                  }
+                }}
+              >
+                {option.label}
+                {currentStatus === option.value && (
+                  <Check className="h-4 w-4" />
+                )}
+              </button>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
     );
   }
-
+  
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <div className={cn(statusBadgeVariants({ variant }), "cursor-pointer hover:opacity-80", className)} {...props}>
-          {icon && <span className="mr-1">{icon}</span>}
-          {children}
-        </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-[180px] p-1">
-        <DropdownMenuItem 
-          className={cn("flex items-center cursor-pointer", currentStatus === "pending" && "bg-accent")}
-          onClick={() => onStatusChange && onStatusChange("pending")}
-        >
-          <Clock className="h-3.5 w-3.5 mr-2 text-amber-600" />
-          <span>Pending</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          className={cn("flex items-center cursor-pointer", currentStatus === "overdue" && "bg-accent")}
-          onClick={() => onStatusChange && onStatusChange("overdue")}
-        >
-          <AlertCircle className="h-3.5 w-3.5 mr-2 text-destructive" />
-          <span>Overdue</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          className={cn("flex items-center cursor-pointer", currentStatus === "completed" && "bg-accent")}
-          onClick={() => onStatusChange && onStatusChange("completed")}
-        >
-          <CheckCircle2 className="h-3.5 w-3.5 mr-2 text-green-600" />
-          <span>Completed</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div
+      className={cn(
+        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+        getVariantStyles(),
+        className
+      )}
+    >
+      {icon}
+      {children}
+    </div>
   );
 }

@@ -40,6 +40,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 interface ActionItem {
   id: number;
@@ -211,7 +213,8 @@ export default function Meetings() {
   const [selectedAdvisorFilter, setSelectedAdvisorFilter] = useState<string>("all");
   const [selectedClientFilter, setSelectedClientFilter] = useState<string>("all");
   const [isAddingMeeting, setIsAddingMeeting] = useState(false);
-  const [editingActionItem, setEditingActionItem] = useState<{meetingId: number, itemId: number} | null>(null);
+  const [selectedTask, setSelectedTask] = useState<ActionItem | null>(null);
+  const [showEditTask, setShowEditTask] = useState(false);
   
   const { toast } = useToast();
   
@@ -233,6 +236,9 @@ export default function Meetings() {
       title: "Action item status updated",
       description: `Action item #${itemId} status changed to ${newStatus}`,
     });
+    
+    // Return false to stop event propagation
+    return false;
   };
   
   // Get filtered meetings based on filters
@@ -339,7 +345,11 @@ export default function Meetings() {
                           variant="outline" 
                           size="sm" 
                           className="h-7 w-7 p-0 flex items-center justify-center rounded-md hover:bg-accent"
-                          onClick={() => setEditingActionItem({ meetingId: meeting.id, itemId: item.id })}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedTask(item);
+                            setShowEditTask(true);
+                          }}
                         >
                           <Edit className="h-4 w-4" />
                           <span className="sr-only">Edit action item</span>
@@ -419,6 +429,7 @@ export default function Meetings() {
           </button>
         </div>
         
+        {/* Filter controls */}
         <div className="flex flex-wrap gap-2 mb-4">
           <div>
             <label htmlFor="advisor-filter" className="text-sm font-medium mr-2">
@@ -455,6 +466,7 @@ export default function Meetings() {
           </div>
         </div>
         
+        {/* DataTable */}
         <DataTable
           columns={columns}
           data={filteredMeetings}
@@ -474,6 +486,7 @@ export default function Meetings() {
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+                {/* ... keep existing code (form fields) */}
                 <FormField
                   control={form.control}
                   name="client"
@@ -617,73 +630,57 @@ export default function Meetings() {
           </DialogContent>
         </Dialog>
         
-        {/* Action Item Edit Dialog - Update to match PendingTasks */}
-        {editingActionItem && (
-          <Dialog open={!!editingActionItem} onOpenChange={(open) => !open && setEditingActionItem(null)}>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Edit Action Item</DialogTitle>
-                <DialogDescription>
-                  Modify this action item's details
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
+        {/* Edit Task Dialog - Same as in PendingTasks */}
+        <Dialog open={showEditTask} onOpenChange={setShowEditTask}>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Edit Task</DialogTitle>
+              <DialogDescription>
+                Make changes to task details
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedTask && (
+              <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium" htmlFor="action-text">Action Item Text</label>
-                  <Input 
-                    id="action-text"
-                    defaultValue={meetings
-                      .find(m => m.id === editingActionItem.meetingId)?.actionItems
-                      .find(item => item.id === editingActionItem.itemId)?.text} 
-                  />
+                  <Label htmlFor="task-text">Task Description</Label>
+                  <Input id="task-text" defaultValue={selectedTask.text} />
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Status</label>
-                  <div className="flex gap-2">
-                    {["pending", "overdue", "completed"].map(status => {
-                      const currentStatus = meetings
-                        .find(m => m.id === editingActionItem.meetingId)?.actionItems
-                        .find(item => item.id === editingActionItem.itemId)?.status;
-                        
-                      return (
-                        <button
-                          key={status}
-                          className={cn(
-                            "px-3 py-1 rounded-md text-sm",
-                            status === "pending" && "bg-amber-500/15 text-amber-600 border border-amber-500/20",
-                            status === "overdue" && "bg-destructive/15 text-destructive border border-destructive/20",
-                            status === "completed" && "bg-green-500/15 text-green-600 border border-green-500/20",
-                            currentStatus === status && "ring-2 ring-offset-1 ring-ring"
-                          )}
-                          onClick={() => {
-                            handleActionItemStatusChange(editingActionItem.meetingId, editingActionItem.itemId, status);
-                          }}
-                        >
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <Label htmlFor="status">Status</Label>
+                  <Select defaultValue={selectedTask.status}>
+                    <SelectTrigger id="status">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="overdue">Overdue</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setEditingActionItem(null)}>
-                  Cancel
-                </Button>
-                <Button onClick={() => {
+            )}
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditTask(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={() => {
                   toast({
-                    title: "Action item updated",
-                    description: "The action item has been updated successfully."
+                    title: "Task updated",
+                    description: "The action item has been successfully updated",
                   });
-                  setEditingActionItem(null);
-                }}>
-                  Save Changes
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )}
+                  setShowEditTask(false);
+                }}
+              >
+                Save Changes
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );
