@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format } from "date-fns";
 import DashboardLayout from "@/components/layout/Dashboard";
@@ -618,7 +617,7 @@ export default function Meetings() {
           </DialogContent>
         </Dialog>
         
-        {/* Action Item Edit Dialog */}
+        {/* Action Item Edit Dialog - Update to match PendingTasks */}
         {editingActionItem && (
           <Dialog open={!!editingActionItem} onOpenChange={(open) => !open && setEditingActionItem(null)}>
             <DialogContent className="sm:max-w-md">

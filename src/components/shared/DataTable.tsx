@@ -18,6 +18,7 @@ interface DataTableProps<T> {
   keyExtractor: (item: T) => string | number;
   isLoading?: boolean;
   searchPlaceholder?: string;
+  rowClassName?: string;
 }
 
 export function DataTable<T>({
@@ -26,7 +27,8 @@ export function DataTable<T>({
   onRowClick,
   keyExtractor,
   isLoading = false,
-  searchPlaceholder = "Search..."
+  searchPlaceholder = "Search...",
+  rowClassName
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -149,6 +151,7 @@ export function DataTable<T>({
                   className={cn(
                     "rounded-md bg-card hover:bg-accent/5 hover-highlight transition-colors mb-3",
                     onRowClick && "cursor-pointer",
+                    rowClassName
                   )}
                   onClick={() => onRowClick && onRowClick(item)}
                 >

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format } from "date-fns";
 import DashboardLayout from "@/components/layout/Dashboard";
@@ -273,7 +272,7 @@ export default function PendingTasks() {
   const { toast } = useToast();
   
   const handleStatusChange = (taskId: number, newStatus: string) => {
-    // Important: Don't open the task details dialog here
+    // Do not open the task details dialog
     toast({
       title: "Status updated",
       description: `Task #${taskId} status changed to ${newStatus}`,
