@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format } from "date-fns";
 import DashboardLayout from "@/components/layout/Dashboard";
@@ -36,6 +35,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useToast } from "@/hooks/use-toast";
 
 interface Task {
   id: number;
@@ -269,6 +269,15 @@ export default function PendingTasks() {
     setSelectedStatusFilter(status);
   };
   
+  const { toast } = useToast();
+  
+  const handleStatusChange = (taskId: number, newStatus: string) => {
+    toast({
+      title: "Status updated",
+      description: `Task #${taskId} status changed to ${newStatus}`,
+    });
+  };
+
   const columns = [
     {
       key: "task",
@@ -336,7 +345,13 @@ export default function PendingTasks() {
         }
         
         return (
-          <StatusBadge variant={variant} icon={icon}>
+          <StatusBadge 
+            variant={variant} 
+            icon={icon} 
+            selectable={true}
+            onStatusChange={(status) => handleStatusChange(task.id, status)}
+            currentStatus={task.status}
+          >
             {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
           </StatusBadge>
         );
@@ -583,6 +598,8 @@ export default function PendingTasks() {
             keyExtractor={(task) => task.id}
             searchPlaceholder="Search tasks..."
             onRowClick={(task) => setSelectedTask(task)}
+            className="space-y-1" // Add spacing between rows
+            rowClassName="hover:outline hover:outline-1 hover:outline-[#2edebe] rounded-md" // Add hover highlight
           />
         ) : (
           <div className="space-y-6">
@@ -593,7 +610,7 @@ export default function PendingTasks() {
                   {tasks.map((task) => (
                     <Card 
                       key={task.id} 
-                      className="overflow-hidden hover-highlight cursor-pointer" 
+                      className="overflow-hidden hover:outline hover:outline-1 hover:outline-[#2edebe] cursor-pointer" 
                       onClick={() => setSelectedTask(task)}
                     >
                       <CardHeader className="pb-2">
@@ -616,21 +633,27 @@ export default function PendingTasks() {
                           >
                             {task.client}
                           </span>
-                          {task.status === "completed" && (
-                            <StatusBadge variant="success" icon={<CheckCircle2 className="h-3 w-3 mr-1" />}>
-                              Completed
-                            </StatusBadge>
-                          )}
-                          {task.status === "pending" && (
-                            <StatusBadge variant="warning" icon={<Clock className="h-3 w-3 mr-1" />}>
-                              Pending
-                            </StatusBadge>
-                          )}
-                          {task.status === "overdue" && (
-                            <StatusBadge variant="danger" icon={<AlertCircle className="h-3 w-3 mr-1" />}>
-                              Overdue
-                            </StatusBadge>
-                          )}
+                          <StatusBadge 
+                            variant={
+                              task.status === "completed" ? "success" : 
+                              task.status === "pending" ? "warning" : 
+                              "danger"
+                            }
+                            icon={
+                              task.status === "completed" ? <CheckCircle2 className="h-3 w-3 mr-1" /> : 
+                              task.status === "pending" ? <Clock className="h-3 w-3 mr-1" /> : 
+                              <AlertCircle className="h-3 w-3 mr-1" />
+                            }
+                            selectable={true}
+                            onStatusChange={(status) => {
+                              handleStatusChange(task.id, status);
+                              setSelectedTask({...task, status: status as "pending" | "overdue" | "completed"});
+                            }}
+                            currentStatus={task.status}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {task.status.charAt(0).toUpperCase() + task.status.slice(1)}
+                          </StatusBadge>
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
@@ -716,6 +739,12 @@ export default function PendingTasks() {
                       selectedTask.status === "pending" ? <Clock className="h-3.5 w-3.5 mr-1" /> : 
                       <AlertCircle className="h-3.5 w-3.5 mr-1" />
                     }
+                    selectable={true}
+                    onStatusChange={(status) => {
+                      handleStatusChange(selectedTask.id, status);
+                      setSelectedTask({...selectedTask, status: status as "pending" | "overdue" | "completed"});
+                    }}
+                    currentStatus={selectedTask.status}
                   >
                     {selectedTask.status.charAt(0).toUpperCase() + selectedTask.status.slice(1)}
                   </StatusBadge>

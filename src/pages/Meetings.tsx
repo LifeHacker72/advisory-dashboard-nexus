@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { format } from "date-fns";
 import DashboardLayout from "@/components/layout/Dashboard";
@@ -14,7 +13,9 @@ import {
   FileText,
   Link as LinkIcon,
   CalendarPlus,
-  Plus
+  Plus,
+  AlertCircle,
+  Edit
 } from "lucide-react";
 import { 
   Dialog, 
@@ -37,6 +38,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useToast } from "@/hooks/use-toast";
+
+interface ActionItem {
+  id: number;
+  text: string;
+  status: "pending" | "overdue" | "completed";
+}
 
 interface Meeting {
   id: number;
@@ -44,7 +52,7 @@ interface Meeting {
   advisor: string;
   meetingNumber: number;
   date: string;
-  actionItems: string[];
+  actionItems: ActionItem[];
   detailedNotes: string;
   recordingLink?: string;
 }
@@ -57,6 +65,7 @@ interface MeetingFormData {
   actionItems: string;
 }
 
+// Convert the existing meetings data to use the new ActionItem structure
 const meetings: Meeting[] = [
   {
     id: 1,
@@ -65,9 +74,9 @@ const meetings: Meeting[] = [
     date: "2024-03-15",
     meetingNumber: 3,
     actionItems: [
-      "Review investment portfolio allocation",
-      "Prepare tax planning documents",
-      "Schedule follow-up call for next quarter"
+      { id: 1, text: "Review investment portfolio allocation", status: "pending" },
+      { id: 2, text: "Prepare tax planning documents", status: "overdue" },
+      { id: 3, text: "Schedule follow-up call for next quarter", status: "pending" }
     ],
     detailedNotes: "Client expressed interest in sustainable investing options. Discussed potential reallocation of 30% of portfolio to ESG funds. Need to prepare comparison report of performance for similar ESG vs. traditional funds.",
     recordingLink: "https://example.com/recordings/meeting-1"
@@ -79,9 +88,9 @@ const meetings: Meeting[] = [
     date: "2024-03-20",
     meetingNumber: 5,
     actionItems: [
-      "Update retirement projections",
-      "Research college savings options for children",
-      "Review insurance coverage"
+      { id: 4, text: "Update retirement projections", status: "pending" },
+      { id: 5, text: "Research college savings options for children", status: "completed" },
+      { id: 6, text: "Review insurance coverage", status: "pending" }
     ],
     detailedNotes: "Client concerned about rising education costs. Recommended 529 plan for two children (ages 10 and 12). Spouse recently changed jobs, so need to review new benefits package and identify any coverage gaps.",
     recordingLink: "https://example.com/recordings/meeting-2"
@@ -93,9 +102,9 @@ const meetings: Meeting[] = [
     date: "2024-03-25",
     meetingNumber: 1,
     actionItems: [
-      "Complete risk assessment questionnaire",
-      "Gather existing financial documents",
-      "Set up client portal access"
+      { id: 7, text: "Complete risk assessment questionnaire", status: "pending" },
+      { id: 8, text: "Gather existing financial documents", status: "pending" },
+      { id: 9, text: "Set up client portal access", status: "pending" }
     ],
     detailedNotes: "Initial meeting with new client. Recently divorced and needs comprehensive financial plan update. Current priorities include reassessing retirement goals and updating estate planning documents."
   },
@@ -106,9 +115,9 @@ const meetings: Meeting[] = [
     date: "2024-03-28",
     meetingNumber: 7,
     actionItems: [
-      "Update beneficiary information",
-      "Review recent portfolio performance",
-      "Discuss charitable giving strategies"
+      { id: 10, text: "Update beneficiary information", status: "pending" },
+      { id: 11, text: "Review recent portfolio performance", status: "pending" },
+      { id: 12, text: "Discuss charitable giving strategies", status: "pending" }
     ],
     detailedNotes: "Client interested in establishing donor-advised fund for charitable giving. Recently received inheritance and wants to discuss tax-efficient strategies for managing these additional assets.",
     recordingLink: "https://example.com/recordings/meeting-4"
@@ -120,9 +129,9 @@ const meetings: Meeting[] = [
     date: "2024-04-01",
     meetingNumber: 2,
     actionItems: [
-      "Create cash flow projection",
-      "Review debt reduction strategies",
-      "Evaluate employee stock options"
+      { id: 13, text: "Create cash flow projection", status: "pending" },
+      { id: 14, text: "Review debt reduction strategies", status: "pending" },
+      { id: 15, text: "Evaluate employee stock options", status: "pending" }
     ],
     detailedNotes: "Client recently promoted to executive position with significant stock compensation. Need to develop strategy for diversification while minimizing tax impact. Also concerned about educational funding for teenager planning to attend college in 3 years.",
     recordingLink: "https://example.com/recordings/meeting-5"
@@ -134,9 +143,9 @@ const meetings: Meeting[] = [
     date: "2024-04-05",
     meetingNumber: 4,
     actionItems: [
-      "Update estate planning documents",
-      "Review life insurance needs",
-      "Discuss long-term care options"
+      { id: 16, text: "Update estate planning documents", status: "pending" },
+      { id: 17, text: "Review life insurance needs", status: "pending" },
+      { id: 18, text: "Discuss long-term care options", status: "pending" }
     ],
     detailedNotes: "Client recently turned 60 and wants to revisit estate plan. Has concerns about aging parents and potential caregiving responsibilities. Discussed importance of having proper legal documents in place for both client and parents."
   },
@@ -147,9 +156,9 @@ const meetings: Meeting[] = [
     date: "2024-04-08",
     meetingNumber: 6,
     actionItems: [
-      "Rebalance investment portfolio",
-      "Review tax loss harvesting opportunities",
-      "Update retirement income projections"
+      { id: 19, text: "Rebalance investment portfolio", status: "pending" },
+      { id: 20, text: "Review tax loss harvesting opportunities", status: "pending" },
+      { id: 21, text: "Update retirement income projections", status: "pending" }
     ],
     detailedNotes: "Annual review meeting. Portfolio has drifted from target allocation due to market performance. Identified several tax loss harvesting opportunities to offset capital gains from business sale earlier in the year.",
     recordingLink: "https://example.com/recordings/meeting-7"
@@ -161,9 +170,9 @@ const meetings: Meeting[] = [
     date: "2024-04-10",
     meetingNumber: 1,
     actionItems: [
-      "Complete risk profile assessment",
-      "Gather existing financial statements",
-      "Set up automatic investments"
+      { id: 22, text: "Complete risk profile assessment", status: "pending" },
+      { id: 23, text: "Gather existing financial statements", status: "pending" },
+      { id: 24, text: "Set up automatic investments", status: "pending" }
     ],
     detailedNotes: "Initial meeting with new client. Recently retired and rolled over 401(k) to IRA. Primary concern is generating reliable retirement income while preserving principal. Conservative risk tolerance - prioritizes capital preservation over growth.",
     recordingLink: "https://example.com/recordings/meeting-8"
@@ -175,9 +184,9 @@ const meetings: Meeting[] = [
     date: "2024-04-12",
     meetingNumber: 8,
     actionItems: [
-      "Update financial plan projections",
-      "Review asset allocation strategy",
-      "Discuss Roth conversion opportunities"
+      { id: 25, text: "Update financial plan projections", status: "pending" },
+      { id: 26, text: "Review asset allocation strategy", status: "pending" },
+      { id: 27, text: "Discuss Roth conversion opportunities", status: "pending" }
     ],
     detailedNotes: "Client planning early retirement in 2 years. Discussed Roth conversion ladder strategy to optimize tax situation before required minimum distributions begin. Needs updated cash flow projections based on new retirement date."
   },
@@ -188,9 +197,9 @@ const meetings: Meeting[] = [
     date: "2024-04-15",
     meetingNumber: 2,
     actionItems: [
-      "Update contact information",
-      "Verify account preferences",
-      "Send welcome package materials"
+      { id: 28, text: "Update contact information", status: "pending" },
+      { id: 29, text: "Verify account preferences", status: "pending" },
+      { id: 30, text: "Send welcome package materials", status: "pending" }
     ],
     detailedNotes: "Administrative follow-up for recently onboarded clients. Need to verify all paperwork is complete and that clients have successfully accessed their online portals. Schedule individual welcome calls for next week.",
     recordingLink: "https://example.com/recordings/meeting-10"
@@ -201,6 +210,9 @@ export default function Meetings() {
   const [selectedAdvisorFilter, setSelectedAdvisorFilter] = useState<string>("all");
   const [selectedClientFilter, setSelectedClientFilter] = useState<string>("all");
   const [isAddingMeeting, setIsAddingMeeting] = useState(false);
+  const [editingActionItem, setEditingActionItem] = useState<{meetingId: number, itemId: number} | null>(null);
+  
+  const { toast } = useToast();
   
   const form = useForm<MeetingFormData>({
     defaultValues: {
@@ -212,6 +224,17 @@ export default function Meetings() {
     }
   });
   
+  // Handle status change for action items
+  const handleActionItemStatusChange = (meetingId: number, itemId: number, newStatus: string) => {
+    // In a real app, this would update the database
+    // For now, we'll just show a toast notification
+    toast({
+      title: "Action item status updated",
+      description: `Action item #${itemId} status changed to ${newStatus}`,
+    });
+  };
+  
+  // Get filtered meetings based on filters
   const getFilteredMeetings = () => {
     return meetings.filter((meeting) => {
       const advisorMatch = selectedAdvisorFilter === "all" || meeting.advisor === selectedAdvisorFilter;
@@ -287,17 +310,39 @@ export default function Meetings() {
                 </DialogDescription>
               </DialogHeader>
               <div className="mt-4">
-                <ul className="list-disc pl-5 space-y-2">
-                  {meeting.actionItems.map((item, index) => (
-                    <li key={index} className="flex justify-between items-start gap-2">
-                      <span>{item}</span>
+                <ul className="list-disc pl-5 space-y-3">
+                  {meeting.actionItems.map((item) => (
+                    <li key={item.id} className="flex justify-between items-start gap-2">
+                      <span>{item.text}</span>
                       <div className="flex gap-1">
-                        <button className="text-primary hover:text-primary/80 h-7 w-7 p-0 flex items-center justify-center rounded-md hover:bg-accent">
-                          <CheckCircle2 className="h-4 w-4" />
-                        </button>
-                        <button className="text-primary hover:text-primary/80 h-7 w-7 p-0 flex items-center justify-center rounded-md hover:bg-accent">
-                          <FileText className="h-4 w-4" />
-                        </button>
+                        <StatusBadge 
+                          variant={
+                            item.status === "completed" ? "success" : 
+                            item.status === "pending" ? "warning" : 
+                            "danger"
+                          }
+                          icon={
+                            item.status === "completed" ? <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> : 
+                            item.status === "pending" ? <Clock className="h-3.5 w-3.5 mr-1" /> : 
+                            <AlertCircle className="h-3.5 w-3.5 mr-1" />
+                          }
+                          selectable={true}
+                          onStatusChange={(status) => handleActionItemStatusChange(meeting.id, item.id, status)}
+                          currentStatus={item.status}
+                          className="mr-2"
+                        >
+                          {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+                        </StatusBadge>
+                        
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-7 w-7 p-0 flex items-center justify-center rounded-md hover:bg-accent"
+                          onClick={() => setEditingActionItem({ meetingId: meeting.id, itemId: item.id })}
+                        >
+                          <Edit className="h-4 w-4" />
+                          <span className="sr-only">Edit action item</span>
+                        </Button>
                       </div>
                     </li>
                   ))}
@@ -414,6 +459,8 @@ export default function Meetings() {
           data={filteredMeetings}
           keyExtractor={(meeting) => meeting.id}
           searchPlaceholder="Search meetings..."
+          className="space-y-1" // Add spacing between rows
+          rowClassName="hover:outline hover:outline-1 hover:outline-[#2edebe] rounded-md" // Add hover highlight
         />
         
         {/* Add Meeting Dialog */}
@@ -569,6 +616,71 @@ export default function Meetings() {
             </Form>
           </DialogContent>
         </Dialog>
+        
+        {/* Action Item Edit Dialog */}
+        {editingActionItem && (
+          <Dialog open={!!editingActionItem} onOpenChange={(open) => !open && setEditingActionItem(null)}>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Edit Action Item</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium" htmlFor="action-text">Action Item Text</label>
+                  <Input 
+                    id="action-text"
+                    defaultValue={meetings
+                      .find(m => m.id === editingActionItem.meetingId)?.actionItems
+                      .find(item => item.id === editingActionItem.itemId)?.text} 
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Status</label>
+                  <div className="flex gap-2">
+                    {["pending", "overdue", "completed"].map(status => {
+                      const currentStatus = meetings
+                        .find(m => m.id === editingActionItem.meetingId)?.actionItems
+                        .find(item => item.id === editingActionItem.itemId)?.status;
+                        
+                      return (
+                        <button
+                          key={status}
+                          className={cn(
+                            "px-3 py-1 rounded-md text-sm",
+                            status === "pending" && "bg-amber-500/15 text-amber-600 border border-amber-500/20",
+                            status === "overdue" && "bg-destructive/15 text-destructive border border-destructive/20",
+                            status === "completed" && "bg-green-500/15 text-green-600 border border-green-500/20",
+                            currentStatus === status && "ring-2 ring-offset-1 ring-ring"
+                          )}
+                          onClick={() => {
+                            handleActionItemStatusChange(editingActionItem.meetingId, editingActionItem.itemId, status);
+                          }}
+                        >
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setEditingActionItem(null)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => {
+                  toast({
+                    title: "Action item updated",
+                    description: "The action item has been updated successfully."
+                  });
+                  setEditingActionItem(null);
+                }}>
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </DashboardLayout>
   );
