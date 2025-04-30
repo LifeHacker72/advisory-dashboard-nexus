@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { format } from "date-fns";
 import DashboardLayout from "@/components/layout/Dashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/shared/DataTable";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { cn } from "@/lib/utils";
 import { 
   CheckCircle2, 
   Clock, 
@@ -459,7 +461,6 @@ export default function Meetings() {
           data={filteredMeetings}
           keyExtractor={(meeting) => meeting.id}
           searchPlaceholder="Search meetings..."
-          className="space-y-1" // Add spacing between rows
           rowClassName="hover:outline hover:outline-1 hover:outline-[#2edebe] rounded-md" // Add hover highlight
         />
         
@@ -623,6 +624,9 @@ export default function Meetings() {
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
                 <DialogTitle>Edit Action Item</DialogTitle>
+                <DialogDescription>
+                  Modify this action item's details
+                </DialogDescription>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">

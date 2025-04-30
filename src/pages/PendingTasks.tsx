@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { format } from "date-fns";
 import DashboardLayout from "@/components/layout/Dashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/shared/DataTable";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { cn } from "@/lib/utils";
 import { 
   CheckCircle2, 
   AlertCircle, 
@@ -16,7 +18,6 @@ import {
   LayoutGrid,
   List
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { 
   Dialog, 
   DialogContent, 
@@ -272,6 +273,7 @@ export default function PendingTasks() {
   const { toast } = useToast();
   
   const handleStatusChange = (taskId: number, newStatus: string) => {
+    // Important: Don't open the task details dialog here
     toast({
       title: "Status updated",
       description: `Task #${taskId} status changed to ${newStatus}`,
@@ -598,7 +600,6 @@ export default function PendingTasks() {
             keyExtractor={(task) => task.id}
             searchPlaceholder="Search tasks..."
             onRowClick={(task) => setSelectedTask(task)}
-            className="space-y-1" // Add spacing between rows
             rowClassName="hover:outline hover:outline-1 hover:outline-[#2edebe] rounded-md" // Add hover highlight
           />
         ) : (
@@ -647,7 +648,6 @@ export default function PendingTasks() {
                             selectable={true}
                             onStatusChange={(status) => {
                               handleStatusChange(task.id, status);
-                              setSelectedTask({...task, status: status as "pending" | "overdue" | "completed"});
                             }}
                             currentStatus={task.status}
                             onClick={(e) => e.stopPropagation()}
