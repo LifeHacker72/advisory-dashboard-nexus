@@ -8,6 +8,7 @@ import {
   DropdownMenuItem
 } from "@/components/ui/dropdown-menu";
 import { CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const statusBadgeVariants = cva(
   "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
@@ -36,6 +37,13 @@ export interface StatusBadgeProps
   selectable?: boolean;
   onStatusChange?: (status: string) => void;
   currentStatus?: string;
+  statusOptions?: Array<{
+    value: string;
+    label: string;
+    icon?: React.ReactNode;
+    variant?: "success" | "warning" | "danger" | "info" | "default" | "primary" | "outline";
+  }>;
+  showToastOnChange?: boolean;
 }
 
 export function StatusBadge({
@@ -46,8 +54,48 @@ export function StatusBadge({
   selectable = false,
   onStatusChange,
   currentStatus,
+  statusOptions,
+  showToastOnChange = false,
   ...props
 }: StatusBadgeProps) {
+  const { toast } = useToast();
+
+  // Default status options if none are provided
+  const defaultStatusOptions = [
+    {
+      value: "pending",
+      label: "Pending",
+      icon: <Clock className="h-3.5 w-3.5 mr-2 text-amber-600" />,
+      variant: "warning" as const,
+    },
+    {
+      value: "overdue",
+      label: "Overdue",
+      icon: <AlertCircle className="h-3.5 w-3.5 mr-2 text-destructive" />,
+      variant: "danger" as const,
+    },
+    {
+      value: "completed",
+      label: "Completed",
+      icon: <CheckCircle2 className="h-3.5 w-3.5 mr-2 text-green-600" />,
+      variant: "success" as const,
+    },
+  ];
+
+  const options = statusOptions || defaultStatusOptions;
+
+  const handleStatusChange = (status: string) => {
+    onStatusChange && onStatusChange(status);
+    
+    if (showToastOnChange) {
+      const statusOption = options.find(option => option.value === status);
+      toast({
+        title: "Status updated",
+        description: `Task status changed to ${statusOption?.label || status}`,
+      });
+    }
+  };
+
   if (!selectable) {
     return (
       <div className={cn(statusBadgeVariants({ variant }), className)} {...props}>
@@ -66,27 +114,16 @@ export function StatusBadge({
         </div>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[180px] p-1">
-        <DropdownMenuItem 
-          className={cn("flex items-center cursor-pointer", currentStatus === "pending" && "bg-accent")}
-          onClick={() => onStatusChange && onStatusChange("pending")}
-        >
-          <Clock className="h-3.5 w-3.5 mr-2 text-amber-600" />
-          <span>Pending</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          className={cn("flex items-center cursor-pointer", currentStatus === "overdue" && "bg-accent")}
-          onClick={() => onStatusChange && onStatusChange("overdue")}
-        >
-          <AlertCircle className="h-3.5 w-3.5 mr-2 text-destructive" />
-          <span>Overdue</span>
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          className={cn("flex items-center cursor-pointer", currentStatus === "completed" && "bg-accent")}
-          onClick={() => onStatusChange && onStatusChange("completed")}
-        >
-          <CheckCircle2 className="h-3.5 w-3.5 mr-2 text-green-600" />
-          <span>Completed</span>
-        </DropdownMenuItem>
+        {options.map((option) => (
+          <DropdownMenuItem 
+            key={option.value}
+            className={cn("flex items-center cursor-pointer", currentStatus === option.value && "bg-accent")}
+            onClick={() => handleStatusChange(option.value)}
+          >
+            {option.icon}
+            <span>{option.label}</span>
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
