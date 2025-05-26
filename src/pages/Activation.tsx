@@ -1,9 +1,9 @@
 
 import { useState } from "react";
 import DashboardLayout from "@/components/layout/Dashboard";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { CheckCircle2, UserPlus, Users, Calendar } from "lucide-react";
+import { CheckCircle2, UserPlus, Calendar, Search, X } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 interface PendingClient {
   id: number;
@@ -23,8 +24,32 @@ interface PendingClient {
   company: string;
   email: string;
   phone: string;
-  advisor: string;
   paymentDate: string;
+  paymentAmount: string;
+}
+
+interface RenewalClient {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  expiryDate: string;
+  membershipType: string;
+}
+
+interface BookingClient {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  bookingDate: string;
+}
+
+interface Advisor {
+  id: number;
+  name: string;
+  email: string;
+  category: string;
 }
 
 const pendingClients: PendingClient[] = [
@@ -34,8 +59,8 @@ const pendingClients: PendingClient[] = [
     company: "Matrix Technologies",
     email: "thomas.anderson@example.com",
     phone: "(555) 123-4567",
-    advisor: "Emily Richardson",
     paymentDate: "Apr 15, 2025",
+    paymentAmount: "₹50,000",
   },
   {
     id: 2,
@@ -43,8 +68,8 @@ const pendingClients: PendingClient[] = [
     company: "Central Perk Inc.",
     email: "rachel.green@example.com",
     phone: "(555) 234-5678",
-    advisor: "Daniel Morgan",
     paymentDate: "Apr 20, 2025",
+    paymentAmount: "₹35,000",
   },
   {
     id: 3,
@@ -52,62 +77,132 @@ const pendingClients: PendingClient[] = [
     company: "White Enterprises",
     email: "walter.white@example.com",
     phone: "(555) 345-6789",
-    advisor: "Sophia Chen",
     paymentDate: "Apr 25, 2025",
+    paymentAmount: "₹45,000",
   },
 ];
 
-interface Advisor {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  clients: number;
-}
-
-const advisors: Advisor[] = [
+const renewalClients: RenewalClient[] = [
   {
     id: 1,
-    name: "Emily Richardson",
-    email: "emily.richardson@example.com",
-    phone: "(555) 123-4567",
-    clients: 28,
+    name: "John Smith",
+    email: "john.smith@example.com",
+    phone: "(555) 111-2222",
+    expiryDate: "Jun 15, 2025",
+    membershipType: "Premium",
   },
   {
     id: 2,
-    name: "Daniel Morgan",
-    email: "daniel.morgan@example.com",
-    phone: "(555) 234-5678",
-    clients: 22,
+    name: "Sarah Johnson",
+    email: "sarah.johnson@example.com",
+    phone: "(555) 333-4444",
+    expiryDate: "Jul 10, 2025",
+    membershipType: "Standard",
   },
   {
     id: 3,
-    name: "Sophia Chen",
-    email: "sophia.chen@example.com",
-    phone: "(555) 345-6789",
-    clients: 19,
+    name: "Mike Davis",
+    email: "mike.davis@example.com",
+    phone: "(555) 555-6666",
+    expiryDate: "Jul 25, 2025",
+    membershipType: "Premium",
+  },
+];
+
+const bookingClients: BookingClient[] = [
+  {
+    id: 1,
+    name: "Alice Brown",
+    email: "alice.brown@example.com",
+    phone: "(555) 777-8888",
+    bookingDate: "Apr 30, 2025",
   },
   {
-    id: 4,
-    name: "James Wilson",
-    email: "james.wilson@example.com",
-    phone: "(555) 456-7890",
-    clients: 26,
+    id: 2,
+    name: "Bob Wilson",
+    email: "bob.wilson@example.com",
+    phone: "(555) 999-0000",
+    bookingDate: "May 2, 2025",
   },
-  {
-    id: 5,
-    name: "Olivia Martinez",
-    email: "olivia.martinez@example.com",
-    phone: "(555) 567-8901",
-    clients: 24,
-  },
+];
+
+const advisors: Advisor[] = [
+  { id: 1, name: "Emily Richardson", email: "emily@example.com", category: "CA" },
+  { id: 2, name: "Daniel Morgan", email: "daniel@example.com", category: "Financial Planner" },
+  { id: 3, name: "Sophia Chen", email: "sophia@example.com", category: "Insurance Advisor" },
+  { id: 4, name: "James Wilson", email: "james@example.com", category: "Estate Planner" },
+  { id: 5, name: "Olivia Martinez", email: "olivia@example.com", category: "Credit Card Advisor" },
+  { id: 6, name: "Robert Taylor", email: "robert@example.com", category: "Banking and Compliance" },
+  { id: 7, name: "Lisa Anderson", email: "lisa@example.com", category: "CA" },
+  { id: 8, name: "Mark Thompson", email: "mark@example.com", category: "Financial Planner" },
+];
+
+const advisorCategories = [
+  "CA",
+  "Financial Planner", 
+  "Insurance Advisor",
+  "Estate Planner",
+  "Credit Card Advisor",
+  "Banking and Compliance"
 ];
 
 export default function Activation() {
   const [selectedClient, setSelectedClient] = useState<PendingClient | null>(null);
   const [showNewClientDialog, setShowNewClientDialog] = useState(false);
-  const [showAdvisorRevisionDialog, setShowAdvisorRevisionDialog] = useState(false);
-  const [selectedAdvisor, setSelectedAdvisor] = useState<Advisor | null>(null);
+  const [showAdvisorAssignmentDialog, setShowAdvisorAssignmentDialog] = useState(false);
+  const [onboardingType, setOnboardingType] = useState<"booking" | "manual" | null>(null);
+  const [selectedBookingClient, setSelectedBookingClient] = useState<BookingClient | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [advisorSearchTerm, setAdvisorSearchTerm] = useState("");
+  const [assignedAdvisors, setAssignedAdvisors] = useState<Record<string, Advisor[]>>({});
+
+  const handleClientSelect = (client: PendingClient) => {
+    setSelectedClient(client);
+    setShowAdvisorAssignmentDialog(true);
+    setAssignedAdvisors({});
+  };
+
+  const handleAssignAdvisor = (category: string, advisor: Advisor) => {
+    setAssignedAdvisors(prev => ({
+      ...prev,
+      [category]: [...(prev[category] || []), advisor]
+    }));
+  };
+
+  const handleRemoveAdvisor = (category: string, advisorId: number) => {
+    setAssignedAdvisors(prev => ({
+      ...prev,
+      [category]: (prev[category] || []).filter(advisor => advisor.id !== advisorId)
+    }));
+  };
+
+  const getTotalAssignedAdvisors = () => {
+    return Object.values(assignedAdvisors).flat().length;
+  };
+
+  const canActivate = getTotalAssignedAdvisors() >= 3;
+
+  const handleActivateMembership = () => {
+    console.log("Activating membership for:", selectedClient?.name);
+    console.log("Assigned advisors:", assignedAdvisors);
+    setShowAdvisorAssignmentDialog(false);
+    setSelectedClient(null);
+  };
+
+  const filteredBookingClients = bookingClients.filter(client =>
+    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    client.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getAvailableAdvisors = (category: string) => {
+    const assignedIds = (assignedAdvisors[category] || []).map(a => a.id);
+    return advisors
+      .filter(advisor => 
+        advisor.category === category && 
+        !assignedIds.includes(advisor.id) &&
+        advisor.name.toLowerCase().includes(advisorSearchTerm.toLowerCase())
+      );
+  };
 
   return (
     <DashboardLayout>
@@ -135,7 +230,7 @@ export default function Activation() {
               <div className="flex justify-between items-center">
                 <div>
                   <CardTitle>Pending Activations</CardTitle>
-                  <CardDescription>Members awaiting full onboarding</CardDescription>
+                  <CardDescription>Members who have completed payment</CardDescription>
                 </div>
                 <div className="flex items-center text-sm">
                   <StatusBadge variant="warning">
@@ -150,7 +245,7 @@ export default function Activation() {
                   <div
                     key={client.id}
                     className="p-4 hover:bg-accent/30 hover-highlight transition-colors cursor-pointer"
-                    onClick={() => setSelectedClient(client)}
+                    onClick={() => handleClientSelect(client)}
                   >
                     <div className="flex justify-between items-start">
                       <div>
@@ -159,15 +254,18 @@ export default function Activation() {
                           {client.company}
                         </p>
                       </div>
-                      <div className="text-sm">
+                      <div className="text-sm text-right">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1.5 text-muted-foreground" />
                           <span>Payment: {client.paymentDate}</span>
                         </div>
+                        <div className="text-green-600 font-medium">
+                          {client.paymentAmount}
+                        </div>
                       </div>
                     </div>
                     <div className="mt-2 text-xs text-muted-foreground">
-                      Assigned to: <span className="clickable">{client.advisor}</span>
+                      {client.email} • {client.phone}
                     </div>
                   </div>
                 ))}
@@ -175,60 +273,145 @@ export default function Activation() {
             </CardContent>
           </Card>
 
-          {/* Advisor Revision */}
+          {/* Renewal Upcoming */}
           <Card className="h-full glass-card">
             <CardHeader>
               <div className="flex justify-between items-center">
                 <div>
-                  <CardTitle>Advisor Revision</CardTitle>
-                  <CardDescription>Manage advisor assignments</CardDescription>
+                  <CardTitle>Renewal Upcoming</CardTitle>
+                  <CardDescription>Memberships expiring in next 2 months</CardDescription>
                 </div>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => setShowAdvisorRevisionDialog(true)}
-                >
-                  Manage Assignments
-                </Button>
+                <StatusBadge variant="info">
+                  {renewalClients.length} Expiring
+                </StatusBadge>
               </div>
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y">
-                {advisors.slice(0, 4).map((advisor) => (
+                {renewalClients.map((client) => (
                   <div
-                    key={advisor.id}
-                    className="p-4 hover:bg-accent/30 hover-highlight transition-colors cursor-pointer"
-                    onClick={() => setSelectedAdvisor(advisor)}
+                    key={client.id}
+                    className="p-4 hover:bg-accent/30 hover-highlight transition-colors"
                   >
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-medium clickable">{advisor.name}</h3>
+                        <h3 className="font-medium">{client.name}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {advisor.email}
+                          {client.membershipType} Member
                         </p>
                       </div>
-                      <div className="flex items-center">
-                        <Users className="h-4 w-4 mr-1.5 text-muted-foreground" />
-                        <span className="text-sm">{advisor.clients} members</span>
+                      <div className="text-sm text-right">
+                        <div className="flex items-center">
+                          <Calendar className="h-4 w-4 mr-1.5 text-muted-foreground" />
+                          <span>Expires: {client.expiryDate}</span>
+                        </div>
                       </div>
+                    </div>
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      {client.email} • {client.phone}
                     </div>
                   </div>
                 ))}
               </div>
             </CardContent>
-            <CardFooter className="border-t py-3 px-4">
-              <div className="w-full text-center">
-                <Button 
-                  variant="ghost" 
-                  className="text-sm text-muted-foreground"
-                  onClick={() => setShowAdvisorRevisionDialog(true)}
-                >
-                  View All Advisors
-                </Button>
-              </div>
-            </CardFooter>
           </Card>
         </div>
+
+        {/* Advisor Assignment Dialog */}
+        <Dialog open={showAdvisorAssignmentDialog} onOpenChange={setShowAdvisorAssignmentDialog}>
+          <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Assign Advisors - {selectedClient?.name}</DialogTitle>
+              <DialogDescription>
+                Assign advisors to complete the onboarding process. At least 3 advisors must be assigned.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4 space-y-6">
+              <div className="mb-4">
+                <Label htmlFor="advisor-search">Search Advisors</Label>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="advisor-search"
+                    placeholder="Search by advisor name..."
+                    value={advisorSearchTerm}
+                    onChange={(e) => setAdvisorSearchTerm(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+              </div>
+
+              {advisorCategories.map((category) => (
+                <div key={category} className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="font-medium">{category}</Label>
+                    <Badge variant="outline">
+                      {(assignedAdvisors[category] || []).length} assigned
+                    </Badge>
+                  </div>
+                  
+                  {/* Assigned Advisors */}
+                  {(assignedAdvisors[category] || []).length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {(assignedAdvisors[category] || []).map((advisor) => (
+                        <Badge key={advisor.id} variant="secondary" className="flex items-center gap-1">
+                          {advisor.name}
+                          <X 
+                            className="h-3 w-3 cursor-pointer" 
+                            onClick={() => handleRemoveAdvisor(category, advisor.id)}
+                          />
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  
+                  {/* Available Advisors */}
+                  <Select onValueChange={(value) => {
+                    const advisor = advisors.find(a => a.id === parseInt(value));
+                    if (advisor) handleAssignAdvisor(category, advisor);
+                  }}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={`Select ${category}`} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getAvailableAdvisors(category).map((advisor) => (
+                        <SelectItem key={advisor.id} value={advisor.id.toString()}>
+                          {advisor.name} - {advisor.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+
+              <div className="pt-4 border-t">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    Total Advisors Assigned: {getTotalAssignedAdvisors()}
+                  </span>
+                  {!canActivate && (
+                    <span className="text-sm text-destructive">
+                      Minimum 3 advisors required
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAdvisorAssignmentDialog(false)}>
+                Cancel
+              </Button>
+              <Button 
+                className="bg-primary text-black"
+                onClick={handleActivateMembership}
+                disabled={!canActivate}
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Activate Membership
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {/* New Member Dialog */}
         <Dialog open={showNewClientDialog} onOpenChange={setShowNewClientDialog}>
@@ -236,151 +419,103 @@ export default function Activation() {
             <DialogHeader>
               <DialogTitle>Onboard New Member</DialogTitle>
               <DialogDescription>
-                Enter the details of the new member to begin the onboarding process.
+                Choose how you want to onboard the new member.
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="client-name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="client-name"
-                  placeholder="Full name"
-                  className="col-span-3"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  variant="outline"
+                  className="h-24 flex flex-col items-center justify-center gap-2"
+                  onClick={() => setOnboardingType("booking")}
+                >
+                  <UserPlus className="h-6 w-6" />
+                  From KC Booking
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-24 flex flex-col items-center justify-center gap-2"
+                  onClick={() => setOnboardingType("manual")}
+                >
+                  <Calendar className="h-6 w-6" />
+                  Manual Entry
+                </Button>
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="client-type" className="text-right">
-                  Type
-                </Label>
-                <Select defaultValue="indian">
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select member type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="indian">Indian</SelectItem>
-                    <SelectItem value="nri">NRI</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="client-email" className="text-right">
-                  Email
-                </Label>
-                <Input
-                  id="client-email"
-                  type="email"
-                  placeholder="Email address"
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="client-phone" className="text-right">
-                  Phone
-                </Label>
-                <Input
-                  id="client-phone"
-                  type="tel"
-                  placeholder="Phone number"
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="spouse-name" className="text-right">
-                  Spouse Name
-                </Label>
-                <Input
-                  id="spouse-name"
-                  placeholder="Spouse name (optional)"
-                  className="col-span-3"
-                />
-              </div>
+
+              {onboardingType === "booking" && (
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="booking-search">Search Booking Clients</Label>
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="booking-search"
+                        placeholder="Search by name or email..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-9"
+                      />
+                    </div>
+                  </div>
+                  <div className="max-h-48 overflow-y-auto border rounded-md">
+                    {filteredBookingClients.map((client) => (
+                      <div
+                        key={client.id}
+                        className={`p-3 cursor-pointer hover:bg-accent/30 hover-highlight transition-colors border-b last:border-b-0 ${
+                          selectedBookingClient?.id === client.id ? 'bg-accent' : ''
+                        }`}
+                        onClick={() => setSelectedBookingClient(client)}
+                      >
+                        <div className="font-medium">{client.name}</div>
+                        <div className="text-sm text-muted-foreground">{client.email}</div>
+                        <div className="text-sm text-muted-foreground">{client.phone}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {onboardingType === "manual" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="manual-name" className="text-right">Name</Label>
+                    <Input id="manual-name" placeholder="Full name" className="col-span-3" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="manual-email" className="text-right">Email</Label>
+                    <Input id="manual-email" type="email" placeholder="Email address" className="col-span-3" />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="manual-phone" className="text-right">Phone</Label>
+                    <Input id="manual-phone" type="tel" placeholder="Phone number" className="col-span-3" />
+                  </div>
+                </div>
+              )}
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowNewClientDialog(false)}>
+              <Button variant="outline" onClick={() => {
+                setShowNewClientDialog(false);
+                setOnboardingType(null);
+                setSelectedBookingClient(null);
+                setSearchTerm("");
+              }}>
                 Cancel
               </Button>
               <Button 
                 className="bg-primary text-black"
+                disabled={onboardingType === "booking" && !selectedBookingClient}
                 onClick={() => {
                   console.log("Send onboarding details");
+                  if (onboardingType === "booking" && selectedBookingClient) {
+                    console.log("Selected booking client:", selectedBookingClient);
+                  }
                   setShowNewClientDialog(false);
+                  setOnboardingType(null);
+                  setSelectedBookingClient(null);
+                  setSearchTerm("");
                 }}
               >
                 Send Onboarding Details
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-
-        {/* Advisor Revision Dialog */}
-        <Dialog open={showAdvisorRevisionDialog} onOpenChange={setShowAdvisorRevisionDialog}>
-          <DialogContent className="sm:max-w-[600px]">
-            <DialogHeader>
-              <DialogTitle>Advisor Assignment Revision</DialogTitle>
-              <DialogDescription>
-                Manage advisor assignments and add new advisors.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="py-4">
-              <div className="mb-4 flex justify-between items-center">
-                <h3 className="text-sm font-medium">Current Advisors</h3>
-                <Button size="sm" variant="outline">
-                  <UserPlus className="h-4 w-4 mr-1" />
-                  Add New Advisor
-                </Button>
-              </div>
-              <div className="border rounded-md overflow-hidden divide-y">
-                {advisors.map((advisor) => (
-                  <div key={advisor.id} className="p-3 flex justify-between items-center hover:bg-accent/30 hover-highlight">
-                    <div>
-                      <p className="font-medium clickable">{advisor.name}</p>
-                      <p className="text-sm text-muted-foreground">{advisor.email}</p>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm">{advisor.clients} members</span>
-                      <Button size="sm" variant="ghost">Edit</Button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="mt-6">
-                <h3 className="text-sm font-medium mb-3">Member-Advisor Assignments</h3>
-                <div className="border rounded-md overflow-hidden divide-y">
-                  {pendingClients.map((client) => (
-                    <div key={client.id} className="p-3 flex justify-between items-center hover:bg-accent/30 hover-highlight">
-                      <div>
-                        <p className="font-medium clickable">{client.name}</p>
-                        <p className="text-sm text-muted-foreground">{client.company}</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Select defaultValue={client.advisor}>
-                          <SelectTrigger className="w-[180px]">
-                            <SelectValue placeholder="Select advisor" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {advisors.map((advisor) => (
-                              <SelectItem key={advisor.id} value={advisor.name}>
-                                {advisor.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <Button size="sm" variant="outline">
-                          <CheckCircle2 className="h-4 w-4" />
-                          <span className="sr-only">Save</span>
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button onClick={() => setShowAdvisorRevisionDialog(false)}>
-                Close
               </Button>
             </DialogFooter>
           </DialogContent>
