@@ -11,7 +11,7 @@ interface Client {
   email: string;
   phone: string;
   company: string;
-  status: "active" | "inactive" | "pending";
+  status: "active" | "expired";
   type: string;
   joinDate: string;
 }
@@ -43,7 +43,7 @@ const clients: Client[] = [
     email: "david.brown@example.com",
     phone: "(555) 345-6789",
     company: "Brown Consulting",
-    status: "inactive",
+    status: "expired",
     type: "Individual",
     joinDate: "Mar 20, 2023",
   },
@@ -53,7 +53,7 @@ const clients: Client[] = [
     email: "jennifer.smith@example.com",
     phone: "(555) 456-7890",
     company: "Smith & Associates",
-    status: "pending",
+    status: "active",
     type: "Corporate",
     joinDate: "Apr 11, 2023",
   },
@@ -83,7 +83,7 @@ const clients: Client[] = [
     email: "thomas.anderson@example.com",
     phone: "(555) 789-0123",
     company: "Anderson LLC",
-    status: "inactive",
+    status: "expired",
     type: "Individual",
     joinDate: "Jul 9, 2023",
   },
@@ -124,9 +124,7 @@ export default function Clients() {
           variant={
             client.status === "active"
               ? "success"
-              : client.status === "inactive"
-              ? "danger"
-              : "warning"
+              : "danger"
           }
         >
           {client.status.charAt(0).toUpperCase() + client.status.slice(1)}
@@ -221,9 +219,7 @@ export default function Clients() {
                           variant={
                             selectedClient.status === "active"
                               ? "success"
-                              : selectedClient.status === "inactive"
-                              ? "danger"
-                              : "warning"
+                              : "danger"
                           }
                         >
                           {selectedClient.status.charAt(0).toUpperCase() + selectedClient.status.slice(1)}
