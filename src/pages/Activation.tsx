@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import DashboardLayout from "@/components/layout/Dashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -268,9 +267,9 @@ export default function Activation() {
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-2">
-                        <StatusBadge variant={getStatusVariant(client.status)}>
+                        <div className="text-sm text-muted-foreground">
                           {client.status}
-                        </StatusBadge>
+                        </div>
                         <Button 
                           size="sm" 
                           className="bg-primary text-black"
@@ -282,10 +281,6 @@ export default function Activation() {
                     </div>
                     <div className="mt-2 text-xs text-muted-foreground">
                       {client.email} • {client.phone}
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground flex items-center">
-                      <Calendar className="h-3 w-3 mr-1" />
-                      Payment: {client.paymentDate}
                     </div>
                   </div>
                 ))}
