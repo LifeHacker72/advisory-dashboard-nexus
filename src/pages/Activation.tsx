@@ -25,7 +25,7 @@ interface PendingClient {
   email: string;
   phone: string;
   paymentDate: string;
-  paymentAmount: string;
+  status: "Payment Complete" | "Onboarding Ongoing";
 }
 
 interface RenewalClient {
@@ -60,7 +60,7 @@ const pendingClients: PendingClient[] = [
     email: "thomas.anderson@example.com",
     phone: "(555) 123-4567",
     paymentDate: "Apr 15, 2025",
-    paymentAmount: "₹50,000",
+    status: "Payment Complete",
   },
   {
     id: 2,
@@ -69,7 +69,7 @@ const pendingClients: PendingClient[] = [
     email: "rachel.green@example.com",
     phone: "(555) 234-5678",
     paymentDate: "Apr 20, 2025",
-    paymentAmount: "₹35,000",
+    status: "Onboarding Ongoing",
   },
   {
     id: 3,
@@ -78,7 +78,7 @@ const pendingClients: PendingClient[] = [
     email: "walter.white@example.com",
     phone: "(555) 345-6789",
     paymentDate: "Apr 25, 2025",
-    paymentAmount: "₹45,000",
+    status: "Payment Complete",
   },
 ];
 
@@ -156,7 +156,7 @@ export default function Activation() {
   const [advisorSearchTerm, setAdvisorSearchTerm] = useState("");
   const [assignedAdvisors, setAssignedAdvisors] = useState<Record<string, Advisor[]>>({});
 
-  const handleClientSelect = (client: PendingClient) => {
+  const handleClientActivate = (client: PendingClient) => {
     setSelectedClient(client);
     setShowAdvisorAssignmentDialog(true);
     setAssignedAdvisors({});
@@ -194,14 +194,28 @@ export default function Activation() {
     client.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const filteredAdvisors = advisors.filter(advisor =>
+    advisor.name.toLowerCase().includes(advisorSearchTerm.toLowerCase()) ||
+    advisor.email.toLowerCase().includes(advisorSearchTerm.toLowerCase())
+  );
+
   const getAvailableAdvisors = (category: string) => {
     const assignedIds = (assignedAdvisors[category] || []).map(a => a.id);
-    return advisors
-      .filter(advisor => 
-        advisor.category === category && 
-        !assignedIds.includes(advisor.id) &&
-        advisor.name.toLowerCase().includes(advisorSearchTerm.toLowerCase())
-      );
+    return filteredAdvisors.filter(advisor => 
+      advisor.category === category && 
+      !assignedIds.includes(advisor.id)
+    );
+  };
+
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case "Payment Complete":
+        return "success";
+      case "Onboarding Ongoing":
+        return "warning";
+      default:
+        return "default";
+    }
   };
 
   return (
@@ -244,28 +258,34 @@ export default function Activation() {
                 {pendingClients.map((client) => (
                   <div
                     key={client.id}
-                    className="p-4 hover:bg-accent/30 hover-highlight transition-colors cursor-pointer"
-                    onClick={() => handleClientSelect(client)}
+                    className="p-4 hover:bg-accent/30 hover-highlight transition-colors"
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <h3 className="font-medium clickable">{client.name}</h3>
+                        <h3 className="font-medium">{client.name}</h3>
                         <p className="text-sm text-muted-foreground">
                           {client.company}
                         </p>
                       </div>
-                      <div className="text-sm text-right">
-                        <div className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1.5 text-muted-foreground" />
-                          <span>Payment: {client.paymentDate}</span>
-                        </div>
-                        <div className="text-green-600 font-medium">
-                          {client.paymentAmount}
-                        </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <StatusBadge variant={getStatusVariant(client.status)}>
+                          {client.status}
+                        </StatusBadge>
+                        <Button 
+                          size="sm" 
+                          className="bg-primary text-black"
+                          onClick={() => handleClientActivate(client)}
+                        >
+                          Activate
+                        </Button>
                       </div>
                     </div>
                     <div className="mt-2 text-xs text-muted-foreground">
                       {client.email} • {client.phone}
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground flex items-center">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      Payment: {client.paymentDate}
                     </div>
                   </div>
                 ))}
@@ -319,7 +339,7 @@ export default function Activation() {
 
         {/* Advisor Assignment Dialog */}
         <Dialog open={showAdvisorAssignmentDialog} onOpenChange={setShowAdvisorAssignmentDialog}>
-          <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
+          <DialogContent className="sm:max-w-[900px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Assign Advisors - {selectedClient?.name}</DialogTitle>
               <DialogDescription>
@@ -341,48 +361,53 @@ export default function Activation() {
                 </div>
               </div>
 
-              {advisorCategories.map((category) => (
-                <div key={category} className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="font-medium">{category}</Label>
-                    <Badge variant="outline">
-                      {(assignedAdvisors[category] || []).length} assigned
-                    </Badge>
-                  </div>
-                  
-                  {/* Assigned Advisors */}
-                  {(assignedAdvisors[category] || []).length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      {(assignedAdvisors[category] || []).map((advisor) => (
-                        <Badge key={advisor.id} variant="secondary" className="flex items-center gap-1">
-                          {advisor.name}
-                          <X 
-                            className="h-3 w-3 cursor-pointer" 
-                            onClick={() => handleRemoveAdvisor(category, advisor.id)}
-                          />
-                        </Badge>
-                      ))}
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                {advisorCategories.map((category) => (
+                  <div key={category} className="space-y-3 border rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <Label className="font-medium text-sm">{category}</Label>
+                      <Badge variant="outline" className="text-xs">
+                        {(assignedAdvisors[category] || []).length} assigned
+                      </Badge>
                     </div>
-                  )}
-                  
-                  {/* Available Advisors */}
-                  <Select onValueChange={(value) => {
-                    const advisor = advisors.find(a => a.id === parseInt(value));
-                    if (advisor) handleAssignAdvisor(category, advisor);
-                  }}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={`Select ${category}`} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getAvailableAdvisors(category).map((advisor) => (
-                        <SelectItem key={advisor.id} value={advisor.id.toString()}>
-                          {advisor.name} - {advisor.email}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ))}
+                    
+                    {/* Assigned Advisors */}
+                    {(assignedAdvisors[category] || []).length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {(assignedAdvisors[category] || []).map((advisor) => (
+                          <Badge key={advisor.id} variant="secondary" className="flex items-center gap-1 text-xs">
+                            {advisor.name}
+                            <X 
+                              className="h-3 w-3 cursor-pointer" 
+                              onClick={() => handleRemoveAdvisor(category, advisor.id)}
+                            />
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Available Advisors */}
+                    <Select onValueChange={(value) => {
+                      const advisor = advisors.find(a => a.id === parseInt(value));
+                      if (advisor) handleAssignAdvisor(category, advisor);
+                    }}>
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder={`Select ${category}`} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getAvailableAdvisors(category).map((advisor) => (
+                          <SelectItem key={advisor.id} value={advisor.id.toString()}>
+                            <div className="text-xs">
+                              <div>{advisor.name}</div>
+                              <div className="text-muted-foreground">{advisor.email}</div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+              </div>
 
               <div className="pt-4 border-t">
                 <div className="flex items-center justify-between">
