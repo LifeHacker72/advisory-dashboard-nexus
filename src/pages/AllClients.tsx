@@ -4,7 +4,7 @@ import DashboardLayout from "@/components/layout/Dashboard";
 import { DataTable } from "@/components/shared/DataTable";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface BookingClient {
+interface BookingProspect {
   id: number;
   name: string;
   email: string;
@@ -12,7 +12,7 @@ interface BookingClient {
   bookingDate: string;
 }
 
-const bookingClients: BookingClient[] = [
+const bookingProspects: BookingProspect[] = [
   {
     id: 1,
     name: "Alex Thompson",
@@ -58,7 +58,7 @@ const bookingClients: BookingClient[] = [
 ];
 
 export default function AllClients() {
-  const [selectedClient, setSelectedClient] = useState<BookingClient | null>(null);
+  const [selectedProspect, setSelectedProspect] = useState<BookingProspect | null>(null);
 
   const columns = [
     {
@@ -82,8 +82,8 @@ export default function AllClients() {
     },
   ];
 
-  const handleRowClick = (client: BookingClient) => {
-    setSelectedClient(client);
+  const handleRowClick = (prospect: BookingProspect) => {
+    setSelectedProspect(prospect);
   };
 
   return (
@@ -91,24 +91,24 @@ export default function AllClients() {
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Client Management</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Prospect Management</h2>
             <p className="text-muted-foreground">
-              View and manage all clients who have booked calls with Turtle.
+              View and manage all prospects who have booked calls with Turtle.
             </p>
           </div>
           <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-            Add New Client
+            Add New Prospect
           </button>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
           <Card className="glass-card">
             <CardHeader className="pb-2">
-              <CardTitle>Total Clients</CardTitle>
-              <CardDescription>All clients who booked calls</CardDescription>
+              <CardTitle>Total Prospects</CardTitle>
+              <CardDescription>All prospects who booked calls</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{bookingClients.length}</div>
+              <div className="text-3xl font-bold">{bookingProspects.length}</div>
             </CardContent>
           </Card>
           
@@ -135,17 +135,17 @@ export default function AllClients() {
 
         <DataTable
           columns={columns}
-          data={bookingClients}
-          keyExtractor={(client) => client.id}
+          data={bookingProspects}
+          keyExtractor={(prospect) => prospect.id}
           onRowClick={handleRowClick}
-          searchPlaceholder="Search clients..."
+          searchPlaceholder="Search prospects..."
         />
 
-        {selectedClient && (
+        {selectedProspect && (
           <Card className="mt-6 border border-primary/20 shadow-md animate-scale-in">
             <CardHeader>
-              <CardTitle>{selectedClient.name}</CardTitle>
-              <CardDescription>Client Details</CardDescription>
+              <CardTitle>{selectedProspect.name}</CardTitle>
+              <CardDescription>Prospect Details</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2">
@@ -154,11 +154,11 @@ export default function AllClients() {
                   <div className="space-y-2">
                     <div className="grid grid-cols-3 gap-2">
                       <p className="text-sm font-medium">Email:</p>
-                      <p className="text-sm col-span-2">{selectedClient.email}</p>
+                      <p className="text-sm col-span-2">{selectedProspect.email}</p>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <p className="text-sm font-medium">Phone:</p>
-                      <p className="text-sm col-span-2">{selectedClient.phone}</p>
+                      <p className="text-sm col-span-2">{selectedProspect.phone}</p>
                     </div>
                   </div>
                 </div>
@@ -167,7 +167,7 @@ export default function AllClients() {
                   <div className="space-y-2">
                     <div className="grid grid-cols-3 gap-2">
                       <p className="text-sm font-medium">Booking Date:</p>
-                      <p className="text-sm col-span-2">{selectedClient.bookingDate}</p>
+                      <p className="text-sm col-span-2">{selectedProspect.bookingDate}</p>
                     </div>
                   </div>
                 </div>
@@ -176,7 +176,7 @@ export default function AllClients() {
             <CardFooter className="flex justify-between">
               <button 
                 className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
-                onClick={() => setSelectedClient(null)}
+                onClick={() => setSelectedProspect(null)}
               >
                 Close
               </button>

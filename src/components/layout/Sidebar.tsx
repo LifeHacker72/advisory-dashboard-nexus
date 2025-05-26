@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -35,11 +36,6 @@ const navItems: NavItem[] = [
     badge: 24,
   },
   {
-    title: "Clients",
-    path: "/all-clients",
-    icon: UserCheck,
-  },
-  {
     title: "Turtle Advisors",
     path: "/advisors",
     icon: UserCog,
@@ -49,6 +45,12 @@ const navItems: NavItem[] = [
     path: "/activation",
     icon: UserPlus,
     badge: 3,
+  },
+  {
+    title: "Pending Tasks",
+    path: "/pending-tasks",
+    icon: ListTodo,
+    badge: 12,
   },
   {
     title: "Meetings",
@@ -63,10 +65,9 @@ const navItems: NavItem[] = [
     badge: 7,
   },
   {
-    title: "Pending Tasks",
-    path: "/pending-tasks",
-    icon: ListTodo,
-    badge: 12,
+    title: "Prospects",
+    path: "/all-clients",
+    icon: UserCheck,
   },
 ];
 
