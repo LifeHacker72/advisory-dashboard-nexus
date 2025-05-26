@@ -21,6 +21,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       case "/clients":
         setPageTitle("Member Management");
         break;
+      case "/all-clients":
+        setPageTitle("Client Management");
+        break;
       case "/advisors":
         setPageTitle("Turtle Advisors");
         break;

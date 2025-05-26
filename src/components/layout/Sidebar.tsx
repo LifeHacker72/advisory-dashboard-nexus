@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { 
@@ -11,7 +10,8 @@ import {
   ChevronRight, 
   LogOut,
   Calendar,
-  BookOpen
+  BookOpen,
+  UserCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,10 +29,15 @@ const navItems: NavItem[] = [
     icon: LayoutDashboard,
   },
   {
-    title: "Members",
+    title: "Turtle Members",
     path: "/clients",
     icon: Users,
     badge: 24,
+  },
+  {
+    title: "Clients",
+    path: "/all-clients",
+    icon: UserCheck,
   },
   {
     title: "Turtle Advisors",
