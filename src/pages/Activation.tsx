@@ -160,6 +160,11 @@ interface BookingClientForm {
   password: string;
 }
 
+interface AdvisorAssignmentForm {
+  membershipStartDate: string;
+  annualFee: string;
+}
+
 export default function Activation() {
   const [selectedClient, setSelectedClient] = useState<PendingClient | null>(null);
   const [showNewClientDialog, setShowNewClientDialog] = useState(false);
@@ -172,11 +177,13 @@ export default function Activation() {
 
   const { register: registerManual, handleSubmit: handleSubmitManual, reset: resetManual, formState: { errors: errorsManual }, setValue: setValueManual, watch: watchManual } = useForm<ManualEntryForm>();
   const { register: registerBooking, handleSubmit: handleSubmitBooking, reset: resetBooking, formState: { errors: errorsBooking }, setValue: setValueBooking, watch: watchBooking } = useForm<BookingClientForm>();
+  const { register: registerAdvisor, handleSubmit: handleSubmitAdvisor, reset: resetAdvisor, formState: { errors: errorsAdvisor } } = useForm<AdvisorAssignmentForm>();
 
   const handleClientActivate = (client: PendingClient) => {
     setSelectedClient(client);
     setShowAdvisorAssignmentDialog(true);
     setAssignedAdvisors({});
+    resetAdvisor();
   };
 
   const handleAssignAdvisor = (category: string, advisor: Advisor) => {
@@ -199,11 +206,13 @@ export default function Activation() {
 
   const canActivate = getTotalAssignedAdvisors() >= 3;
 
-  const handleActivateMembership = () => {
+  const onSubmitAdvisorAssignment = (data: AdvisorAssignmentForm) => {
     console.log("Activating membership for:", selectedClient?.name);
     console.log("Assigned advisors:", assignedAdvisors);
+    console.log("Membership details:", data);
     setShowAdvisorAssignmentDialog(false);
     setSelectedClient(null);
+    resetAdvisor();
   };
 
   const filteredBookingClients = bookingClients.filter(client =>
@@ -381,24 +390,46 @@ export default function Activation() {
             <DialogHeader>
               <DialogTitle>Assign Advisors - {selectedClient?.name}</DialogTitle>
               <DialogDescription>
-                Assign advisors to complete the onboarding process. At least 3 advisors must be assigned.
+                Assign advisors and set membership details to complete the onboarding process. At least 3 advisors must be assigned.
               </DialogDescription>
             </DialogHeader>
-            <div className="py-4 space-y-6">
-              <div className="mb-4">
-                <Label htmlFor="advisor-search">Search Advisors</Label>
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="advisor-search"
-                    placeholder="Search by advisor name..."
-                    value={advisorSearchTerm}
-                    onChange={(e) => setAdvisorSearchTerm(e.target.value)}
-                    className="pl-9"
-                  />
+            <form onSubmit={handleSubmitAdvisor(onSubmitAdvisorAssignment)} className="py-4 space-y-6">
+              {/* Membership Details Section */}
+              <div className="space-y-4 border rounded-lg p-4">
+                <h3 className="font-medium text-lg">Membership Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="membership-start-date">Membership Start Date</Label>
+                    <Input
+                      id="membership-start-date"
+                      type="date"
+                      {...registerAdvisor("membershipStartDate", { 
+                        required: "Membership start date is required" 
+                      })}
+                    />
+                    {errorsAdvisor.membershipStartDate && (
+                      <p className="text-sm text-destructive mt-1">{errorsAdvisor.membershipStartDate.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="annual-fee">Annual Fee (INR)</Label>
+                    <Input
+                      id="annual-fee"
+                      type="number"
+                      placeholder="Enter amount in INR"
+                      {...registerAdvisor("annualFee", { 
+                        required: "Annual fee is required",
+                        min: { value: 1, message: "Annual fee must be greater than 0" }
+                      })}
+                    />
+                    {errorsAdvisor.annualFee && (
+                      <p className="text-sm text-destructive mt-1">{errorsAdvisor.annualFee.message}</p>
+                    )}
+                  </div>
                 </div>
               </div>
 
+              {/* Advisor Assignment Section */}
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {advisorCategories.map((category) => (
                   <div key={category} className="space-y-3 border rounded-lg p-4">
@@ -433,7 +464,10 @@ export default function Activation() {
                         <SelectValue placeholder={`Select ${category}`} />
                       </SelectTrigger>
                       <SelectContent>
-                        {getAvailableAdvisors(category).map((advisor) => (
+                        {advisors.filter(advisor => 
+                          advisor.category === category && 
+                          !(assignedAdvisors[category] || []).map(a => a.id).includes(advisor.id)
+                        ).map((advisor) => (
                           <SelectItem key={advisor.id} value={advisor.id.toString()}>
                             <div className="text-xs">
                               <div>{advisor.name}</div>
@@ -459,20 +493,21 @@ export default function Activation() {
                   )}
                 </div>
               </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowAdvisorAssignmentDialog(false)}>
-                Cancel
-              </Button>
-              <Button 
-                className="bg-primary text-black"
-                onClick={handleActivateMembership}
-                disabled={!canActivate}
-              >
-                <CheckCircle2 className="mr-2 h-4 w-4" />
-                Activate Membership
-              </Button>
-            </DialogFooter>
+
+              <DialogFooter>
+                <Button variant="outline" type="button" onClick={() => setShowAdvisorAssignmentDialog(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit"
+                  className="bg-primary text-black"
+                  disabled={!canActivate}
+                >
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Activate Membership
+                </Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
 
