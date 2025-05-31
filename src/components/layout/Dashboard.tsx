@@ -22,7 +22,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         setPageTitle("Member Management");
         break;
       case "/all-clients":
-        setPageTitle("Prospect Management");
+        setPageTitle("Contact Management");
         break;
       case "/advisors":
         setPageTitle("Turtle Advisors");

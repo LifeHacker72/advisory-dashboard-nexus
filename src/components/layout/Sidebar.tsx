@@ -12,7 +12,7 @@ import {
   LogOut,
   Calendar,
   BookOpen,
-  UserCheck
+  Contact
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -65,9 +65,9 @@ const navItems: NavItem[] = [
     badge: 7,
   },
   {
-    title: "Prospects",
+    title: "Contacts",
     path: "/all-clients",
-    icon: UserCheck,
+    icon: Contact,
   },
 ];
 

@@ -4,61 +4,61 @@ import DashboardLayout from "@/components/layout/Dashboard";
 import { DataTable } from "@/components/shared/DataTable";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface BookingProspect {
+interface Contact {
   id: number;
   name: string;
   email: string;
   phone: string;
-  bookingDate: string;
+  firstBookingDate: string;
 }
 
-const bookingProspects: BookingProspect[] = [
+const contacts: Contact[] = [
   {
     id: 1,
     name: "Alex Thompson",
     email: "alex.thompson@example.com",
     phone: "(555) 111-2222",
-    bookingDate: "Jan 15, 2024",
+    firstBookingDate: "Jan 15, 2024",
   },
   {
     id: 2,
     name: "Maria Rodriguez",
     email: "maria.rodriguez@example.com",
     phone: "(555) 333-4444",
-    bookingDate: "Jan 18, 2024",
+    firstBookingDate: "Jan 18, 2024",
   },
   {
     id: 3,
     name: "James Wilson",
     email: "james.wilson@example.com",
     phone: "(555) 555-6666",
-    bookingDate: "Jan 20, 2024",
+    firstBookingDate: "Jan 20, 2024",
   },
   {
     id: 4,
     name: "Emma Davis",
     email: "emma.davis@example.com",
     phone: "(555) 777-8888",
-    bookingDate: "Jan 22, 2024",
+    firstBookingDate: "Jan 22, 2024",
   },
   {
     id: 5,
     name: "Michael Chang",
     email: "michael.chang@example.com",
     phone: "(555) 999-0000",
-    bookingDate: "Jan 25, 2024",
+    firstBookingDate: "Jan 25, 2024",
   },
   {
     id: 6,
     name: "Sophie Miller",
     email: "sophie.miller@example.com",
     phone: "(555) 123-9876",
-    bookingDate: "Jan 28, 2024",
+    firstBookingDate: "Jan 28, 2024",
   },
 ];
 
 export default function AllClients() {
-  const [selectedProspect, setSelectedProspect] = useState<BookingProspect | null>(null);
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
   const columns = [
     {
@@ -68,7 +68,7 @@ export default function AllClients() {
     },
     {
       key: "email",
-      title: "Email",
+      title: "Email ID",
       sortable: true,
     },
     {
@@ -76,14 +76,14 @@ export default function AllClients() {
       title: "Phone Number",
     },
     {
-      key: "bookingDate",
-      title: "Booking Date",
+      key: "firstBookingDate",
+      title: "First Booking Date",
       sortable: true,
     },
   ];
 
-  const handleRowClick = (prospect: BookingProspect) => {
-    setSelectedProspect(prospect);
+  const handleRowClick = (contact: Contact) => {
+    setSelectedContact(contact);
   };
 
   return (
@@ -91,31 +91,31 @@ export default function AllClients() {
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Prospect Management</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Contact Management</h2>
             <p className="text-muted-foreground">
-              View and manage all prospects who have booked calls with Turtle.
+              View and manage all contacts who have booked calls with Turtle.
             </p>
           </div>
           <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
-            Add New Prospect
+            Add New Contact
           </button>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
           <Card className="glass-card">
             <CardHeader className="pb-2">
-              <CardTitle>Total Prospects</CardTitle>
-              <CardDescription>All prospects who booked calls</CardDescription>
+              <CardTitle>Total Contacts</CardTitle>
+              <CardDescription>All contacts who booked calls</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold">{bookingProspects.length}</div>
+              <div className="text-3xl font-bold">{contacts.length}</div>
             </CardContent>
           </Card>
           
           <Card className="glass-card">
             <CardHeader className="pb-2">
-              <CardTitle>This Month</CardTitle>
-              <CardDescription>New bookings this month</CardDescription>
+              <CardTitle>Added This Month</CardTitle>
+              <CardDescription>New contacts this month</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">4</div>
@@ -135,17 +135,17 @@ export default function AllClients() {
 
         <DataTable
           columns={columns}
-          data={bookingProspects}
-          keyExtractor={(prospect) => prospect.id}
+          data={contacts}
+          keyExtractor={(contact) => contact.id}
           onRowClick={handleRowClick}
-          searchPlaceholder="Search prospects..."
+          searchPlaceholder="Search contacts..."
         />
 
-        {selectedProspect && (
+        {selectedContact && (
           <Card className="mt-6 border border-primary/20 shadow-md animate-scale-in">
             <CardHeader>
-              <CardTitle>{selectedProspect.name}</CardTitle>
-              <CardDescription>Prospect Details</CardDescription>
+              <CardTitle>{selectedContact.name}</CardTitle>
+              <CardDescription>Contact Details</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2">
@@ -154,11 +154,11 @@ export default function AllClients() {
                   <div className="space-y-2">
                     <div className="grid grid-cols-3 gap-2">
                       <p className="text-sm font-medium">Email:</p>
-                      <p className="text-sm col-span-2">{selectedProspect.email}</p>
+                      <p className="text-sm col-span-2">{selectedContact.email}</p>
                     </div>
                     <div className="grid grid-cols-3 gap-2">
                       <p className="text-sm font-medium">Phone:</p>
-                      <p className="text-sm col-span-2">{selectedProspect.phone}</p>
+                      <p className="text-sm col-span-2">{selectedContact.phone}</p>
                     </div>
                   </div>
                 </div>
@@ -166,8 +166,8 @@ export default function AllClients() {
                   <h4 className="text-sm font-medium text-muted-foreground mb-2">Booking Information</h4>
                   <div className="space-y-2">
                     <div className="grid grid-cols-3 gap-2">
-                      <p className="text-sm font-medium">Booking Date:</p>
-                      <p className="text-sm col-span-2">{selectedProspect.bookingDate}</p>
+                      <p className="text-sm font-medium">First Booking:</p>
+                      <p className="text-sm col-span-2">{selectedContact.firstBookingDate}</p>
                     </div>
                   </div>
                 </div>
@@ -176,7 +176,7 @@ export default function AllClients() {
             <CardFooter className="flex justify-between">
               <button 
                 className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
-                onClick={() => setSelectedProspect(null)}
+                onClick={() => setSelectedContact(null)}
               >
                 Close
               </button>
