@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
 
@@ -169,8 +170,8 @@ export default function Activation() {
   const [advisorSearchTerm, setAdvisorSearchTerm] = useState("");
   const [assignedAdvisors, setAssignedAdvisors] = useState<Record<string, Advisor[]>>({});
 
-  const { register: registerManual, handleSubmit: handleSubmitManual, reset: resetManual, formState: { errors: errorsManual } } = useForm<ManualEntryForm>();
-  const { register: registerBooking, handleSubmit: handleSubmitBooking, reset: resetBooking, formState: { errors: errorsBooking } } = useForm<BookingClientForm>();
+  const { register: registerManual, handleSubmit: handleSubmitManual, reset: resetManual, formState: { errors: errorsManual }, setValue: setValueManual, watch: watchManual } = useForm<ManualEntryForm>();
+  const { register: registerBooking, handleSubmit: handleSubmitBooking, reset: resetBooking, formState: { errors: errorsBooking }, setValue: setValueBooking, watch: watchBooking } = useForm<BookingClientForm>();
 
   const handleClientActivate = (client: PendingClient) => {
     setSelectedClient(client);
@@ -540,15 +541,20 @@ export default function Activation() {
                       <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="booking-case-type" className="text-right">Case Type</Label>
                         <div className="col-span-3">
-                          <Select onValueChange={(value) => registerBooking("caseType", { value })}>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select case type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="NRI">NRI</SelectItem>
-                              <SelectItem value="Resident Indian">Resident Indian</SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <RadioGroup
+                            value={watchBooking("caseType")}
+                            onValueChange={(value: "NRI" | "Resident Indian") => setValueBooking("caseType", value)}
+                            className="flex space-x-4"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="NRI" id="booking-nri" />
+                              <Label htmlFor="booking-nri">NRI</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="Resident Indian" id="booking-resident" />
+                              <Label htmlFor="booking-resident">Resident Indian</Label>
+                            </div>
+                          </RadioGroup>
                           {errorsBooking.caseType && (
                             <p className="text-sm text-destructive mt-1">{errorsBooking.caseType.message}</p>
                           )}
@@ -633,15 +639,20 @@ export default function Activation() {
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="manual-case-type" className="text-right">Case Type</Label>
                     <div className="col-span-3">
-                      <Select onValueChange={(value) => registerManual("caseType", { value })}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select case type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="NRI">NRI</SelectItem>
-                          <SelectItem value="Resident Indian">Resident Indian</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <RadioGroup
+                        value={watchManual("caseType")}
+                        onValueChange={(value: "NRI" | "Resident Indian") => setValueManual("caseType", value)}
+                        className="flex space-x-4"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="NRI" id="manual-nri" />
+                          <Label htmlFor="manual-nri">NRI</Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="Resident Indian" id="manual-resident" />
+                          <Label htmlFor="manual-resident">Resident Indian</Label>
+                        </div>
+                      </RadioGroup>
                       {errorsManual.caseType && (
                         <p className="text-sm text-destructive mt-1">{errorsManual.caseType.message}</p>
                       )}
