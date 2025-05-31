@@ -3,9 +3,28 @@ import { useState } from "react";
 import DashboardLayout from "@/components/layout/Dashboard";
 import { DataTable } from "@/components/shared/DataTable";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle 
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
 
 interface Contact {
   id: number;
+  name: string;
+  email: string;
+  phone: string;
+  firstBookingDate: string;
+}
+
+interface NewContactForm {
   name: string;
   email: string;
   phone: string;
@@ -59,6 +78,9 @@ const contacts: Contact[] = [
 
 export default function AllClients() {
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [showNewContactDialog, setShowNewContactDialog] = useState(false);
+  
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<NewContactForm>();
 
   const columns = [
     {
@@ -86,6 +108,18 @@ export default function AllClients() {
     setSelectedContact(contact);
   };
 
+  const onSubmitNewContact = (data: NewContactForm) => {
+    console.log("New contact data:", data);
+    // Here you would typically add the contact to your data source
+    setShowNewContactDialog(false);
+    reset();
+  };
+
+  const handleCloseNewContactDialog = () => {
+    setShowNewContactDialog(false);
+    reset();
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6 animate-fade-in">
@@ -96,9 +130,12 @@ export default function AllClients() {
               View and manage all contacts who have booked calls with Turtle.
             </p>
           </div>
-          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+          <Button 
+            className="bg-primary text-black"
+            onClick={() => setShowNewContactDialog(true)}
+          >
             Add New Contact
-          </button>
+          </Button>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
@@ -141,6 +178,90 @@ export default function AllClients() {
           searchPlaceholder="Search contacts..."
         />
 
+        {/* Add New Contact Dialog */}
+        <Dialog open={showNewContactDialog} onOpenChange={setShowNewContactDialog}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Add New Contact</DialogTitle>
+              <DialogDescription>
+                Enter the contact details to add a new contact.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit(onSubmitNewContact)}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">Name</Label>
+                  <div className="col-span-3">
+                    <Input 
+                      id="name" 
+                      placeholder="Full name"
+                      {...register("name", { required: "Name is required" })}
+                    />
+                    {errors.name && (
+                      <p className="text-sm text-destructive mt-1">{errors.name.message}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="email" className="text-right">Email ID</Label>
+                  <div className="col-span-3">
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="Email address"
+                      {...register("email", { 
+                        required: "Email is required",
+                        pattern: {
+                          value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                          message: "Invalid email address"
+                        }
+                      })}
+                    />
+                    {errors.email && (
+                      <p className="text-sm text-destructive mt-1">{errors.email.message}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="phone" className="text-right">Phone Number</Label>
+                  <div className="col-span-3">
+                    <Input 
+                      id="phone" 
+                      type="tel" 
+                      placeholder="Phone number"
+                      {...register("phone", { required: "Phone number is required" })}
+                    />
+                    {errors.phone && (
+                      <p className="text-sm text-destructive mt-1">{errors.phone.message}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="firstBookingDate" className="text-right">First Booking Date</Label>
+                  <div className="col-span-3">
+                    <Input 
+                      id="firstBookingDate" 
+                      type="date"
+                      {...register("firstBookingDate", { required: "First booking date is required" })}
+                    />
+                    {errors.firstBookingDate && (
+                      <p className="text-sm text-destructive mt-1">{errors.firstBookingDate.message}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" type="button" onClick={handleCloseNewContactDialog}>
+                  Cancel
+                </Button>
+                <Button type="submit" className="bg-primary text-black">
+                  Add Contact
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
         {selectedContact && (
           <Card className="mt-6 border border-primary/20 shadow-md animate-scale-in">
             <CardHeader>
@@ -174,19 +295,19 @@ export default function AllClients() {
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
-              <button 
+              <Button 
                 className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
                 onClick={() => setSelectedContact(null)}
               >
                 Close
-              </button>
+              </Button>
               <div className="flex space-x-2">
-                <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+                <Button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
                   Schedule Call
-                </button>
-                <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+                </Button>
+                <Button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
                   View History
-                </button>
+                </Button>
               </div>
             </CardFooter>
           </Card>

@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useForm } from "react-hook-form";
 
 interface PendingClient {
   id: number;
@@ -145,6 +146,19 @@ const advisorCategories = [
   "Banking and Compliance"
 ];
 
+interface ManualEntryForm {
+  name: string;
+  email: string;
+  phone: string;
+  caseType: "NRI" | "Resident Indian";
+  password: string;
+}
+
+interface BookingClientForm {
+  caseType: "NRI" | "Resident Indian";
+  password: string;
+}
+
 export default function Activation() {
   const [selectedClient, setSelectedClient] = useState<PendingClient | null>(null);
   const [showNewClientDialog, setShowNewClientDialog] = useState(false);
@@ -154,6 +168,9 @@ export default function Activation() {
   const [searchTerm, setSearchTerm] = useState("");
   const [advisorSearchTerm, setAdvisorSearchTerm] = useState("");
   const [assignedAdvisors, setAssignedAdvisors] = useState<Record<string, Advisor[]>>({});
+
+  const { register: registerManual, handleSubmit: handleSubmitManual, reset: resetManual, formState: { errors: errorsManual } } = useForm<ManualEntryForm>();
+  const { register: registerBooking, handleSubmit: handleSubmitBooking, reset: resetBooking, formState: { errors: errorsBooking } } = useForm<BookingClientForm>();
 
   const handleClientActivate = (client: PendingClient) => {
     setSelectedClient(client);
@@ -215,6 +232,31 @@ export default function Activation() {
       default:
         return "default";
     }
+  };
+
+  const onSubmitManualEntry = (data: ManualEntryForm) => {
+    console.log("Manual entry data:", data);
+    setShowNewClientDialog(false);
+    setOnboardingType(null);
+    resetManual();
+  };
+
+  const onSubmitBookingClient = (data: BookingClientForm) => {
+    console.log("Booking client data:", { ...selectedBookingClient, ...data });
+    setShowNewClientDialog(false);
+    setOnboardingType(null);
+    setSelectedBookingClient(null);
+    setSearchTerm("");
+    resetBooking();
+  };
+
+  const handleCloseNewClientDialog = () => {
+    setShowNewClientDialog(false);
+    setOnboardingType(null);
+    setSelectedBookingClient(null);
+    setSearchTerm("");
+    resetManual();
+    resetBooking();
   };
 
   return (
@@ -492,52 +534,152 @@ export default function Activation() {
                       </div>
                     ))}
                   </div>
+                  
+                  {selectedBookingClient && (
+                    <form onSubmit={handleSubmitBooking(onSubmitBookingClient)} className="space-y-4 border-t pt-4">
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="booking-case-type" className="text-right">Case Type</Label>
+                        <div className="col-span-3">
+                          <Select onValueChange={(value) => registerBooking("caseType", { value })}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select case type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="NRI">NRI</SelectItem>
+                              <SelectItem value="Resident Indian">Resident Indian</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          {errorsBooking.caseType && (
+                            <p className="text-sm text-destructive mt-1">{errorsBooking.caseType.message}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="booking-password" className="text-right">Password</Label>
+                        <div className="col-span-3">
+                          <Input 
+                            id="booking-password" 
+                            type="password" 
+                            placeholder="Enter password"
+                            {...registerBooking("password", { required: "Password is required" })}
+                          />
+                          {errorsBooking.password && (
+                            <p className="text-sm text-destructive mt-1">{errorsBooking.password.message}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex justify-end space-x-2">
+                        <Button variant="outline" type="button" onClick={handleCloseNewClientDialog}>
+                          Cancel
+                        </Button>
+                        <Button type="submit" className="bg-primary text-black">
+                          Send Onboarding Details
+                        </Button>
+                      </div>
+                    </form>
+                  )}
                 </div>
               )}
 
               {onboardingType === "manual" && (
-                <div className="space-y-4">
+                <form onSubmit={handleSubmitManual(onSubmitManualEntry)} className="space-y-4">
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="manual-name" className="text-right">Name</Label>
-                    <Input id="manual-name" placeholder="Full name" className="col-span-3" />
+                    <div className="col-span-3">
+                      <Input 
+                        id="manual-name" 
+                        placeholder="Full name"
+                        {...registerManual("name", { required: "Name is required" })}
+                      />
+                      {errorsManual.name && (
+                        <p className="text-sm text-destructive mt-1">{errorsManual.name.message}</p>
+                      )}
+                    </div>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="manual-email" className="text-right">Email</Label>
-                    <Input id="manual-email" type="email" placeholder="Email address" className="col-span-3" />
+                    <div className="col-span-3">
+                      <Input 
+                        id="manual-email" 
+                        type="email" 
+                        placeholder="Email address"
+                        {...registerManual("email", { 
+                          required: "Email is required",
+                          pattern: {
+                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                            message: "Invalid email address"
+                          }
+                        })}
+                      />
+                      {errorsManual.email && (
+                        <p className="text-sm text-destructive mt-1">{errorsManual.email.message}</p>
+                      )}
+                    </div>
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="manual-phone" className="text-right">Phone</Label>
-                    <Input id="manual-phone" type="tel" placeholder="Phone number" className="col-span-3" />
+                    <div className="col-span-3">
+                      <Input 
+                        id="manual-phone" 
+                        type="tel" 
+                        placeholder="Phone number"
+                        {...registerManual("phone", { required: "Phone number is required" })}
+                      />
+                      {errorsManual.phone && (
+                        <p className="text-sm text-destructive mt-1">{errorsManual.phone.message}</p>
+                      )}
+                    </div>
                   </div>
-                </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="manual-case-type" className="text-right">Case Type</Label>
+                    <div className="col-span-3">
+                      <Select onValueChange={(value) => registerManual("caseType", { value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select case type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="NRI">NRI</SelectItem>
+                          <SelectItem value="Resident Indian">Resident Indian</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {errorsManual.caseType && (
+                        <p className="text-sm text-destructive mt-1">{errorsManual.caseType.message}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="manual-password" className="text-right">Password</Label>
+                    <div className="col-span-3">
+                      <Input 
+                        id="manual-password" 
+                        type="password" 
+                        placeholder="Enter password"
+                        {...registerManual("password", { required: "Password is required" })}
+                      />
+                      {errorsManual.password && (
+                        <p className="text-sm text-destructive mt-1">{errorsManual.password.message}</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" type="button" onClick={handleCloseNewClientDialog}>
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="bg-primary text-black">
+                      Send Onboarding Details
+                    </Button>
+                  </div>
+                </form>
+              )}
+
+              {!onboardingType && (
+                <DialogFooter>
+                  <Button variant="outline" onClick={handleCloseNewClientDialog}>
+                    Cancel
+                  </Button>
+                </DialogFooter>
               )}
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => {
-                setShowNewClientDialog(false);
-                setOnboardingType(null);
-                setSelectedBookingClient(null);
-                setSearchTerm("");
-              }}>
-                Cancel
-              </Button>
-              <Button 
-                className="bg-primary text-black"
-                disabled={onboardingType === "booking" && !selectedBookingClient}
-                onClick={() => {
-                  console.log("Send onboarding details");
-                  if (onboardingType === "booking" && selectedBookingClient) {
-                    console.log("Selected booking client:", selectedBookingClient);
-                  }
-                  setShowNewClientDialog(false);
-                  setOnboardingType(null);
-                  setSelectedBookingClient(null);
-                  setSearchTerm("");
-                }}
-              >
-                Send Onboarding Details
-              </Button>
-            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
