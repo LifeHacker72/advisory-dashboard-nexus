@@ -1,6 +1,14 @@
+
 import { useState } from "react";
 import { ArrowDown, ArrowUp, Search, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 interface Column<T> {
   key: string;
@@ -8,6 +16,16 @@ interface Column<T> {
   render?: (item: T) => React.ReactNode;
   sortable?: boolean;
   onClick?: (item: T) => void;
+}
+
+interface FilterOption {
+  label: string;
+  value: string;
+}
+
+interface SortOption {
+  label: string;
+  value: string;
 }
 
 interface DataTableProps<T> {
@@ -19,6 +37,14 @@ interface DataTableProps<T> {
   searchPlaceholder?: string;
   className?: string;
   rowClassName?: string;
+  filterOptions?: FilterOption[];
+  sortOptions?: SortOption[];
+  onFilterChange?: (filter: string) => void;
+  onSortChange?: (sort: string) => void;
+  currentFilter?: string;
+  currentSort?: string;
+  sortOrder?: "asc" | "desc";
+  onSortOrderChange?: (order: "asc" | "desc") => void;
 }
 
 export function DataTable<T>({
@@ -29,7 +55,15 @@ export function DataTable<T>({
   isLoading = false,
   searchPlaceholder = "Search...",
   className,
-  rowClassName
+  rowClassName,
+  filterOptions,
+  sortOptions,
+  onFilterChange,
+  onSortChange,
+  currentFilter,
+  currentSort,
+  sortOrder = "asc",
+  onSortOrderChange
 }: DataTableProps<T>) {
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
@@ -87,10 +121,74 @@ export function DataTable<T>({
           />
         </div>
         <div className="flex items-center gap-2">
-          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
-            <Filter className="mr-2 h-4 w-4" />
-            <span>Filter</span>
-          </button>
+          {filterOptions && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Filter className="mr-2 h-4 w-4" />
+                  Filter
+                  {currentFilter && currentFilter !== "all" && (
+                    <span className="ml-1 text-xs bg-primary/10 px-1.5 py-0.5 rounded">
+                      {filterOptions.find(f => f.value === currentFilter)?.label}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {filterOptions.map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    onClick={() => onFilterChange?.(option.value)}
+                    className={currentFilter === option.value ? "bg-accent" : ""}
+                  >
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+          
+          {sortOptions && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <ArrowUp className="mr-2 h-4 w-4" />
+                  Sort
+                  {currentSort && currentSort !== "none" && (
+                    <span className="ml-1 text-xs bg-primary/10 px-1.5 py-0.5 rounded">
+                      {sortOptions.find(s => s.value === currentSort)?.label}
+                    </span>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {sortOptions.map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    onClick={() => onSortChange?.(option.value)}
+                    className={currentSort === option.value ? "bg-accent" : ""}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      {option.label}
+                      {currentSort === option.value && option.value !== "none" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-4 w-4 p-0 ml-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSortOrderChange?.(sortOrder === "asc" ? "desc" : "asc");
+                          }}
+                        >
+                          {sortOrder === "asc" ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+                        </Button>
+                      )}
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
       

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import DashboardLayout from "@/components/layout/Dashboard";
 import { DataTable } from "@/components/shared/DataTable";
@@ -123,13 +122,27 @@ export default function Clients() {
   };
 
   const handleSortChange = (value: string) => {
-    if (value === sortBy) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortBy(value);
+    setSortBy(value);
+    if (value === "none") {
       setSortOrder("asc");
     }
   };
+
+  const handleSortOrderChange = (order: "asc" | "desc") => {
+    setSortOrder(order);
+  };
+
+  const filterOptions = [
+    { label: "All Status", value: "all" },
+    { label: "Active", value: "active" },
+    { label: "Expired", value: "expired" },
+    { label: "Dormant", value: "dormant" },
+  ];
+
+  const sortOptions = [
+    { label: "None", value: "none" },
+    { label: "Days Since Last Call", value: "daysSinceLastCall" },
+  ];
 
   const columns = [
     {
@@ -320,6 +333,14 @@ export default function Clients() {
           keyExtractor={(client) => client.id}
           onRowClick={handleViewClient}
           searchPlaceholder="Search members..."
+          filterOptions={filterOptions}
+          sortOptions={sortOptions}
+          onFilterChange={setStatusFilter}
+          onSortChange={handleSortChange}
+          currentFilter={statusFilter}
+          currentSort={sortBy}
+          sortOrder={sortOrder}
+          onSortOrderChange={handleSortOrderChange}
         />
 
         {selectedClient && (
