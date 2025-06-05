@@ -86,6 +86,8 @@ const clients: Client[] = [
 export default function Clients() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("none");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
   // Calculate metrics
   const totalMembers = clients.length;
@@ -93,10 +95,18 @@ export default function Clients() {
   const expiredMembers = clients.filter(c => c.subscriptionStatus === "expired").length;
   const dormantMembers = clients.filter(c => c.subscriptionStatus === "dormant").length;
 
-  // Filter clients by status
-  const getFilteredClients = () => {
-    if (statusFilter === "all") return clients;
-    return clients.filter(client => client.subscriptionStatus === statusFilter);
+  // Filter and sort clients
+  const getFilteredAndSortedClients = () => {
+    let filteredClients = statusFilter === "all" ? clients : clients.filter(client => client.subscriptionStatus === statusFilter);
+    
+    if (sortBy === "daysSinceLastCall") {
+      filteredClients = [...filteredClients].sort((a, b) => {
+        const compareResult = a.daysSinceLastCall - b.daysSinceLastCall;
+        return sortOrder === "asc" ? compareResult : -compareResult;
+      });
+    }
+    
+    return filteredClients;
   };
 
   const handleViewClient = (client: Client) => {
@@ -106,6 +116,19 @@ export default function Clients() {
   const handleEditClient = (client: Client) => {
     console.log("Edit client:", client);
     // TODO: Implement edit functionality
+  };
+
+  const handleStatusWidgetClick = (status: string) => {
+    setStatusFilter(status);
+  };
+
+  const handleSortChange = (value: string) => {
+    if (value === sortBy) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(value);
+      setSortOrder("asc");
+    }
   };
 
   const columns = [
@@ -188,13 +211,16 @@ export default function Clients() {
               Manage member subscriptions and track engagement.
             </p>
           </div>
-          <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+          <Button>
             Add New Member
-          </button>
+          </Button>
         </div>
 
         <div className="grid gap-6 md:grid-cols-4">
-          <Card className="glass-card">
+          <Card 
+            className="glass-card cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleStatusWidgetClick("all")}
+          >
             <CardHeader className="pb-2">
               <CardTitle>Total Members</CardTitle>
               <CardDescription>All registered members</CardDescription>
@@ -204,7 +230,10 @@ export default function Clients() {
             </CardContent>
           </Card>
           
-          <Card className="glass-card">
+          <Card 
+            className="glass-card cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleStatusWidgetClick("active")}
+          >
             <CardHeader className="pb-2">
               <CardTitle>Active</CardTitle>
               <CardDescription>Currently active subscriptions</CardDescription>
@@ -214,7 +243,10 @@ export default function Clients() {
             </CardContent>
           </Card>
 
-          <Card className="glass-card">
+          <Card 
+            className="glass-card cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleStatusWidgetClick("expired")}
+          >
             <CardHeader className="pb-2">
               <CardTitle>Expired</CardTitle>
               <CardDescription>Expired subscriptions</CardDescription>
@@ -224,7 +256,10 @@ export default function Clients() {
             </CardContent>
           </Card>
 
-          <Card className="glass-card">
+          <Card 
+            className="glass-card cursor-pointer hover:shadow-md transition-shadow"
+            onClick={() => handleStatusWidgetClick("dormant")}
+          >
             <CardHeader className="pb-2">
               <CardTitle>Dormant</CardTitle>
               <CardDescription>Inactive members</CardDescription>
@@ -252,11 +287,36 @@ export default function Clients() {
               <option value="dormant">Dormant</option>
             </select>
           </div>
+          
+          <div>
+            <label htmlFor="sort-filter" className="text-sm font-medium mr-2">
+              Sort by:
+            </label>
+            <select
+              id="sort-filter"
+              className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value)}
+            >
+              <option value="none">None</option>
+              <option value="daysSinceLastCall">Days Since Last Call</option>
+            </select>
+            {sortBy !== "none" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="ml-2"
+                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+              >
+                {sortOrder === "asc" ? "↑" : "↓"}
+              </Button>
+            )}
+          </div>
         </div>
 
         <DataTable
           columns={columns}
-          data={getFilteredClients()}
+          data={getFilteredAndSortedClients()}
           keyExtractor={(client) => client.id}
           onRowClick={handleViewClient}
           searchPlaceholder="Search members..."
@@ -315,22 +375,22 @@ export default function Clients() {
               </div>
             </CardContent>
             <CardFooter className="flex justify-between">
-              <button 
-                className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+              <Button 
+                variant="outline"
                 onClick={() => setSelectedClient(null)}
               >
                 Close
-              </button>
+              </Button>
               <div className="flex space-x-2">
-                <button 
-                  className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
+                <Button 
+                  variant="outline"
                   onClick={() => handleEditClient(selectedClient)}
                 >
                   Edit Profile
-                </button>
-                <button className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+                </Button>
+                <Button>
                   Schedule Call
-                </button>
+                </Button>
               </div>
             </CardFooter>
           </Card>
