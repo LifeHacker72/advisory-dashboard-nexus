@@ -19,6 +19,7 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
   const [isEditingBio, setIsEditingBio] = useState(false);
   const [clientBio, setClientBio] = useState("John is a seasoned financial advisor with over 15 years of experience in wealth management. He specializes in retirement planning and has helped numerous clients achieve their financial goals through strategic investment planning.");
   const [linkedinProfile, setLinkedinProfile] = useState("https://linkedin.com/in/michael-johnson");
+  const [showAllBookings, setShowAllBookings] = useState(false);
 
   if (!isOpen) return null;
 
@@ -38,6 +39,9 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
     { id: 3, advisor: "David Wilson", date: "2024-01-08", status: "cancelled" },
     { id: 4, advisor: "Sarah Johnson", date: "2024-01-05", status: "completed" },
     { id: 5, advisor: "Jennifer Smith", date: "2024-01-03", status: "completed" },
+    { id: 6, advisor: "Michael Brown", date: "2024-01-01", status: "completed" },
+    { id: 7, advisor: "David Wilson", date: "2023-12-28", status: "cancelled" },
+    { id: 8, advisor: "Sarah Johnson", date: "2023-12-25", status: "completed" },
   ];
 
   const handleSaveBio = () => {
@@ -165,14 +169,15 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-xs font-medium flex items-center gap-1">
                       <Users className="h-3 w-3 text-green-600" />
-                      Advisors Assigned
+                      Advisors Assigned ({profileData.advisorsAssigned.length})
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-lg font-bold mb-1">{profileData.advisorsAssigned.length}</div>
-                    <div className="text-xs text-muted-foreground grid grid-cols-2 gap-1">
+                    <div className="flex flex-wrap gap-1">
                       {profileData.advisorsAssigned.map((advisor, index) => (
-                        <div key={index} className="truncate">{advisor}</div>
+                        <div key={index} className="bg-muted px-2 py-1 rounded text-xs font-medium">
+                          {advisor}
+                        </div>
                       ))}
                     </div>
                   </CardContent>
@@ -208,17 +213,27 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
                   </CardContent>
                 </Card>
 
-                {/* Tasks Pending - Smaller */}
+                {/* Tasks Combined - Smaller */}
                 <Card className="col-span-1">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-xs font-medium flex items-center gap-1">
                       <CheckSquare className="h-3 w-3 text-blue-600" />
-                      Pending
+                      Tasks
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-lg font-bold">{profileData.tasksPending}</div>
-                    <p className="text-xs text-muted-foreground">tasks</p>
+                    <div className="space-y-1">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Pending:</span>
+                        <span className="font-bold">{profileData.tasksPending}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-muted-foreground">Overdue:</span>
+                        <span className={`font-bold ${profileData.tasksOverdue > 0 ? "text-red-600" : ""}`}>
+                          {profileData.tasksOverdue}
+                        </span>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
               </div>
@@ -226,10 +241,19 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
               {/* Recent Bookings Table */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Recent Bookings</CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">Recent Bookings</CardTitle>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setShowAllBookings(true)}
+                    >
+                      View All
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="max-h-[300px] overflow-y-auto">
+                  <div className="min-h-[180px] overflow-y-auto">
                     <table className="w-full">
                       <thead className="sticky top-0 bg-background border-b">
                         <tr>
@@ -239,7 +263,7 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
                         </tr>
                       </thead>
                       <tbody className="divide-y">
-                        {recentBookings.map((booking) => (
+                        {recentBookings.slice(0, 3).map((booking) => (
                           <tr key={booking.id} className="hover:bg-muted/50">
                             <td className="py-3 text-sm">{booking.advisor}</td>
                             <td className="py-3 text-sm">{booking.date}</td>
@@ -334,6 +358,55 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
             </TabsContent>
           </div>
         </Tabs>
+
+        {/* View All Bookings Modal */}
+        {showAllBookings && (
+          <div className="fixed inset-0 z-60 bg-black/80 flex items-center justify-center p-4">
+            <div className="bg-background rounded-lg shadow-xl w-full max-w-4xl h-[70vh] flex flex-col">
+              <div className="flex items-center justify-between p-6 border-b">
+                <h3 className="text-xl font-bold">All Bookings - {client.name}</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAllBookings(false)}
+                  className="h-8 w-8 p-0"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex-1 overflow-auto p-6">
+                <table className="w-full">
+                  <thead className="sticky top-0 bg-background border-b">
+                    <tr>
+                      <th className="text-left text-sm font-medium text-muted-foreground uppercase tracking-wider py-3">Advisor</th>
+                      <th className="text-left text-sm font-medium text-muted-foreground uppercase tracking-wider py-3">Date</th>
+                      <th className="text-left text-sm font-medium text-muted-foreground uppercase tracking-wider py-3">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {recentBookings.map((booking) => (
+                      <tr key={booking.id} className="hover:bg-muted/50">
+                        <td className="py-4 text-sm">{booking.advisor}</td>
+                        <td className="py-4 text-sm">{booking.date}</td>
+                        <td className="py-4">
+                          <StatusBadge
+                            variant={
+                              booking.status === "completed" ? "success" :
+                              booking.status === "cancelled" ? "danger" :
+                              "warning"
+                            }
+                          >
+                            {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                          </StatusBadge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
