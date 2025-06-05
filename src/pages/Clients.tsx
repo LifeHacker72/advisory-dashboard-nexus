@@ -2,9 +2,10 @@ import { useState } from "react";
 import DashboardLayout from "@/components/layout/Dashboard";
 import { DataTable } from "@/components/shared/DataTable";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Eye, Edit } from "lucide-react";
+import { ClientProfile } from "@/components/clients/ClientProfile";
 
 interface Client {
   id: number;
@@ -84,9 +85,7 @@ const clients: Client[] = [
 
 export default function Clients() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<string>("none");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Calculate metrics
   const totalMembers = clients.length;
@@ -94,22 +93,9 @@ export default function Clients() {
   const expiredMembers = clients.filter(c => c.subscriptionStatus === "expired").length;
   const dormantMembers = clients.filter(c => c.subscriptionStatus === "dormant").length;
 
-  // Filter and sort clients
-  const getFilteredAndSortedClients = () => {
-    let filteredClients = statusFilter === "all" ? clients : clients.filter(client => client.subscriptionStatus === statusFilter);
-    
-    if (sortBy === "daysSinceLastCall") {
-      filteredClients = [...filteredClients].sort((a, b) => {
-        const compareResult = a.daysSinceLastCall - b.daysSinceLastCall;
-        return sortOrder === "asc" ? compareResult : -compareResult;
-      });
-    }
-    
-    return filteredClients;
-  };
-
   const handleViewClient = (client: Client) => {
     setSelectedClient(client);
+    setIsProfileOpen(true);
   };
 
   const handleEditClient = (client: Client) => {
@@ -118,18 +104,13 @@ export default function Clients() {
   };
 
   const handleStatusWidgetClick = (status: string) => {
-    setStatusFilter(status);
+    // This functionality is now handled by the DataTable component
+    console.log("Status widget clicked:", status);
   };
 
-  const handleSortChange = (value: string) => {
-    setSortBy(value);
-    if (value === "none") {
-      setSortOrder("asc");
-    }
-  };
-
-  const handleSortOrderChange = (order: "asc" | "desc") => {
-    setSortOrder(order);
+  const handleCloseProfile = () => {
+    setIsProfileOpen(false);
+    setSelectedClient(null);
   };
 
   const filterOptions = [
@@ -285,92 +266,20 @@ export default function Clients() {
 
         <DataTable
           columns={columns}
-          data={getFilteredAndSortedClients()}
+          data={clients}
           keyExtractor={(client) => client.id}
           onRowClick={handleViewClient}
           searchPlaceholder="Search members..."
           filterOptions={filterOptions}
           sortOptions={sortOptions}
-          onFilterChange={setStatusFilter}
-          onSortChange={handleSortChange}
-          currentFilter={statusFilter}
-          currentSort={sortBy}
-          sortOrder={sortOrder}
-          onSortOrderChange={handleSortOrderChange}
         />
 
         {selectedClient && (
-          <Card className="mt-6 border border-primary/20 shadow-md animate-scale-in">
-            <CardHeader>
-              <CardTitle>{selectedClient.name}</CardTitle>
-              <CardDescription>Member Details</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2">
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Contact Information</h4>
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-3 gap-2">
-                      <p className="text-sm font-medium">Email:</p>
-                      <p className="text-sm col-span-2">{selectedClient.email}</p>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <p className="text-sm font-medium">Phone:</p>
-                      <p className="text-sm col-span-2">{selectedClient.phone}</p>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Subscription Details</h4>
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-3 gap-2">
-                      <p className="text-sm font-medium">Status:</p>
-                      <div className="col-span-2">
-                        <StatusBadge
-                          variant={
-                            selectedClient.subscriptionStatus === "active" ? "success" :
-                            selectedClient.subscriptionStatus === "expired" ? "danger" :
-                            "warning"
-                          }
-                        >
-                          {selectedClient.subscriptionStatus.charAt(0).toUpperCase() + selectedClient.subscriptionStatus.slice(1)}
-                        </StatusBadge>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <p className="text-sm font-medium">Subscription Date:</p>
-                      <p className="text-sm col-span-2">{selectedClient.subscriptionDate}</p>
-                    </div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <p className="text-sm font-medium">Days Since Last Call:</p>
-                      <p className={`text-sm col-span-2 ${selectedClient.daysSinceLastCall > 30 ? "text-red-600 font-medium" : ""}`}>
-                        {selectedClient.daysSinceLastCall} days
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button 
-                variant="outline"
-                onClick={() => setSelectedClient(null)}
-              >
-                Close
-              </Button>
-              <div className="flex space-x-2">
-                <Button 
-                  variant="outline"
-                  onClick={() => handleEditClient(selectedClient)}
-                >
-                  Edit Profile
-                </Button>
-                <Button>
-                  Schedule Call
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
+          <ClientProfile
+            client={selectedClient}
+            isOpen={isProfileOpen}
+            onClose={handleCloseProfile}
+          />
         )}
       </div>
     </DashboardLayout>
