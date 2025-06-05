@@ -1,20 +1,10 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { X, Calendar, Users, Phone, Clock, CheckSquare, AlertTriangle } from "lucide-react";
-
-interface Client {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  subscriptionDate: string;
-  subscriptionStatus: "active" | "expired" | "dormant";
-  daysSinceLastCall: number;
-}
+import { Client } from "@/types/client";
 
 interface ClientProfileProps {
   client: Client;

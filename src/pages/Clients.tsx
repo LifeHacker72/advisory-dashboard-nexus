@@ -1,21 +1,11 @@
+
 import { useState } from "react";
 import DashboardLayout from "@/components/layout/Dashboard";
-import { DataTable } from "@/components/shared/DataTable";
-import { StatusBadge } from "@/components/shared/StatusBadge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Eye, Edit } from "lucide-react";
 import { ClientProfile } from "@/components/clients/ClientProfile";
-
-interface Client {
-  id: number;
-  name: string;
-  email: string;
-  phone: string;
-  subscriptionDate: string;
-  subscriptionStatus: "active" | "expired" | "dormant";
-  daysSinceLastCall: number;
-}
+import { ClientMetrics } from "@/components/clients/ClientMetrics";
+import { ClientsTable } from "@/components/clients/ClientsTable";
+import { Client } from "@/types/client";
 
 const clients: Client[] = [
   {
@@ -87,12 +77,6 @@ export default function Clients() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  // Calculate metrics
-  const totalMembers = clients.length;
-  const activeMembers = clients.filter(c => c.subscriptionStatus === "active").length;
-  const expiredMembers = clients.filter(c => c.subscriptionStatus === "expired").length;
-  const dormantMembers = clients.filter(c => c.subscriptionStatus === "dormant").length;
-
   const handleViewClient = (client: Client) => {
     setSelectedClient(client);
     setIsProfileOpen(true);
@@ -103,97 +87,10 @@ export default function Clients() {
     // TODO: Implement edit functionality
   };
 
-  const handleStatusWidgetClick = (status: string) => {
-    // This functionality is now handled by the DataTable component
-    console.log("Status widget clicked:", status);
-  };
-
   const handleCloseProfile = () => {
     setIsProfileOpen(false);
     setSelectedClient(null);
   };
-
-  const filterOptions = [
-    { label: "All Status", value: "all" },
-    { label: "Active", value: "active" },
-    { label: "Expired", value: "expired" },
-    { label: "Dormant", value: "dormant" },
-  ];
-
-  const sortOptions = [
-    { label: "None", value: "none" },
-    { label: "Days Since Last Call", value: "daysSinceLastCall" },
-  ];
-
-  const columns = [
-    {
-      key: "name",
-      title: "Name",
-      sortable: true,
-    },
-    {
-      key: "subscriptionDate",
-      title: "Subscription Date",
-      sortable: true,
-    },
-    {
-      key: "subscriptionStatus",
-      title: "Subscription Status",
-      render: (client: Client) => (
-        <StatusBadge
-          variant={
-            client.subscriptionStatus === "active" ? "success" :
-            client.subscriptionStatus === "expired" ? "danger" :
-            "warning"
-          }
-        >
-          {client.subscriptionStatus.charAt(0).toUpperCase() + client.subscriptionStatus.slice(1)}
-        </StatusBadge>
-      ),
-    },
-    {
-      key: "daysSinceLastCall",
-      title: "Days Since Last Call",
-      sortable: true,
-      render: (client: Client) => (
-        <span className={client.daysSinceLastCall > 30 ? "text-red-600 font-medium" : ""}>
-          {client.daysSinceLastCall} days
-        </span>
-      ),
-    },
-    {
-      key: "email",
-      title: "Email ID",
-    },
-    {
-      key: "phone",
-      title: "Phone Number",
-    },
-    {
-      key: "actions",
-      title: "Actions",
-      render: (client: Client) => (
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleViewClient(client)}
-            className="h-8 w-8 p-0"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleEditClient(client)}
-            className="h-8 w-8 p-0"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
-    },
-  ];
 
   return (
     <DashboardLayout>
@@ -210,68 +107,12 @@ export default function Clients() {
           </Button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-4">
-          <Card 
-            className="glass-card cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => handleStatusWidgetClick("all")}
-          >
-            <CardHeader className="pb-2">
-              <CardTitle>Total Members</CardTitle>
-              <CardDescription>All registered members</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{totalMembers}</div>
-            </CardContent>
-          </Card>
-          
-          <Card 
-            className="glass-card cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => handleStatusWidgetClick("active")}
-          >
-            <CardHeader className="pb-2">
-              <CardTitle>Active</CardTitle>
-              <CardDescription>Currently active subscriptions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-green-600">{activeMembers}</div>
-            </CardContent>
-          </Card>
+        <ClientMetrics clients={clients} />
 
-          <Card 
-            className="glass-card cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => handleStatusWidgetClick("expired")}
-          >
-            <CardHeader className="pb-2">
-              <CardTitle>Expired</CardTitle>
-              <CardDescription>Expired subscriptions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-red-600">{expiredMembers}</div>
-            </CardContent>
-          </Card>
-
-          <Card 
-            className="glass-card cursor-pointer hover:shadow-md transition-shadow"
-            onClick={() => handleStatusWidgetClick("dormant")}
-          >
-            <CardHeader className="pb-2">
-              <CardTitle>Dormant</CardTitle>
-              <CardDescription>Inactive members</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-amber-600">{dormantMembers}</div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <DataTable
-          columns={columns}
-          data={clients}
-          keyExtractor={(client) => client.id}
-          onRowClick={handleViewClient}
-          searchPlaceholder="Search members..."
-          filterOptions={filterOptions}
-          sortOptions={sortOptions}
+        <ClientsTable
+          clients={clients}
+          onViewClient={handleViewClient}
+          onEditClient={handleEditClient}
         />
 
         {selectedClient && (
