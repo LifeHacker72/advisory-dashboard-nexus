@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import Sidebar from "./Sidebar";
-import { Bell, User, Search } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -60,29 +59,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       <Sidebar />
       
       <main className="flex-1 overflow-x-hidden">
-        <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-border bg-background/95 backdrop-blur-md px-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center border-b border-border bg-background/95 backdrop-blur-md px-6">
           <div className="flex-1">
             <h1 className="text-xl font-semibold tracking-tight">{pageTitle}</h1>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <div className="relative hidden md:flex items-center">
-              <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground" />
-              <input
-                type="search"
-                placeholder="Search..."
-                className="rounded-md border border-input bg-background pl-8 pr-3 py-1.5 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              />
-            </div>
-            
-            <button className="relative rounded-full h-9 w-9 flex items-center justify-center border border-input bg-background hover:bg-accent transition-colors">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-1 right-1.5 h-2 w-2 rounded-full bg-primary"></span>
-            </button>
-            
-            <button className="rounded-full h-9 w-9 flex items-center justify-center border border-input bg-background overflow-hidden hover:ring-2 hover:ring-ring transition-all">
-              <User className="h-5 w-5" />
-            </button>
           </div>
         </header>
         
