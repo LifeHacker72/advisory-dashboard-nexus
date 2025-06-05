@@ -283,50 +283,6 @@ export default function Clients() {
           </Card>
         </div>
 
-        <div className="flex gap-4 items-center">
-          <div>
-            <label htmlFor="status-filter" className="text-sm font-medium mr-2">
-              Filter by Status:
-            </label>
-            <select
-              id="status-filter"
-              className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="expired">Expired</option>
-              <option value="dormant">Dormant</option>
-            </select>
-          </div>
-          
-          <div>
-            <label htmlFor="sort-filter" className="text-sm font-medium mr-2">
-              Sort by:
-            </label>
-            <select
-              id="sort-filter"
-              className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-              value={sortBy}
-              onChange={(e) => handleSortChange(e.target.value)}
-            >
-              <option value="none">None</option>
-              <option value="daysSinceLastCall">Days Since Last Call</option>
-            </select>
-            {sortBy !== "none" && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="ml-2"
-                onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
-              >
-                {sortOrder === "asc" ? "↑" : "↓"}
-              </Button>
-            )}
-          </div>
-        </div>
-
         <DataTable
           columns={columns}
           data={getFilteredAndSortedClients()}
