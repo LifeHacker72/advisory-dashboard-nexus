@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { X, Calendar, Users, Phone, Clock, CheckSquare, AlertTriangle } from "lucide-react";
+import { X, Calendar, Users, Phone, Clock, CheckSquare, AlertTriangle, Edit3, ExternalLink } from "lucide-react";
 import { Client } from "@/types/client";
 
 interface ClientProfileProps {
@@ -14,21 +16,39 @@ interface ClientProfileProps {
 
 export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
   const [activeTab, setActiveTab] = useState("summary");
+  const [isEditingBio, setIsEditingBio] = useState(false);
+  const [clientBio, setClientBio] = useState("John is a seasoned financial advisor with over 15 years of experience in wealth management. He specializes in retirement planning and has helped numerous clients achieve their financial goals through strategic investment planning.");
+  const [linkedinProfile, setLinkedinProfile] = useState("https://linkedin.com/in/michael-johnson");
 
   if (!isOpen) return null;
 
   // Mock data for demonstration - this would come from your data source
   const profileData = {
     membershipExpiryDate: "Mar 15, 2024",
-    advisorsAssigned: ["Sarah Johnson", "Michael Brown"],
+    advisorsAssigned: ["Sarah Johnson", "Michael Brown", "David Wilson", "Jennifer Smith"],
     callsCompleted: 12,
     tasksPending: 3,
     tasksOverdue: 1
   };
 
+  // Mock recent bookings data
+  const recentBookings = [
+    { id: 1, advisor: "Sarah Johnson", date: "2024-01-15", status: "completed" },
+    { id: 2, advisor: "Michael Brown", date: "2024-01-12", status: "completed" },
+    { id: 3, advisor: "David Wilson", date: "2024-01-08", status: "cancelled" },
+    { id: 4, advisor: "Sarah Johnson", date: "2024-01-05", status: "completed" },
+    { id: 5, advisor: "Jennifer Smith", date: "2024-01-03", status: "completed" },
+  ];
+
+  const handleSaveBio = () => {
+    setIsEditingBio(false);
+    // TODO: Save bio to backend
+    console.log("Saving bio:", clientBio, "LinkedIn:", linkedinProfile);
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-      <div className="bg-background rounded-lg shadow-xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-background rounded-lg shadow-xl w-full max-w-7xl h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center gap-4">
@@ -66,104 +86,181 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
           </TabsList>
 
           <div className="flex-1 overflow-auto p-6">
-            <TabsContent value="summary" className="mt-0">
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {/* Membership Expiry Date */}
-                <Card>
+            <TabsContent value="summary" className="mt-0 space-y-6">
+              {/* Client Bio Section */}
+              <Card>
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-lg">Client Bio</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsEditingBio(!isEditingBio)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {isEditingBio ? (
+                    <div className="space-y-4">
+                      <Textarea
+                        value={clientBio}
+                        onChange={(e) => setClientBio(e.target.value)}
+                        placeholder="Enter client bio..."
+                        className="min-h-[100px]"
+                      />
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium">LinkedIn Profile</label>
+                        <input
+                          type="url"
+                          value={linkedinProfile}
+                          onChange={(e) => setLinkedinProfile(e.target.value)}
+                          placeholder="https://linkedin.com/in/..."
+                          className="w-full px-3 py-2 text-sm rounded-md border border-input bg-background"
+                        />
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={handleSaveBio} size="sm">Save</Button>
+                        <Button variant="outline" onClick={() => setIsEditingBio(false)} size="sm">Cancel</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-sm leading-relaxed">{clientBio}</p>
+                      {linkedinProfile && (
+                        <a
+                          href={linkedinProfile}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          LinkedIn Profile
+                        </a>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Metrics Grid */}
+              <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+                {/* Membership Expiry Date - Smaller */}
+                <Card className="col-span-1">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-blue-600" />
-                      Membership Expiry Date
+                    <CardTitle className="text-xs font-medium flex items-center gap-1">
+                      <Calendar className="h-3 w-3 text-blue-600" />
+                      Membership Expiry
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{profileData.membershipExpiryDate}</div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {client.subscriptionStatus === "active" ? "Active subscription" : "Subscription ended"}
-                    </p>
+                    <div className="text-lg font-bold">{profileData.membershipExpiryDate}</div>
                   </CardContent>
                 </Card>
 
-                {/* Advisors Assigned */}
-                <Card>
+                {/* Advisors Assigned - Larger */}
+                <Card className="col-span-2">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <Users className="h-4 w-4 text-green-600" />
+                    <CardTitle className="text-xs font-medium flex items-center gap-1">
+                      <Users className="h-3 w-3 text-green-600" />
                       Advisors Assigned
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{profileData.advisorsAssigned.length}</div>
-                    <div className="text-xs text-muted-foreground mt-1">
+                    <div className="text-lg font-bold mb-1">{profileData.advisorsAssigned.length}</div>
+                    <div className="text-xs text-muted-foreground grid grid-cols-2 gap-1">
                       {profileData.advisorsAssigned.map((advisor, index) => (
-                        <div key={index}>{advisor}</div>
+                        <div key={index} className="truncate">{advisor}</div>
                       ))}
                     </div>
                   </CardContent>
                 </Card>
 
-                {/* No. Of Calls Completed */}
-                <Card>
+                {/* Calls Completed - Smaller */}
+                <Card className="col-span-1">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-purple-600" />
-                      No. Of Calls Completed
+                    <CardTitle className="text-xs font-medium flex items-center gap-1">
+                      <Phone className="h-3 w-3 text-purple-600" />
+                      Calls
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{profileData.callsCompleted}</div>
-                    <p className="text-xs text-muted-foreground mt-1">Total calls this year</p>
+                    <div className="text-lg font-bold">{profileData.callsCompleted}</div>
+                    <p className="text-xs text-muted-foreground">completed</p>
                   </CardContent>
                 </Card>
 
-                {/* Days Since Last Call */}
-                <Card>
+                {/* Days Since Last Call - Smaller */}
+                <Card className="col-span-1">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-orange-600" />
-                      Days Since Last Call
+                    <CardTitle className="text-xs font-medium flex items-center gap-1">
+                      <Clock className="h-3 w-3 text-orange-600" />
+                      Last Call
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className={`text-2xl font-bold ${client.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
+                    <div className={`text-lg font-bold ${client.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
                       {client.daysSinceLastCall}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {client.daysSinceLastCall > 30 ? "Requires attention" : "Recent contact"}
-                    </p>
+                    <p className="text-xs text-muted-foreground">days ago</p>
                   </CardContent>
                 </Card>
 
-                {/* Number of Tasks Pending */}
-                <Card>
+                {/* Tasks Pending - Smaller */}
+                <Card className="col-span-1">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <CheckSquare className="h-4 w-4 text-blue-600" />
-                      Number of Tasks Pending
+                    <CardTitle className="text-xs font-medium flex items-center gap-1">
+                      <CheckSquare className="h-3 w-3 text-blue-600" />
+                      Pending
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{profileData.tasksPending}</div>
-                    <p className="text-xs text-muted-foreground mt-1">Active tasks</p>
-                  </CardContent>
-                </Card>
-
-                {/* Number of Tasks Overdue */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-red-600" />
-                      Number of Tasks Overdue
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold text-red-600">{profileData.tasksOverdue}</div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {profileData.tasksOverdue > 0 ? "Needs immediate attention" : "All tasks on track"}
-                    </p>
+                    <div className="text-lg font-bold">{profileData.tasksPending}</div>
+                    <p className="text-xs text-muted-foreground">tasks</p>
                   </CardContent>
                 </Card>
               </div>
+
+              {/* Recent Bookings Table */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Recent Bookings</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="max-h-[300px] overflow-y-auto">
+                    <table className="w-full">
+                      <thead className="sticky top-0 bg-background border-b">
+                        <tr>
+                          <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-2">Advisor</th>
+                          <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-2">Date</th>
+                          <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-2">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {recentBookings.map((booking) => (
+                          <tr key={booking.id} className="hover:bg-muted/50">
+                            <td className="py-3 text-sm">{booking.advisor}</td>
+                            <td className="py-3 text-sm">{booking.date}</td>
+                            <td className="py-3">
+                              <StatusBadge
+                                variant={
+                                  booking.status === "completed" ? "success" :
+                                  booking.status === "cancelled" ? "danger" :
+                                  "warning"
+                                }
+                              >
+                                {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                              </StatusBadge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="notes" className="mt-0">
@@ -237,21 +334,6 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
             </TabsContent>
           </div>
         </Tabs>
-
-        {/* Footer */}
-        <div className="flex justify-between items-center p-6 border-t bg-muted/20">
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-          <div className="flex gap-2">
-            <Button variant="outline">
-              Edit Profile
-            </Button>
-            <Button>
-              Schedule Call
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );
