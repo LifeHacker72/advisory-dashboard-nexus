@@ -8,6 +8,7 @@ import { ClientProfileHeader } from "./ClientProfileHeader";
 import { ClientBioSection } from "./ClientBioSection";
 import { ClientMetricsGrid } from "./ClientMetricsGrid";
 import { ClientRecentBookings } from "./ClientRecentBookings";
+import { ClientNotesSection } from "./ClientNotesSection";
 
 interface ClientProfileProps {
   client: Client;
@@ -29,6 +30,7 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
           <TabsList className="mx-6 mt-4 w-fit">
             <TabsTrigger value="summary">Summary View</TabsTrigger>
+            <TabsTrigger value="bookings">Recent Bookings</TabsTrigger>
             <TabsTrigger value="notes">Meeting Notes</TabsTrigger>
             <TabsTrigger value="tasks">Pending Tasks</TabsTrigger>
             <TabsTrigger value="info">General Info</TabsTrigger>
@@ -36,8 +38,23 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
 
           <div className="flex-1 overflow-auto p-6">
             <TabsContent value="summary" className="mt-0 space-y-6">
+              {/* Client Bio at the top */}
               <ClientBioSection />
-              <ClientMetricsGrid client={client} />
+              
+              {/* Main content area with Client Notes on left and Stats on right */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[400px]">
+                {/* Left side - Client Notes */}
+                <ClientNotesSection />
+                
+                {/* Right side - Stats Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Stats</h3>
+                  <ClientMetricsGrid client={client} />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="bookings" className="mt-0">
               <ClientRecentBookings client={client} />
             </TabsContent>
 
