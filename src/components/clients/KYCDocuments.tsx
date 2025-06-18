@@ -78,42 +78,43 @@ export function KYCDocuments() {
   return (
     <>
       <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">KYC Documents</CardTitle>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm">KYC Documents</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* PAN Card Section */}
-            <div className="border rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium">PAN Card</h4>
+            <div className="border rounded-lg p-2">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="text-xs font-medium">PAN Card</h4>
                 <Button 
                   onClick={() => handleUpload("PAN")} 
                   size="sm"
                   variant={panDocument ? "outline" : "default"}
+                  className="h-6 px-2 text-xs"
                 >
-                  <Upload className="h-3 w-3 mr-1" />
+                  <Upload className="h-2 w-2 mr-1" />
                   {panDocument ? "Replace" : "Upload"}
                 </Button>
               </div>
               
               {panDocument ? (
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="flex items-center justify-between p-1.5 bg-gray-50 rounded">
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
                     {getDocumentIcon(panDocument.fileType)}
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium truncate">{panDocument.fileName}</p>
+                      <p className="text-xs font-medium truncate">{panDocument.fileName}</p>
                       <p className="text-xs text-muted-foreground">
-                        Uploaded: {panDocument.uploadedAt}
+                        {panDocument.uploadedAt}
                       </p>
                     </div>
                   </div>
-                  <div className="flex gap-1 flex-shrink-0">
-                    <Button variant="ghost" size="sm" onClick={() => handleView(panDocument)}>
-                      <Eye className="h-3 w-3" />
+                  <div className="flex gap-0.5 flex-shrink-0">
+                    <Button variant="ghost" size="sm" onClick={() => handleView(panDocument)} className="h-5 w-5 p-0">
+                      <Eye className="h-2.5 w-2.5" />
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(panDocument.id)}>
-                      <Trash2 className="h-3 w-3" />
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(panDocument.id)} className="h-5 w-5 p-0">
+                      <Trash2 className="h-2.5 w-2.5" />
                     </Button>
                   </div>
                 </div>
@@ -123,36 +124,37 @@ export function KYCDocuments() {
             </div>
 
             {/* Aadhaar Card Section */}
-            <div className="border rounded-lg p-3">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium">Aadhaar Card</h4>
+            <div className="border rounded-lg p-2">
+              <div className="flex items-center justify-between mb-1">
+                <h4 className="text-xs font-medium">Aadhaar Card</h4>
                 <Button 
                   onClick={() => handleUpload("Aadhaar")} 
                   size="sm"
                   variant={aadhaarDocument ? "outline" : "default"}
+                  className="h-6 px-2 text-xs"
                 >
-                  <Upload className="h-3 w-3 mr-1" />
+                  <Upload className="h-2 w-2 mr-1" />
                   {aadhaarDocument ? "Replace" : "Upload"}
                 </Button>
               </div>
               
               {aadhaarDocument ? (
-                <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="flex items-center justify-between p-1.5 bg-gray-50 rounded">
+                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
                     {getDocumentIcon(aadhaarDocument.fileType)}
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium truncate">{aadhaarDocument.fileName}</p>
+                      <p className="text-xs font-medium truncate">{aadhaarDocument.fileName}</p>
                       <p className="text-xs text-muted-foreground">
-                        Uploaded: {aadhaarDocument.uploadedAt}
+                        {aadhaarDocument.uploadedAt}
                       </p>
                     </div>
                   </div>
-                  <div className="flex gap-1 flex-shrink-0">
-                    <Button variant="ghost" size="sm" onClick={() => handleView(aadhaarDocument)}>
-                      <Eye className="h-3 w-3" />
+                  <div className="flex gap-0.5 flex-shrink-0">
+                    <Button variant="ghost" size="sm" onClick={() => handleView(aadhaarDocument)} className="h-5 w-5 p-0">
+                      <Eye className="h-2.5 w-2.5" />
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(aadhaarDocument.id)}>
-                      <Trash2 className="h-3 w-3" />
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(aadhaarDocument.id)} className="h-5 w-5 p-0">
+                      <Trash2 className="h-2.5 w-2.5" />
                     </Button>
                   </div>
                 </div>

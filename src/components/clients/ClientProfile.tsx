@@ -122,8 +122,12 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
                     </CardContent>
                   </Card>
 
-                  <RiskProfileResponses />
-                  <AdvisoryAgreement />
+                  {/* Risk Profile and Advisory Agreement side by side */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <RiskProfileResponses />
+                    <AdvisoryAgreement />
+                  </div>
+
                   <KYCDocuments />
                 </div>
               </ScrollArea>
