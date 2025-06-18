@@ -95,46 +95,46 @@ export function AdvisoryAgreement() {
   return (
     <>
       <Card>
-        <CardHeader className="pb-4">
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Advisory Agreement</CardTitle>
+            <CardTitle className="text-base">Advisory Agreement</CardTitle>
             <Button onClick={handleAdd} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add New
+              <Plus className="h-3 w-3 mr-1" />
+              Add
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
+        <CardContent className="pt-0">
+          <div className="space-y-2">
             {agreements.map((agreement) => (
-              <div key={agreement.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-blue-600" />
-                  <div>
-                    <p className="font-medium">{agreement.name}</p>
-                    <p className="text-sm text-muted-foreground">Uploaded: {agreement.uploadedAt}</p>
+              <div key={agreement.id} className="flex items-center justify-between p-2 border rounded-lg">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium truncate">{agreement.name}</p>
+                    <p className="text-xs text-muted-foreground">Uploaded: {agreement.uploadedAt}</p>
                     {agreement.url && (
                       <a 
                         href={agreement.url} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                        className="text-xs text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
                       >
-                        <ExternalLink className="h-3 w-3" />
+                        <ExternalLink className="h-2 w-2" />
                         View Online
                       </a>
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1 flex-shrink-0">
                   <Button variant="ghost" size="sm" onClick={() => handleDownload(agreement)}>
-                    <Download className="h-4 w-4" />
+                    <Download className="h-3 w-3" />
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => handleEdit(agreement)}>
-                    <Edit3 className="h-4 w-4" />
+                    <Edit3 className="h-3 w-3" />
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => handleDelete(agreement.id)}>
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>

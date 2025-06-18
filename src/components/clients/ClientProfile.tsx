@@ -1,6 +1,8 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Client } from "@/types/client";
 import { ClientProfileHeader } from "./ClientProfileHeader";
@@ -36,85 +38,95 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
             <TabsTrigger value="info">General Info</TabsTrigger>
           </TabsList>
 
-          <div className="flex-1 overflow-auto p-6">
-            <TabsContent value="summary" className="mt-0 space-y-6">
-              <ClientBioSection />
-              <ClientMetricsGrid client={client} />
-              <ClientRecentBookings client={client} />
+          <div className="flex-1 overflow-hidden">
+            <TabsContent value="summary" className="mt-0 h-full">
+              <div className="p-6 space-y-6 h-full overflow-auto">
+                <ClientBioSection />
+                <ClientMetricsGrid client={client} />
+                <ClientRecentBookings client={client} />
+              </div>
             </TabsContent>
 
-            <TabsContent value="notes" className="mt-0">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Meeting Notes</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Meeting notes functionality will be implemented here.</p>
-                </CardContent>
-              </Card>
+            <TabsContent value="notes" className="mt-0 h-full">
+              <div className="p-6 h-full">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Meeting Notes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">Meeting notes functionality will be implemented here.</p>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
-            <TabsContent value="tasks" className="mt-0">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Pending Tasks</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">Pending tasks functionality will be implemented here.</p>
-                </CardContent>
-              </Card>
+            <TabsContent value="tasks" className="mt-0 h-full">
+              <div className="p-6 h-full">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Pending Tasks</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">Pending tasks functionality will be implemented here.</p>
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
-            <TabsContent value="info" className="mt-0 space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>General Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-2">Contact Information</h4>
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-3 gap-2">
-                          <p className="text-sm font-medium">Email:</p>
-                          <p className="text-sm col-span-2">{client.email}</p>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2">
-                          <p className="text-sm font-medium">Phone:</p>
-                          <p className="text-sm col-span-2">{client.phone}</p>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-medium text-muted-foreground mb-2">Subscription Details</h4>
-                      <div className="space-y-2">
-                        <div className="grid grid-cols-3 gap-2">
-                          <p className="text-sm font-medium">Status:</p>
-                          <div className="col-span-2">
-                            <StatusBadge
-                              variant={
-                                client.subscriptionStatus === "active" ? "success" :
-                                client.subscriptionStatus === "expired" ? "danger" :
-                                "warning"
-                              }
-                            >
-                              {client.subscriptionStatus.charAt(0).toUpperCase() + client.subscriptionStatus.slice(1)}
-                            </StatusBadge>
+            <TabsContent value="info" className="mt-0 h-full">
+              <ScrollArea className="h-full">
+                <div className="p-6 space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>General Information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-2">Contact Information</h4>
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-3 gap-2">
+                              <p className="text-sm font-medium">Email:</p>
+                              <p className="text-sm col-span-2">{client.email}</p>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              <p className="text-sm font-medium">Phone:</p>
+                              <p className="text-sm col-span-2">{client.phone}</p>
+                            </div>
                           </div>
                         </div>
-                        <div className="grid grid-cols-3 gap-2">
-                          <p className="text-sm font-medium">Subscription Date:</p>
-                          <p className="text-sm col-span-2">{client.subscriptionDate}</p>
+                        <div>
+                          <h4 className="text-sm font-medium text-muted-foreground mb-2">Subscription Details</h4>
+                          <div className="space-y-2">
+                            <div className="grid grid-cols-3 gap-2">
+                              <p className="text-sm font-medium">Status:</p>
+                              <div className="col-span-2">
+                                <StatusBadge
+                                  variant={
+                                    client.subscriptionStatus === "active" ? "success" :
+                                    client.subscriptionStatus === "expired" ? "danger" :
+                                    "warning"
+                                  }
+                                >
+                                  {client.subscriptionStatus.charAt(0).toUpperCase() + client.subscriptionStatus.slice(1)}
+                                </StatusBadge>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              <p className="text-sm font-medium">Subscription Date:</p>
+                              <p className="text-sm col-span-2">{client.subscriptionDate}</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    </CardContent>
+                  </Card>
 
-              <RiskProfileResponses />
-              <AdvisoryAgreement />
-              <KYCDocuments />
+                  <RiskProfileResponses />
+                  <AdvisoryAgreement />
+                  <KYCDocuments />
+                </div>
+              </ScrollArea>
             </TabsContent>
           </div>
         </Tabs>

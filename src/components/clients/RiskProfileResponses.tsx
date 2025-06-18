@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -155,13 +154,13 @@ export function RiskProfileResponses() {
   return (
     <>
       <Card>
-        <CardHeader className="pb-4">
+        <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-lg">Risk Profile Responses</CardTitle>
+              <CardTitle className="text-base">Risk Profile Responses</CardTitle>
               {latestProfile && (
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-sm text-muted-foreground">Current Profile:</span>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-xs text-muted-foreground">Current:</span>
                   <Badge 
                     variant={
                       latestProfile.riskProfile === "Conservative" ? "secondary" :
@@ -175,20 +174,19 @@ export function RiskProfileResponses() {
               )}
             </div>
             <Button onClick={handleAdd} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add New
+              <Plus className="h-3 w-3 mr-1" />
+              Add
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
+        <CardContent className="pt-0">
+          <div className="space-y-2">
             {profiles.map((profile) => (
-              <div key={profile.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex items-center gap-3">
+              <div key={profile.id} className="flex items-center justify-between p-2 border rounded-lg">
+                <div className="flex items-center gap-2">
                   <div>
-                    <p className="font-medium">{profile.submittedAt}</p>
+                    <p className="text-sm font-medium">{profile.submittedAt}</p>
                     <Badge 
-                      size="sm"
                       variant={
                         profile.riskProfile === "Conservative" ? "secondary" :
                         profile.riskProfile === "Moderate" ? "default" : 
@@ -199,15 +197,15 @@ export function RiskProfileResponses() {
                     </Badge>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <Button variant="ghost" size="sm" onClick={() => handleView(profile)}>
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-3 w-3" />
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => handleEdit(profile)}>
-                    <Edit3 className="h-4 w-4" />
+                    <Edit3 className="h-3 w-3" />
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => handleDelete(profile.id)}>
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
