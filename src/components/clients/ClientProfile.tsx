@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,6 +7,9 @@ import { ClientProfileHeader } from "./ClientProfileHeader";
 import { ClientBioSection } from "./ClientBioSection";
 import { ClientMetricsGrid } from "./ClientMetricsGrid";
 import { ClientRecentBookings } from "./ClientRecentBookings";
+import { RiskProfileResponses } from "./RiskProfileResponses";
+import { AdvisoryAgreement } from "./AdvisoryAgreement";
+import { KYCDocuments } from "./KYCDocuments";
 
 interface ClientProfileProps {
   client: Client;
@@ -63,7 +65,7 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
               </Card>
             </TabsContent>
 
-            <TabsContent value="info" className="mt-0">
+            <TabsContent value="info" className="mt-0 space-y-6">
               <Card>
                 <CardHeader>
                   <CardTitle>General Information</CardTitle>
@@ -109,6 +111,10 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
                   </div>
                 </CardContent>
               </Card>
+
+              <RiskProfileResponses />
+              <AdvisoryAgreement />
+              <KYCDocuments />
             </TabsContent>
           </div>
         </Tabs>
