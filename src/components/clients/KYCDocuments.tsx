@@ -132,7 +132,7 @@ export function KYCDocuments() {
                   variant={aadhaarDocument ? "outline" : "default"}
                 >
                   <Upload className="h-4 w-4 mr-2" />
-                  {aadhaarDocument ? "Replace" : "Uploa
+                  {aadhaarDocument ? "Replace" : "Upload"}
                 </Button>
               </div>
               
