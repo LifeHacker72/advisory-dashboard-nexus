@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Download, Edit3, Trash2, Plus, FileText, ExternalLink } from "lucide-react";
+import { Download, Edit3, Trash2, Plus, FileText, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 
 interface Agreement {
   id: number;
@@ -36,6 +35,7 @@ export function AdvisoryAgreement() {
   const [agreements, setAgreements] = useState<Agreement[]>(mockAgreements);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingAgreement, setEditingAgreement] = useState<Agreement | null>(null);
+  const [showOlder, setShowOlder] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     url: "",
@@ -92,26 +92,29 @@ export function AdvisoryAgreement() {
     }
   };
 
+  const sortedAgreements = agreements.sort((a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime());
+  const displayedAgreements = showOlder ? sortedAgreements : sortedAgreements.slice(0, 1);
+
   return (
     <>
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Advisory Agreement</CardTitle>
-            <Button onClick={handleAdd} size="sm">
+            <CardTitle className="text-sm">Advisory Agreement</CardTitle>
+            <Button onClick={handleAdd} size="sm" className="h-7 px-2 text-xs">
               <Plus className="h-3 w-3 mr-1" />
               Add
             </Button>
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="space-y-2">
-            {agreements.map((agreement) => (
-              <div key={agreement.id} className="flex items-center justify-between p-2 border rounded-lg">
+          <div className="space-y-1">
+            {displayedAgreements.map((agreement) => (
+              <div key={agreement.id} className="flex items-center justify-between p-1.5 border rounded">
                 <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <FileText className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                  <FileText className="h-3 w-3 text-blue-600 flex-shrink-0" />
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate">{agreement.name}</p>
+                    <p className="text-xs font-medium truncate">{agreement.name}</p>
                     <p className="text-xs text-muted-foreground">Uploaded: {agreement.uploadedAt}</p>
                     {agreement.url && (
                       <a 
@@ -127,19 +130,42 @@ export function AdvisoryAgreement() {
                   </div>
                 </div>
                 <div className="flex gap-1 flex-shrink-0">
-                  <Button variant="ghost" size="sm" onClick={() => handleDownload(agreement)}>
+                  <Button variant="ghost" size="sm" onClick={() => handleDownload(agreement)} className="h-6 w-6 p-0">
                     <Download className="h-3 w-3" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleEdit(agreement)}>
+                  <Button variant="ghost" size="sm" onClick={() => handleEdit(agreement)} className="h-6 w-6 p-0">
                     <Edit3 className="h-3 w-3" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(agreement.id)}>
+                  <Button variant="ghost" size="sm" onClick={() => handleDelete(agreement.id)} className="h-6 w-6 p-0">
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
             ))}
           </div>
+
+          {agreements.length > 1 && (
+            <div className="flex justify-end mt-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowOlder(!showOlder)}
+                className="h-6 px-2 text-xs"
+              >
+                {showOlder ? (
+                  <>
+                    <ChevronUp className="h-3 w-3 mr-1" />
+                    View Less
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-3 w-3 mr-1" />
+                    View Older
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Edit3, Trash2, Plus } from "lucide-react";
+import { Eye, Edit3, Trash2, Plus, ChevronDown, ChevronUp } from "lucide-react";
 import { RiskProfileDialog } from "./RiskProfileDialog";
 
 interface RiskProfileResponse {
@@ -116,6 +116,7 @@ export function RiskProfileResponses() {
   const [selectedProfile, setSelectedProfile] = useState<RiskProfileResponse | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [showOlder, setShowOlder] = useState(false);
 
   const handleView = (profile: RiskProfileResponse) => {
     setSelectedProfile(profile);
@@ -149,15 +150,17 @@ export function RiskProfileResponses() {
     setIsDialogOpen(false);
   };
 
-  const latestProfile = profiles.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())[0];
+  const sortedProfiles = profiles.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+  const latestProfile = sortedProfiles[0];
+  const displayedProfiles = showOlder ? sortedProfiles : sortedProfiles.slice(0, 1);
 
   return (
     <>
       <Card>
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-base">Risk Profile Responses</CardTitle>
+              <CardTitle className="text-sm">Risk Profile Responses</CardTitle>
               {latestProfile && (
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs text-muted-foreground">Current:</span>
@@ -173,44 +176,68 @@ export function RiskProfileResponses() {
                 </div>
               )}
             </div>
-            <Button onClick={handleAdd} size="sm">
+            <Button onClick={handleAdd} size="sm" className="h-7 px-2 text-xs">
               <Plus className="h-3 w-3 mr-1" />
               Add
             </Button>
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="space-y-2">
-            {profiles.map((profile) => (
-              <div key={profile.id} className="flex items-center justify-between p-2 border rounded-lg">
+          <div className="space-y-1">
+            {displayedProfiles.map((profile) => (
+              <div key={profile.id} className="flex items-center justify-between p-1.5 border rounded text-xs">
                 <div className="flex items-center gap-2">
                   <div>
-                    <p className="text-sm font-medium">{profile.submittedAt}</p>
+                    <p className="font-medium">{profile.submittedAt}</p>
                     <Badge 
                       variant={
                         profile.riskProfile === "Conservative" ? "secondary" :
                         profile.riskProfile === "Moderate" ? "default" : 
                         "destructive"
                       }
+                      className="text-xs px-1 py-0"
                     >
                       {profile.riskProfile}
                     </Badge>
                   </div>
                 </div>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" onClick={() => handleView(profile)}>
+                  <Button variant="ghost" size="sm" onClick={() => handleView(profile)} className="h-6 w-6 p-0">
                     <Eye className="h-3 w-3" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleEdit(profile)}>
+                  <Button variant="ghost" size="sm" onClick={() => handleEdit(profile)} className="h-6 w-6 p-0">
                     <Edit3 className="h-3 w-3" />
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(profile.id)}>
+                  <Button variant="ghost" size="sm" onClick={() => handleDelete(profile.id)} className="h-6 w-6 p-0">
                     <Trash2 className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
             ))}
           </div>
+          
+          {profiles.length > 1 && (
+            <div className="flex justify-end mt-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setShowOlder(!showOlder)}
+                className="h-6 px-2 text-xs"
+              >
+                {showOlder ? (
+                  <>
+                    <ChevronUp className="h-3 w-3 mr-1" />
+                    View Less
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-3 w-3 mr-1" />
+                    View Older
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
