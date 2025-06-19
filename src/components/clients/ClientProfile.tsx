@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,6 +20,21 @@ interface ClientProfileProps {
 
 export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
   const [activeTab, setActiveTab] = useState("summary");
+
+  useEffect(() => {
+    if (isOpen) {
+      // Disable scrolling on body when popup is open
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Re-enable scrolling when popup is closed
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup function to ensure scrolling is re-enabled when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
