@@ -40,37 +40,43 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
 
           <div className="flex-1 overflow-hidden">
             <TabsContent value="summary" className="mt-0 h-full">
-              <div className="p-6 space-y-6 h-full overflow-auto">
-                <ClientBioSection />
-                <ClientMetricsGrid client={client} />
-                <ClientRecentBookings client={client} />
-              </div>
+              <ScrollArea className="h-full">
+                <div className="p-6 space-y-6">
+                  <ClientBioSection />
+                  <ClientMetricsGrid client={client} />
+                  <ClientRecentBookings client={client} />
+                </div>
+              </ScrollArea>
             </TabsContent>
 
             <TabsContent value="notes" className="mt-0 h-full">
-              <div className="p-6 h-full">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Meeting Notes</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">Meeting notes functionality will be implemented here.</p>
-                  </CardContent>
-                </Card>
-              </div>
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Meeting Notes</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground">Meeting notes functionality will be implemented here.</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </ScrollArea>
             </TabsContent>
 
             <TabsContent value="tasks" className="mt-0 h-full">
-              <div className="p-6 h-full">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Pending Tasks</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground">Pending tasks functionality will be implemented here.</p>
-                  </CardContent>
-                </Card>
-              </div>
+              <ScrollArea className="h-full">
+                <div className="p-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Pending Tasks</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-muted-foreground">Pending tasks functionality will be implemented here.</p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </ScrollArea>
             </TabsContent>
 
             <TabsContent value="info" className="mt-0 h-full">
