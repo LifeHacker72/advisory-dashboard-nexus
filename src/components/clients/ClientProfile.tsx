@@ -27,7 +27,22 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl max-h-[90vh] p-0 overflow-hidden">
         <div className="flex flex-col h-full max-h-[90vh]">
-          <ClientProfileHeader client={client} onClose={onClose} />
+          {/* Header without close button since Dialog already has one */}
+          <div className="flex items-center gap-4 p-6 border-b">
+            <div>
+              <h2 className="text-2xl font-bold">{client.name}</h2>
+              <p className="text-muted-foreground">{client.email}</p>
+            </div>
+            <StatusBadge
+              variant={
+                client.subscriptionStatus === "active" ? "success" :
+                client.subscriptionStatus === "expired" ? "danger" :
+                "warning"
+              }
+            >
+              {client.subscriptionStatus.charAt(0).toUpperCase() + client.subscriptionStatus.slice(1)}
+            </StatusBadge>
+          </div>
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden min-h-0">

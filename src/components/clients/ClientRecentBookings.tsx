@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/StatusBadge";
-import { X } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { Client } from "@/types/client";
 
 interface ClientRecentBookingsProps {
@@ -25,37 +25,38 @@ export function ClientRecentBookings({ client }: ClientRecentBookingsProps) {
     { id: 8, advisor: "Sarah Johnson", date: "2023-12-25", status: "completed" },
   ];
 
-  return (
-    <>
+  if (showAllBookings) {
+    return (
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-lg">Recent Bookings</CardTitle>
-            <Button 
-              variant="outline" 
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
               size="sm"
-              onClick={() => setShowAllBookings(true)}
+              onClick={() => setShowAllBookings(false)}
+              className="h-8 w-8 p-0"
             >
-              View All
+              <ChevronLeft className="h-4 w-4" />
             </Button>
+            <CardTitle className="text-lg">All Bookings - {client.name}</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="min-h-[180px] overflow-y-auto">
+          <div className="max-h-[400px] overflow-y-auto">
             <table className="w-full">
               <thead className="sticky top-0 bg-background border-b">
                 <tr>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-2">Advisor</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-2">Date</th>
-                  <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-2">Status</th>
+                  <th className="text-left text-sm font-medium text-muted-foreground uppercase tracking-wider py-3">Advisor</th>
+                  <th className="text-left text-sm font-medium text-muted-foreground uppercase tracking-wider py-3">Date</th>
+                  <th className="text-left text-sm font-medium text-muted-foreground uppercase tracking-wider py-3">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {recentBookings.slice(0, 3).map((booking) => (
+                {recentBookings.map((booking) => (
                   <tr key={booking.id} className="hover:bg-muted/50">
-                    <td className="py-3 text-sm">{booking.advisor}</td>
-                    <td className="py-3 text-sm">{booking.date}</td>
-                    <td className="py-3">
+                    <td className="py-4 text-sm">{booking.advisor}</td>
+                    <td className="py-4 text-sm">{booking.date}</td>
+                    <td className="py-4">
                       <StatusBadge
                         variant={
                           booking.status === "completed" ? "success" :
@@ -73,55 +74,55 @@ export function ClientRecentBookings({ client }: ClientRecentBookingsProps) {
           </div>
         </CardContent>
       </Card>
+    );
+  }
 
-      {/* View All Bookings Modal */}
-      {showAllBookings && (
-        <div className="fixed inset-0 z-60 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-background rounded-lg shadow-xl w-full max-w-4xl h-[70vh] flex flex-col">
-            <div className="flex items-center justify-between p-6 border-b">
-              <h3 className="text-xl font-bold">All Bookings - {client.name}</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowAllBookings(false)}
-                className="h-8 w-8 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="flex-1 overflow-auto p-6">
-              <table className="w-full">
-                <thead className="sticky top-0 bg-background border-b">
-                  <tr>
-                    <th className="text-left text-sm font-medium text-muted-foreground uppercase tracking-wider py-3">Advisor</th>
-                    <th className="text-left text-sm font-medium text-muted-foreground uppercase tracking-wider py-3">Date</th>
-                    <th className="text-left text-sm font-medium text-muted-foreground uppercase tracking-wider py-3">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {recentBookings.map((booking) => (
-                    <tr key={booking.id} className="hover:bg-muted/50">
-                      <td className="py-4 text-sm">{booking.advisor}</td>
-                      <td className="py-4 text-sm">{booking.date}</td>
-                      <td className="py-4">
-                        <StatusBadge
-                          variant={
-                            booking.status === "completed" ? "success" :
-                            booking.status === "cancelled" ? "danger" :
-                            "warning"
-                          }
-                        >
-                          {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                        </StatusBadge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">Recent Bookings</CardTitle>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowAllBookings(true)}
+          >
+            View All
+          </Button>
         </div>
-      )}
-    </>
+      </CardHeader>
+      <CardContent>
+        <div className="min-h-[180px] overflow-y-auto">
+          <table className="w-full">
+            <thead className="sticky top-0 bg-background border-b">
+              <tr>
+                <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-2">Advisor</th>
+                <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-2">Date</th>
+                <th className="text-left text-xs font-medium text-muted-foreground uppercase tracking-wider py-2">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {recentBookings.slice(0, 3).map((booking) => (
+                <tr key={booking.id} className="hover:bg-muted/50">
+                  <td className="py-3 text-sm">{booking.advisor}</td>
+                  <td className="py-3 text-sm">{booking.date}</td>
+                  <td className="py-3">
+                    <StatusBadge
+                      variant={
+                        booking.status === "completed" ? "success" :
+                        booking.status === "cancelled" ? "danger" :
+                        "warning"
+                      }
+                    >
+                      {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                    </StatusBadge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
