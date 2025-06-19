@@ -25,21 +25,21 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 overflow-hidden">
       <div className="bg-background rounded-lg shadow-xl w-full max-w-7xl h-[90vh] flex flex-col overflow-hidden">
         <ClientProfileHeader client={client} onClose={onClose} />
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-          <TabsList className="mx-6 mt-4 w-fit">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+          <TabsList className="mx-6 mt-4 w-fit flex-shrink-0">
             <TabsTrigger value="summary">Summary View</TabsTrigger>
             <TabsTrigger value="notes">Meeting Notes</TabsTrigger>
             <TabsTrigger value="tasks">Pending Tasks</TabsTrigger>
             <TabsTrigger value="info">General Info</TabsTrigger>
           </TabsList>
 
-          <div className="flex-1 overflow-hidden">
-            <TabsContent value="summary" className="mt-0 h-full">
+          <div className="flex-1 overflow-hidden min-h-0">
+            <TabsContent value="summary" className="mt-0 h-full overflow-hidden">
               <ScrollArea className="h-full">
                 <div className="p-6 space-y-6">
                   <ClientBioSection />
@@ -49,7 +49,7 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
               </ScrollArea>
             </TabsContent>
 
-            <TabsContent value="notes" className="mt-0 h-full">
+            <TabsContent value="notes" className="mt-0 h-full overflow-hidden">
               <ScrollArea className="h-full">
                 <div className="p-6">
                   <Card>
@@ -64,7 +64,7 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
               </ScrollArea>
             </TabsContent>
 
-            <TabsContent value="tasks" className="mt-0 h-full">
+            <TabsContent value="tasks" className="mt-0 h-full overflow-hidden">
               <ScrollArea className="h-full">
                 <div className="p-6">
                   <Card>
@@ -79,7 +79,7 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
               </ScrollArea>
             </TabsContent>
 
-            <TabsContent value="info" className="mt-0 h-full">
+            <TabsContent value="info" className="mt-0 h-full overflow-hidden">
               <ScrollArea className="h-full">
                 <div className="p-6 space-y-4">
                   <Card>
