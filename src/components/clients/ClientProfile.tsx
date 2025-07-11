@@ -13,6 +13,7 @@ import { ClientRecentBookings } from "./ClientRecentBookings";
 import { RiskProfileResponses } from "./RiskProfileResponses";
 import { AdvisoryAgreement } from "./AdvisoryAgreement";
 import { KYCDocuments } from "./KYCDocuments";
+import { FRDDocument } from "./FRDDocument";
 
 interface ClientProfileProps {
   client: Client;
@@ -48,6 +49,7 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
             <TabsList className="mx-6 mt-4 w-fit flex-shrink-0">
               <TabsTrigger value="summary">Summary View</TabsTrigger>
+              <TabsTrigger value="frd">FRD</TabsTrigger>
               <TabsTrigger value="notes">Meeting Notes</TabsTrigger>
               <TabsTrigger value="tasks">Pending Tasks</TabsTrigger>
               <TabsTrigger value="info">General Info</TabsTrigger>
@@ -60,6 +62,14 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
                     <ClientBioSection />
                     <ClientMetricsGrid client={client} />
                     <ClientRecentBookings client={client} />
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+
+              <TabsContent value="frd" className="mt-0 h-full overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col">
+                <ScrollArea className="flex-1">
+                  <div className="p-6">
+                    <FRDDocument client={client} />
                   </div>
                 </ScrollArea>
               </TabsContent>
