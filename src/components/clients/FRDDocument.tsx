@@ -16,8 +16,9 @@ interface FRDDocumentProps {
   client: Client;
 }
 
-// Define the 7 subsections
+// Define the 7 subsections + overview
 const subsections = [
+  { id: "overview", title: "Overview", icon: FileText, color: "bg-slate-500" },
   { id: "financial", title: "Financial Planning", icon: TrendingUp, color: "bg-blue-500" },
   { id: "tax", title: "Tax Planning", icon: FileText, color: "bg-green-500" },
   { id: "insurance", title: "Insurance", icon: Shield, color: "bg-red-500" },
@@ -66,22 +67,54 @@ export function FRDDocument({ client }: FRDDocumentProps) {
     return "outline";
   };
 
-  if (selectedSubsection) {
+  if (selectedSubsection && selectedSubsection !== "overview") {
     const subsection = subsections.find(s => s.id === selectedSubsection);
     
     return (
       <div className="h-[70vh] flex flex-col">
-        {/* Fixed Tabs Header with proper spacing */}
-        <div className="border-b bg-background z-10 pb-2 pt-3 flex-shrink-0">
-          <Tabs value={selectedSubsection} onValueChange={setSelectedSubsection}>
-            <TabsList className="grid w-full grid-cols-7 h-8">
-              {subsections.map((subsection) => (
-                <TabsTrigger key={subsection.id} value={subsection.id} className="text-xs px-2">
-                  {subsection.title}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
+        {/* Client Name */}
+        <div className="flex-shrink-0 mb-3">
+          <h3 className="text-lg font-semibold">{client.name}</h3>
+        </div>
+
+        {/* Fixed Button Navigation */}
+        <div className="border-b bg-background z-10 pb-3 flex-shrink-0">
+          <div className="flex gap-1 overflow-x-auto pb-1">
+            {subsections.map((section) => {
+              const Icon = section.icon;
+              const taskCount = section.id === "overview" ? 0 : pendingTasks[section.id as keyof typeof pendingTasks];
+              const isActive = selectedSubsection === section.id;
+              const hasHighTasks = taskCount > 2;
+              const hasTasks = taskCount > 0;
+              
+              return (
+                <Button
+                  key={section.id} 
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "h-auto p-2 flex-1 min-w-0 text-xs",
+                    isActive && "border-[#2edebe] border-2 font-bold text-[#2edebe]",
+                    !isActive && hasHighTasks && "border-red-500/60 bg-red-50/50",
+                    !isActive && hasTasks && !hasHighTasks && "border-orange-400/60 bg-orange-50/50"
+                  )}
+                  onClick={() => setSelectedSubsection(section.id === "overview" ? null : section.id)}
+                >
+                  <div className="flex items-center gap-1.5 w-full justify-center">
+                    <div className={`p-0.5 rounded ${section.color} text-white flex-shrink-0`}>
+                      <Icon className="h-2.5 w-2.5" />
+                    </div>
+                    <div className="text-center min-w-0">
+                      <div className="text-xs font-medium leading-tight truncate">{section.title}</div>
+                      {taskCount > 0 && !isActive && (
+                        <div className="text-xs opacity-75 leading-tight">{taskCount} pending</div>
+                      )}
+                    </div>
+                  </div>
+                </Button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Scrollable Subsection Content */}
@@ -105,8 +138,8 @@ export function FRDDocument({ client }: FRDDocumentProps) {
 
       {/* Vertical Sections - Horizontal Line - Moved up */}
       <div className="flex-shrink-0">
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
-          {subsections.map((subsection) => {
+        <div className="flex gap-1 overflow-x-auto pb-1">
+          {subsections.slice(1).map((subsection) => {
             const Icon = subsection.icon;
             const taskCount = pendingTasks[subsection.id as keyof typeof pendingTasks];
             const hasHighTasks = taskCount > 2;
@@ -117,18 +150,18 @@ export function FRDDocument({ client }: FRDDocumentProps) {
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "h-auto p-2 flex-shrink-0 min-w-[85px] text-xs",
+                  "h-auto p-2 flex-1 min-w-0 text-xs",
                   hasHighTasks && "border-red-500/60 bg-red-50/50",
                   hasTasks && !hasHighTasks && "border-orange-400/60 bg-orange-50/50"
                 )}
                 onClick={() => setSelectedSubsection(subsection.id)}
               >
-                <div className="flex items-center gap-1.5">
-                  <div className={`p-0.5 rounded ${subsection.color} text-white`}>
+                <div className="flex items-center gap-1.5 w-full justify-center">
+                  <div className={`p-0.5 rounded ${subsection.color} text-white flex-shrink-0`}>
                     <Icon className="h-2.5 w-2.5" />
                   </div>
-                  <div className="text-left">
-                    <div className="text-xs font-medium leading-tight">{subsection.title}</div>
+                  <div className="text-center min-w-0">
+                    <div className="text-xs font-medium leading-tight truncate">{subsection.title}</div>
                     {taskCount > 0 && (
                       <div className="text-xs opacity-75 leading-tight">{taskCount} pending</div>
                     )}
