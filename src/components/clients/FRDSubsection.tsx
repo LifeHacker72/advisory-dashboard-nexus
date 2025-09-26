@@ -109,227 +109,283 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
     setAgendaItems(items => items.filter(item => item.id !== id));
   };
 
+  // Mock stats data
+  const stats = {
+    totalCalls: 8,
+    lastCallDate: new Date(2024, 8, 15),
+    daysSinceLastCall: 11
+  };
+
+  const toggleTaskCompletion = (id: string) => {
+    setTasks(tasks =>
+      tasks.map(task =>
+        task.id === id ? { ...task, status: task.status === 'completed' ? 'pending' : 'completed' } : task
+      )
+    );
+  };
+
+  // Sort agenda items: active first, completed last
+  const sortedAgendaItems = [...agendaItems].sort((a, b) => {
+    if (a.completed === b.completed) return 0;
+    return a.completed ? 1 : -1;
+  });
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Button variant="outline" onClick={onBack}>← Back</Button>
-        <div>
-          <h2 className="text-2xl font-semibold">{client.name} - {vertical}</h2>
-          <p className="text-muted-foreground">Financial planning vertical management</p>
+    <div className="grid grid-cols-2 gap-6 h-[60vh]">
+      {/* Left Column */}
+      <div className="space-y-4">
+        {/* Header */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={onBack}>← Back</Button>
+            <h3 className="text-lg font-semibold">{client.name} - {vertical}</h3>
+          </div>
         </div>
-      </div>
 
-      {/* Advisor Assignment */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5" />
-            Advisor(s) Assigned
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
-            {advisors.map((advisor, index) => (
-              <Badge key={index} variant="secondary">{advisor}</Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Tasks Section */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <ClipboardList className="h-5 w-5" />
-              Tasks Pending ({tasks.filter(t => t.status === 'pending').length})
+        {/* Advisor Assignment */}
+        <Card className="flex-shrink-0">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <User className="h-4 w-4" />
+              Advisor(s) Assigned
             </CardTitle>
-            <Button 
-              onClick={() => setShowAddTask(true)} 
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Add Task
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {tasks.map((task) => (
-              <div key={task.id} className="flex items-center justify-between p-3 border rounded-lg">
-                <div className="flex-1">
-                  <p className="font-medium">{task.title}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Action date: {format(task.actionDate, "PPP")}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant={task.status === 'completed' ? 'default' : 'secondary'}>
-                    {task.status}
-                  </Badge>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="flex gap-2">
+              {advisors.map((advisor, index) => (
+                <Badge key={index} variant="secondary" className="text-xs">{advisor}</Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tasks Section */}
+        <Card className="flex-1">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ClipboardList className="h-4 w-4" />
+                Tasks ({tasks.filter(t => t.status === 'pending').length} pending)
+              </CardTitle>
+              <Button 
+                onClick={() => setShowAddTask(true)} 
+                size="sm"
+                className="h-7 px-2 text-xs"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {tasks.map((task) => (
+                <div key={task.id} className="flex items-center justify-between p-2 border rounded text-sm">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        checked={task.status === 'completed'}
+                        onCheckedChange={() => toggleTaskCompletion(task.id)}
+                      />
+                      <span className={task.status === 'completed' ? 'line-through text-muted-foreground' : ''}>{task.title}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground ml-6">
+                      {format(task.actionDate, "dd MMM yyyy")}
+                    </p>
+                  </div>
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="h-6 w-6 p-0"
                     onClick={() => removeTask(task.id)}
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-3 w-3" />
                   </Button>
                 </div>
-              </div>
-            ))}
-            {tasks.length === 0 && (
-              <p className="text-center text-muted-foreground py-4">No tasks pending</p>
-            )}
-          </div>
+              ))}
+              {tasks.length === 0 && (
+                <p className="text-center text-muted-foreground py-4 text-sm">No tasks</p>
+              )}
+            </div>
 
-          {/* Add Task Form */}
-          {showAddTask && (
-            <div className="mt-4 p-4 border rounded-lg bg-muted/50">
-              <div className="space-y-4">
-                <div>
-                  <Label>Task</Label>
-                  <Select
-                    value={newTaskTitle}
-                    onValueChange={setNewTaskTitle}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select or type a task..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {taskOptions.map((option, index) => (
-                        <SelectItem key={index} value={option}>
-                          {option}
-                        </SelectItem>
-                      ))}
-                      <SelectItem value="custom">Custom Task</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {newTaskTitle === "custom" && (
-                    <Input
-                      className="mt-2"
-                      placeholder="Enter custom task..."
-                      onChange={(e) => setNewTaskTitle(e.target.value)}
-                    />
-                  )}
-                </div>
-                
-                <div>
-                  <Label>Action Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !newTaskDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {newTaskDate ? format(newTaskDate, "PPP") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={newTaskDate}
-                        onSelect={setNewTaskDate}
-                        initialFocus
+            {/* Add Task Form */}
+            {showAddTask && (
+              <div className="mt-3 p-3 border rounded bg-muted/50">
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-xs">Task</Label>
+                    <Select
+                      value={newTaskTitle}
+                      onValueChange={setNewTaskTitle}
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue placeholder="Select task..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {taskOptions.map((option, index) => (
+                          <SelectItem key={index} value={option} className="text-xs">
+                            {option}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="custom" className="text-xs">Custom Task</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    {newTaskTitle === "custom" && (
+                      <Input
+                        className="mt-2 h-8 text-xs"
+                        placeholder="Enter custom task..."
+                        onChange={(e) => setNewTaskTitle(e.target.value)}
                       />
-                    </PopoverContent>
-                  </Popover>
-                </div>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <Label className="text-xs">Action Date</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className={cn(
+                            "w-full justify-start text-left font-normal h-8 text-xs",
+                            !newTaskDate && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-3 w-3" />
+                          {newTaskDate ? format(newTaskDate, "dd MMM") : "Pick date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <Calendar
+                          mode="single"
+                          selected={newTaskDate}
+                          onSelect={setNewTaskDate}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
 
-                <div className="flex gap-2">
-                  <Button onClick={handleAddTask} size="sm">Add Task</Button>
-                  <Button 
-                    onClick={() => setShowAddTask(false)} 
-                    variant="outline" 
-                    size="sm"
-                  >
-                    Cancel
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button onClick={handleAddTask} size="sm" className="h-7 text-xs">Add</Button>
+                    <Button 
+                      onClick={() => setShowAddTask(false)} 
+                      variant="outline" 
+                      size="sm"
+                      className="h-7 text-xs"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Agenda Items */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5" />
-              Agenda Items ({agendaItems.filter(item => !item.completed).length} remaining)
-            </CardTitle>
-            <Button 
-              onClick={() => setShowAddAgenda(true)} 
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <Plus className="h-4 w-4" />
-              Add Item
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {agendaItems.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                <Checkbox
-                  checked={item.completed}
-                  onCheckedChange={() => toggleAgendaItem(item.id)}
-                />
-                <span className={cn(
-                  "flex-1",
-                  item.completed && "line-through text-muted-foreground"
-                )}>
-                  {item.title}
-                </span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeAgendaItem(item.id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-            {agendaItems.length === 0 && (
-              <p className="text-center text-muted-foreground py-4">No agenda items</p>
             )}
-          </div>
+          </CardContent>
+        </Card>
+      </div>
 
-          {/* Add Agenda Item Form */}
-          {showAddAgenda && (
-            <div className="mt-4 p-4 border rounded-lg bg-muted/50">
-              <div className="space-y-4">
-                <div>
-                  <Label>Agenda Item</Label>
-                  <Input
-                    value={newAgendaTitle}
-                    onChange={(e) => setNewAgendaTitle(e.target.value)}
-                    placeholder="Enter agenda item..."
+      {/* Right Column */}
+      <div className="space-y-4">
+        {/* Agenda Items - 60% height */}
+        <Card className="h-[60%]">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CheckCircle2 className="h-4 w-4" />
+                Agenda Items ({agendaItems.filter(item => !item.completed).length} active)
+              </CardTitle>
+              <Button 
+                onClick={() => setShowAddAgenda(true)} 
+                size="sm"
+                className="h-7 px-2 text-xs"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0 h-[calc(100%-4rem)] overflow-hidden">
+            <div className="space-y-2 h-full overflow-y-auto">
+              {sortedAgendaItems.map((item) => (
+                <div key={item.id} className="flex items-center gap-2 p-2 border rounded text-sm">
+                  <Checkbox
+                    checked={item.completed}
+                    onCheckedChange={() => toggleAgendaItem(item.id)}
                   />
-                </div>
-                <div className="flex gap-2">
-                  <Button onClick={handleAddAgendaItem} size="sm">Add Item</Button>
-                  <Button 
-                    onClick={() => setShowAddAgenda(false)} 
-                    variant="outline" 
+                  <span className={cn(
+                    "flex-1",
+                    item.completed && "line-through text-muted-foreground"
+                  )}>
+                    {item.title}
+                  </span>
+                  <Button
+                    variant="ghost"
                     size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => removeAgendaItem(item.id)}
                   >
-                    Cancel
+                    <X className="h-3 w-3" />
                   </Button>
                 </div>
+              ))}
+              {agendaItems.length === 0 && (
+                <p className="text-center text-muted-foreground py-4 text-sm">No agenda items</p>
+              )}
+            </div>
+
+            {/* Add Agenda Item Form */}
+            {showAddAgenda && (
+              <div className="mt-3 p-3 border rounded bg-muted/50">
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-xs">Agenda Item</Label>
+                    <Input
+                      value={newAgendaTitle}
+                      onChange={(e) => setNewAgendaTitle(e.target.value)}
+                      placeholder="Enter agenda item..."
+                      className="h-8 text-xs"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={handleAddAgendaItem} size="sm" className="h-7 text-xs">Add</Button>
+                    <Button 
+                      onClick={() => setShowAddAgenda(false)} 
+                      variant="outline" 
+                      size="sm"
+                      className="h-7 text-xs"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Stats Section - 40% height */}
+        <Card className="h-[35%]">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">Call Statistics</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-1 gap-3 text-sm">
+              <div className="text-center p-2 bg-muted/50 rounded">
+                <p className="font-medium">{stats.totalCalls}</p>
+                <p className="text-xs text-muted-foreground">Total Calls</p>
+              </div>
+              <div className="text-center p-2 bg-muted/50 rounded">
+                <p className="font-medium">{format(stats.lastCallDate, "dd MMM")}</p>
+                <p className="text-xs text-muted-foreground">Last Call</p>
+              </div>
+              <div className="text-center p-2 bg-muted/50 rounded">
+                <p className="font-medium">{stats.daysSinceLastCall}d</p>
+                <p className="text-xs text-muted-foreground">Days Since</p>
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
