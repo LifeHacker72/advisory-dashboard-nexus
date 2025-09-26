@@ -139,9 +139,10 @@ export function FRDDocument({ client }: FRDDocumentProps) {
       {/* Vertical Sections - Horizontal Line - Moved up */}
       <div className="flex-shrink-0">
         <div className="flex gap-1 overflow-x-auto pb-1">
-          {subsections.slice(1).map((subsection) => {
+          {subsections.map((subsection) => {
             const Icon = subsection.icon;
-            const taskCount = pendingTasks[subsection.id as keyof typeof pendingTasks];
+            const taskCount = subsection.id === "overview" ? 0 : pendingTasks[subsection.id as keyof typeof pendingTasks];
+            const isActive = (selectedSubsection === null && subsection.id === "overview") || selectedSubsection === subsection.id;
             const hasHighTasks = taskCount > 2;
             const hasTasks = taskCount > 0;
             return (
@@ -151,10 +152,11 @@ export function FRDDocument({ client }: FRDDocumentProps) {
                 size="sm"
                 className={cn(
                   "h-auto p-2 flex-1 min-w-0 text-xs",
-                  hasHighTasks && "border-red-500/60 bg-red-50/50",
-                  hasTasks && !hasHighTasks && "border-orange-400/60 bg-orange-50/50"
+                  isActive && "border-[#2edebe] border-2 font-bold text-[#2edebe]",
+                  !isActive && hasHighTasks && "border-red-500/60 bg-red-50/50",
+                  !isActive && hasTasks && !hasHighTasks && "border-orange-400/60 bg-orange-50/50"
                 )}
-                onClick={() => setSelectedSubsection(subsection.id)}
+                onClick={() => setSelectedSubsection(subsection.id === "overview" ? null : subsection.id)}
               >
                 <div className="flex items-center gap-1.5 w-full justify-center">
                   <div className={`p-0.5 rounded ${subsection.color} text-white flex-shrink-0`}>
@@ -162,7 +164,7 @@ export function FRDDocument({ client }: FRDDocumentProps) {
                   </div>
                   <div className="text-center min-w-0">
                     <div className="text-xs font-medium leading-tight truncate">{subsection.title}</div>
-                    {taskCount > 0 && (
+                    {taskCount > 0 && !isActive && (
                       <div className="text-xs opacity-75 leading-tight">{taskCount} pending</div>
                     )}
                   </div>
