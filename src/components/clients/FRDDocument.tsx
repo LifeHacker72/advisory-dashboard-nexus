@@ -94,20 +94,21 @@ export function FRDDocument({ client }: FRDDocumentProps) {
                   size="sm"
                   className={cn(
                     "h-auto p-2 flex-1 min-w-0 text-xs",
-                    isActive && "border-[#2edebe] border-2 font-bold text-[#2edebe]",
-                    !isActive && hasHighTasks && "border-red-500/60 bg-red-50/50",
-                    !isActive && hasTasks && !hasHighTasks && "border-orange-400/60 bg-orange-50/50"
+                    isActive && "border-[#2edebe] border-2 font-bold text-[#2edebe]"
                   )}
                   onClick={() => setSelectedSubsection(section.id === "overview" ? null : section.id)}
                 >
                   <div className="flex items-center gap-1.5 w-full justify-center">
-                    <div className={`p-0.5 rounded ${section.color} text-white flex-shrink-0`}>
+                    <div className={cn(
+                      "p-0.5 rounded flex-shrink-0",
+                      isActive ? "bg-[#2edebe] text-white" : "bg-muted text-muted-foreground"
+                    )}>
                       <Icon className="h-2.5 w-2.5" />
                     </div>
                     <div className="text-center min-w-0">
                       <div className="text-xs font-medium leading-tight truncate">{section.title}</div>
-                      {taskCount > 0 && !isActive && (
-                        <div className="text-xs opacity-75 leading-tight">{taskCount} pending</div>
+                      {taskCount > 0 && (
+                        <div className="text-xs leading-tight text-red-400">{taskCount} pending</div>
                       )}
                     </div>
                   </div>
@@ -152,20 +153,21 @@ export function FRDDocument({ client }: FRDDocumentProps) {
                 size="sm"
                 className={cn(
                   "h-auto p-2 flex-1 min-w-0 text-xs",
-                  isActive && "border-[#2edebe] border-2 font-bold text-[#2edebe]",
-                  !isActive && hasHighTasks && "border-red-500/60 bg-red-50/50",
-                  !isActive && hasTasks && !hasHighTasks && "border-orange-400/60 bg-orange-50/50"
+                  isActive && "border-[#2edebe] border-2 font-bold text-[#2edebe]"
                 )}
                 onClick={() => setSelectedSubsection(subsection.id === "overview" ? null : subsection.id)}
               >
                 <div className="flex items-center gap-1.5 w-full justify-center">
-                  <div className={`p-0.5 rounded ${subsection.color} text-white flex-shrink-0`}>
+                  <div className={cn(
+                    "p-0.5 rounded flex-shrink-0",
+                    isActive ? "bg-[#2edebe] text-white" : "bg-muted text-muted-foreground"
+                  )}>
                     <Icon className="h-2.5 w-2.5" />
                   </div>
                   <div className="text-center min-w-0">
                     <div className="text-xs font-medium leading-tight truncate">{subsection.title}</div>
-                    {taskCount > 0 && !isActive && (
-                      <div className="text-xs opacity-75 leading-tight">{taskCount} pending</div>
+                    {taskCount > 0 && (
+                      <div className="text-xs leading-tight text-red-400">{taskCount} pending</div>
                     )}
                   </div>
                 </div>
