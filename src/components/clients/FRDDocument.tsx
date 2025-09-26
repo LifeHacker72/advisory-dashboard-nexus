@@ -181,32 +181,40 @@ export function FRDDocument({ client }: FRDDocumentProps) {
       <div className="flex-1 grid grid-cols-2 gap-3 min-h-0">
         {/* Left Column */}
         <div className="space-y-3 h-full flex flex-col">
-          {/* Call Statistics - Match summary view style */}
-          <Card className="flex-shrink-0">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Call Statistics</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{cumulativeStats.totalCalls}</div>
-                    <p className="text-xs text-muted-foreground">Total Calls</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-lg font-bold">{format(cumulativeStats.lastCallDate, "dd MMM")}</div>
-                    <p className="text-xs text-muted-foreground">Last Call</p>
-                  </div>
-                  <div className="text-center">
-                    <div className={`text-lg font-bold ${cumulativeStats.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
-                      {cumulativeStats.daysSinceLastCall}d
-                    </div>
-                    <p className="text-xs text-muted-foreground">Since</p>
-                  </div>
+          {/* Call Statistics - Three separate boxes */}
+          <div className="grid grid-cols-3 gap-2 flex-shrink-0">
+            <Card className="p-3">
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="text-lg font-bold">{cumulativeStats.totalCalls}</div>
+                  <p className="text-xs text-muted-foreground">Calls Completed</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </Card>
+            
+            <Card className="p-3">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="text-lg font-bold">{format(cumulativeStats.lastCallDate, "dd MMM")}</div>
+                  <p className="text-xs text-muted-foreground">Last Call Date</p>
+                </div>
+              </div>
+            </Card>
+            
+            <Card className="p-3">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className={`text-lg font-bold ${cumulativeStats.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
+                    {cumulativeStats.daysSinceLastCall}d
+                  </div>
+                  <p className="text-xs text-muted-foreground">Days Since</p>
+                </div>
+              </div>
+            </Card>
+          </div>
 
           {/* Pending Tasks */}
           <Card className="flex-1 min-h-0">
