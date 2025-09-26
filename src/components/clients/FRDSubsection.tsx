@@ -131,21 +131,21 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
   });
 
   return (
-    <div className="h-[60vh] flex flex-col space-y-3">
+    <div className="h-full flex flex-col space-y-3">
       {/* Fixed Header Area - Client Name, Vertical, and Back Button */}
-      <div className="flex-shrink-0 sticky top-0 bg-background z-10">
+      <div className="flex-shrink-0">
         <div className="flex items-center gap-2 mb-2">
           <Button variant="outline" size="sm" onClick={onBack}>← Back</Button>
           <h3 className="text-lg font-semibold">{client.name} - {vertical}</h3>
         </div>
       </div>
 
-      {/* Main Content Grid - Scrollable */}
-      <div className="flex-1 grid grid-cols-2 gap-3 min-h-0 overflow-y-auto">
+      {/* Main Content Grid */}
+      <div className="flex-1 grid grid-cols-2 gap-3 min-h-0">
         {/* Left Column */}
-        <div className="space-y-3 h-fit">
+        <div className="space-y-3 h-full flex flex-col">
           {/* Advisor Assignment */}
-          <Card className="flex-shrink-0">
+          <Card className="flex-shrink-0" style={{ height: '120px' }}>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4" />
@@ -162,7 +162,7 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
           </Card>
 
           {/* Tasks Section */}
-          <Card className="min-h-[300px]">
+          <Card className="flex-1 min-h-0">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-sm">
@@ -179,8 +179,8 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2 max-h-[200px] overflow-y-auto">
+            <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-y-auto">
+              <div className="space-y-2">
                 {tasks.map((task) => (
                   <div key={task.id} className="flex items-center justify-between p-2 border rounded text-sm">
                     <div className="flex-1">
@@ -287,26 +287,23 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
         </div>
 
         {/* Right Column */}
-        <div className="space-y-3 h-fit">
-          {/* Call Statistics - Compact horizontal layout */}
-          <Card className="flex-shrink-0">
+        <div className="space-y-3 h-full flex flex-col">
+          {/* Call Statistics - Match height with Advisors */}
+          <Card className="flex-shrink-0" style={{ height: '120px' }}>
             <CardHeader className="pb-2">
-              <CardTitle className="text-xs font-medium flex items-center gap-1">
-                <Phone className="h-3 w-3 text-blue-600" />
-                Call Statistics
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">Call Statistics</CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div>
-                  <div className="text-lg font-bold">{stats.totalCalls}</div>
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <div className="text-xl font-bold">{stats.totalCalls}</div>
                   <p className="text-xs text-muted-foreground">Calls</p>
                 </div>
-                <div>
+                <div className="text-center">
                   <div className="text-lg font-bold">{format(stats.lastCallDate, "dd MMM")}</div>
                   <p className="text-xs text-muted-foreground">Last Call</p>
                 </div>
-                <div>
+                <div className="text-center">
                   <div className={`text-lg font-bold ${stats.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
                     {stats.daysSinceLastCall}d
                   </div>
@@ -317,7 +314,7 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
           </Card>
 
           {/* Agenda Items */}
-          <Card className="min-h-[300px]">
+          <Card className="flex-1 min-h-0">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-sm">
@@ -334,8 +331,8 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2 max-h-[200px] overflow-y-auto">
+            <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-y-auto">
+              <div className="space-y-2">
                 {sortedAgendaItems.map((item) => (
                   <div key={item.id} className="flex items-center gap-2 p-2 border rounded text-sm">
                     <Checkbox
