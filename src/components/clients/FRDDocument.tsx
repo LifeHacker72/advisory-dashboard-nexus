@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   TrendingUp, Shield, CreditCard, Building2, 
   Scale, FileText, MoreHorizontal, ChevronRight, Phone, User,
@@ -69,8 +70,9 @@ export function FRDDocument({ client }: FRDDocumentProps) {
   const [selectedSubsection, setSelectedSubsection] = useState<string | null>(null);
   
   // Overview section state (combined advisors from all verticals)
-  const [advisors] = useState(["Priya Sharma", "Rajesh Kumar", "Anita Patel", "Vikram Singh", "Meera Iyer", "Arjun Nair"]);
-  const [showAllAdvisors, setShowAllAdvisors] = useState(false);
+  const [overviewAdvisors] = useState(["Priya Sharma", "Rajesh Kumar", "Anita Patel", "Vikram Singh", "Meera Iyer", "Arjun Nair"]);
+  const [showAllOverviewAdvisors, setShowAllOverviewAdvisors] = useState(false);
+  const [showEditAdvisorDialog, setShowEditAdvisorDialog] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([
     { id: "1", title: "Review investment portfolio", actionDate: new Date(2024, 8, 15), status: 'pending', vertical: "Financial Planning" },
     { id: "2", title: "Update insurance coverage", actionDate: new Date(2024, 8, 20), status: 'pending', vertical: "Insurance" }
@@ -103,7 +105,6 @@ export function FRDDocument({ client }: FRDDocumentProps) {
   // New task form states
   const [newTaskAgendaItem, setNewTaskAgendaItem] = useState("");
   const [newTaskVertical, setNewTaskVertical] = useState("");
-
   // Mock data for cumulative stats from all verticals combined
   const cumulativeStats = {
     totalCalls: 45, // Combined from all verticals
@@ -357,17 +358,17 @@ export function FRDDocument({ client }: FRDDocumentProps) {
             </CardHeader>
             <CardContent className="pt-0">
               <div className="flex flex-wrap gap-1">
-                {(showAllAdvisors ? advisors : advisors.slice(0, 3)).map((advisor, index) => (
+                {(showAllOverviewAdvisors ? overviewAdvisors : overviewAdvisors.slice(0, 3)).map((advisor, index) => (
                   <Badge key={index} variant="secondary" className="text-xs">{advisor}</Badge>
                 ))}
-                {advisors.length > 3 && (
+                {overviewAdvisors.length > 3 && (
                   <Button
                     variant="ghost"
                     size="sm"
                     className="h-5 px-2 text-xs"
-                    onClick={() => setShowAllAdvisors(!showAllAdvisors)}
+                    onClick={() => setShowAllOverviewAdvisors(!showAllOverviewAdvisors)}
                   >
-                    {showAllAdvisors ? 'Less' : `+${advisors.length - 3} more`}
+                    {showAllOverviewAdvisors ? 'Less' : `+${overviewAdvisors.length - 3} more`}
                   </Button>
                 )}
               </div>
@@ -821,6 +822,80 @@ export function FRDDocument({ client }: FRDDocumentProps) {
           </Card>
         </div>
       </div>
+      
+      {/* Advisor Assignment Dialog */}
+      <Dialog open={showEditAdvisorDialog} onOpenChange={setShowEditAdvisorDialog}>
+        <DialogContent className="sm:max-w-[900px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Advisors - {client.name}</DialogTitle>
+            <DialogDescription>
+              Manage advisor assignments for this client. Membership start date is frozen.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4 space-y-6">
+            {/* Membership Details Section (Frozen) */}
+            <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
+              <h3 className="font-medium text-lg">Membership Details</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label>Membership Start Date</Label>
+                  <Input
+                    type="date"
+                    value="2024-01-15"
+                    disabled
+                    className="bg-muted"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Start date cannot be modified</p>
+                </div>
+                <div>
+                  <Label>Annual Fee (INR)</Label>
+                  <Input
+                    type="number"
+                    defaultValue="50000"
+                    placeholder="Enter amount in INR"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Current Advisors Display */}
+            <div className="space-y-4 border rounded-lg p-4">
+              <h3 className="font-medium text-lg">Current Advisors</h3>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                {["Financial Planning", "Tax Planning", "Insurance", "Credit Cards", "Banking ++", "Estate Planning"].map((category) => (
+                  <div key={category} className="space-y-3">
+                    <Label className="font-medium text-sm">{category}</Label>
+                    <div className="flex flex-wrap gap-1">
+                      <Badge variant="secondary" className="text-xs">John Doe</Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs"
+                      >
+                        Change
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" type="button" onClick={() => setShowEditAdvisorDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              type="button"
+              className="bg-primary text-black"
+              onClick={() => setShowEditAdvisorDialog(false)}
+            >
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
