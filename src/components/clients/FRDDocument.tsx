@@ -10,6 +10,7 @@ import {
 import { format } from "date-fns";
 import { Client } from "@/types/client";
 import { FRDSubsection } from "./FRDSubsection";
+import { cn } from "@/lib/utils";
 
 interface FRDDocumentProps {
   client: Client;
@@ -94,82 +95,129 @@ export function FRDDocument({ client }: FRDDocumentProps) {
   }
 
   return (
-    <div className="space-y-4 max-h-[70vh] overflow-hidden">
-      {/* Client Name and Stats */}
-      <div className="space-y-3">
+    <div className="h-[70vh] flex flex-col space-y-4">
+      {/* Client Name */}
+      <div className="flex-shrink-0">
         <h3 className="text-lg font-semibold">{client.name}</h3>
-        
-        {/* Cumulative Stats */}
-        <div className="grid grid-cols-3 gap-3 text-sm">
-          <div className="text-center p-2 bg-muted/50 rounded">
-            <p className="font-medium">{cumulativeStats.totalCalls}</p>
-            <p className="text-xs text-muted-foreground">Total Calls</p>
-          </div>
-          <div className="text-center p-2 bg-muted/50 rounded">
-            <p className="font-medium">{format(cumulativeStats.lastCallDate, "dd MMM")}</p>
-            <p className="text-xs text-muted-foreground">Last Call</p>
-          </div>
-          <div className="text-center p-2 bg-muted/50 rounded">
-            <p className="font-medium">{cumulativeStats.daysSinceLastCall}d</p>
-            <p className="text-xs text-muted-foreground">Days Since</p>
-          </div>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="flex-1 grid grid-cols-2 gap-4 min-h-0">
+        {/* Left Column */}
+        <div className="space-y-4 h-full">
+          {/* Stats Box */}
+          <Card className="flex-shrink-0">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Call Statistics</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex gap-4 text-sm">
+                <div className="text-center">
+                  <p className="font-medium">{cumulativeStats.totalCalls}</p>
+                  <p className="text-xs text-muted-foreground">Calls</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-medium">{format(cumulativeStats.lastCallDate, "dd MMM")}</p>
+                  <p className="text-xs text-muted-foreground">Last Call</p>
+                </div>
+                <div className="text-center">
+                  <p className="font-medium">{cumulativeStats.daysSinceLastCall}d</p>
+                  <p className="text-xs text-muted-foreground">Since</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tasks Box - placeholder for future implementation */}
+          <Card className="flex-1 min-h-0">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm">Recent Tasks</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-y-auto">
+              <p className="text-xs text-muted-foreground">Task overview coming soon</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-4 h-full">
+          {/* Active Agenda Items */}
+          <Card className="flex-1 min-h-0">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-green-600">Active Agenda ({activeAgendaItems.length})</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-y-auto">
+              <div className="space-y-2">
+                {activeAgendaItems.map((item) => (
+                  <div key={item.id} className="flex justify-between items-center text-xs p-2 bg-green-50 rounded">
+                    <span>{item.title}</span>
+                    <Badge variant="outline" className="text-xs">{item.vertical}</Badge>
+                  </div>
+                ))}
+                {activeAgendaItems.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-4">No active agenda items</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Completed Agenda Items */}
+          <Card className="flex-1 min-h-0">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm text-muted-foreground">Completed ({completedAgendaItems.length})</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-y-auto">
+              <div className="space-y-2">
+                {completedAgendaItems.map((item) => (
+                  <div key={item.id} className="flex justify-between items-center text-xs p-2 bg-muted/30 rounded">
+                    <span className="line-through text-muted-foreground">{item.title}</span>
+                    <Badge variant="outline" className="text-xs">{item.vertical}</Badge>
+                  </div>
+                ))}
+                {completedAgendaItems.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-4">No completed items</p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      {/* Active & Completed Agenda Items */}
-      <div className="space-y-3">
-        <div>
-          <h4 className="text-sm font-medium mb-2 text-green-600">Active Agenda Items ({activeAgendaItems.length})</h4>
-          <div className="space-y-1 max-h-20 overflow-y-auto">
-            {activeAgendaItems.map((item) => (
-              <div key={item.id} className="flex justify-between items-center text-xs p-2 bg-green-50 rounded">
-                <span>{item.title}</span>
-                <Badge variant="outline" className="text-xs">{item.vertical}</Badge>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div>
-          <h4 className="text-sm font-medium mb-2 text-muted-foreground">Completed ({completedAgendaItems.length})</h4>
-          <div className="space-y-1 max-h-16 overflow-y-auto">
-            {completedAgendaItems.map((item) => (
-              <div key={item.id} className="flex justify-between items-center text-xs p-2 bg-muted/30 rounded">
-                <span className="line-through text-muted-foreground">{item.title}</span>
-                <Badge variant="outline" className="text-xs">{item.vertical}</Badge>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Compact Subsections Grid */}
-      <div className="grid grid-cols-2 gap-2">
-        {subsections.map((subsection) => {
-          const Icon = subsection.icon;
-          const taskCount = pendingTasks[subsection.id as keyof typeof pendingTasks];
-          return (
-            <Button
-              key={subsection.id} 
-              variant={getButtonVariant(subsection.id)}
-              size="sm"
-              className="h-auto p-3 justify-start"
-              onClick={() => setSelectedSubsection(subsection.id)}
-            >
-              <div className="flex items-center gap-2 w-full">
-                <div className={`p-1 rounded ${subsection.color} text-white`}>
-                  <Icon className="h-3 w-3" />
+      {/* Vertical Sections - Horizontal Line */}
+      <div className="flex-shrink-0">
+        <div className="flex gap-2 overflow-x-auto">
+          {subsections.map((subsection) => {
+            const Icon = subsection.icon;
+            const taskCount = pendingTasks[subsection.id as keyof typeof pendingTasks];
+            const hasHighTasks = taskCount > 2;
+            const hasTasks = taskCount > 0;
+            return (
+              <Button
+                key={subsection.id} 
+                variant="outline"
+                size="sm"
+                className={cn(
+                  "h-auto p-2 flex-shrink-0 min-w-[120px]",
+                  hasHighTasks && "border-red-500 border-2",
+                  hasTasks && !hasHighTasks && "border-orange-400"
+                )}
+                onClick={() => setSelectedSubsection(subsection.id)}
+              >
+                <div className="flex items-center gap-2">
+                  <div className={`p-1 rounded ${subsection.color} text-white`}>
+                    <Icon className="h-3 w-3" />
+                  </div>
+                  <div className="text-left">
+                    <div className="text-xs font-medium">{subsection.title}</div>
+                    {taskCount > 0 && (
+                      <div className="text-xs opacity-75">{taskCount} pending</div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex-1 text-left">
-                  <div className="text-xs font-medium">{subsection.title}</div>
-                  {taskCount > 0 && (
-                    <div className="text-xs opacity-75">{taskCount} pending</div>
-                  )}
-                </div>
-              </div>
-            </Button>
-          );
-        })}
+              </Button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
