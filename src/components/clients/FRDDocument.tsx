@@ -843,51 +843,47 @@ export function FRDDocument({ client }: FRDDocumentProps) {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4 space-y-6">
-            {/* Membership Details Section (Frozen) */}
-            <div className="space-y-4 border rounded-lg p-4 bg-muted/30">
-              <h3 className="font-medium text-lg">Membership Details</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label>Membership Start Date</Label>
-                  <Input
-                    type="date"
-                    value="2024-01-15"
-                    disabled
-                    className="bg-muted"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Start date cannot be modified</p>
-                </div>
-                <div>
-                  <Label>Annual Fee (INR)</Label>
-                  <Input
-                    type="number"
-                    defaultValue="50000"
-                    placeholder="Enter amount in INR"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Current Advisors Display */}
-            <div className="space-y-4 border rounded-lg p-4">
-              <h3 className="font-medium text-lg">Current Advisors</h3>
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
-                {["Financial Planning", "Tax Planning", "Insurance", "Credit Cards", "Banking ++", "Estate Planning"].map((category) => (
-                  <div key={category} className="space-y-3">
+            {/* Advisor Assignment Section */}
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+              {["Financial Planning", "Tax Planning", "Insurance", "Credit Cards", "Banking ++", "Estate Planning"].map((category) => (
+                <div key={category} className="space-y-3 border rounded-lg p-4">
+                  <div className="flex items-center justify-between">
                     <Label className="font-medium text-sm">{category}</Label>
-                    <div className="flex flex-wrap gap-1">
-                      <Badge variant="secondary" className="text-xs">John Doe</Badge>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-xs"
-                      >
-                        Change
-                      </Button>
-                    </div>
+                    <Badge variant="outline" className="text-xs">
+                      1 assigned
+                    </Badge>
                   </div>
-                ))}
-              </div>
+                  
+                  {/* Assigned Advisors */}
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                      John Doe
+                      <X className="h-3 w-3 cursor-pointer" />
+                    </Badge>
+                  </div>
+                  
+                  {/* Available Advisors */}
+                  <Select>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue placeholder={`Select ${category}`} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background border z-50">
+                      <SelectItem value="advisor1">
+                        <div className="text-xs">
+                          <div>Emily Richardson</div>
+                          <div className="text-muted-foreground">emily@example.com</div>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="advisor2">
+                        <div className="text-xs">
+                          <div>Daniel Morgan</div>
+                          <div className="text-muted-foreground">daniel@example.com</div>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
             </div>
           </div>
           

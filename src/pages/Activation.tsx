@@ -128,23 +128,23 @@ const bookingClients: BookingClient[] = [
 ];
 
 const advisors: Advisor[] = [
-  { id: 1, name: "Emily Richardson", email: "emily@example.com", category: "CA" },
-  { id: 2, name: "Daniel Morgan", email: "daniel@example.com", category: "Financial Planner" },
-  { id: 3, name: "Sophia Chen", email: "sophia@example.com", category: "Insurance Advisor" },
-  { id: 4, name: "James Wilson", email: "james@example.com", category: "Estate Planner" },
-  { id: 5, name: "Olivia Martinez", email: "olivia@example.com", category: "Credit Card Advisor" },
-  { id: 6, name: "Robert Taylor", email: "robert@example.com", category: "Banking and Compliance" },
-  { id: 7, name: "Lisa Anderson", email: "lisa@example.com", category: "CA" },
-  { id: 8, name: "Mark Thompson", email: "mark@example.com", category: "Financial Planner" },
+  { id: 1, name: "Emily Richardson", email: "emily@example.com", category: "Tax Planning" },
+  { id: 2, name: "Daniel Morgan", email: "daniel@example.com", category: "Financial Planning" },
+  { id: 3, name: "Sophia Chen", email: "sophia@example.com", category: "Insurance" },
+  { id: 4, name: "James Wilson", email: "james@example.com", category: "Estate Planning" },
+  { id: 5, name: "Olivia Martinez", email: "olivia@example.com", category: "Credit Cards" },
+  { id: 6, name: "Robert Taylor", email: "robert@example.com", category: "Banking ++" },
+  { id: 7, name: "Lisa Anderson", email: "lisa@example.com", category: "Tax Planning" },
+  { id: 8, name: "Mark Thompson", email: "mark@example.com", category: "Financial Planning" },
 ];
 
 const advisorCategories = [
-  "CA",
-  "Financial Planner", 
-  "Insurance Advisor",
-  "Estate Planner",
-  "Credit Card Advisor",
-  "Banking and Compliance"
+  "Financial Planning",
+  "Tax Planning", 
+  "Insurance",
+  "Estate Planning",
+  "Credit Cards",
+  "Banking ++"
 ];
 
 interface ManualEntryForm {
@@ -161,8 +161,7 @@ interface BookingClientForm {
 }
 
 interface AdvisorAssignmentForm {
-  membershipStartDate: string;
-  annualFee: string;
+  // No form fields needed for advisor assignment only
 }
 
 export default function Activation() {
@@ -206,10 +205,9 @@ export default function Activation() {
 
   const canActivate = getTotalAssignedAdvisors() >= 3;
 
-  const onSubmitAdvisorAssignment = (data: AdvisorAssignmentForm) => {
+  const onSubmitAdvisorAssignment = () => {
     console.log("Activating membership for:", selectedClient?.name);
     console.log("Assigned advisors:", assignedAdvisors);
-    console.log("Membership details:", data);
     setShowAdvisorAssignmentDialog(false);
     setSelectedClient(null);
     resetAdvisor();
@@ -393,42 +391,7 @@ export default function Activation() {
                 Assign advisors and set membership details to complete the onboarding process. At least 3 advisors must be assigned.
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmitAdvisor(onSubmitAdvisorAssignment)} className="py-4 space-y-6">
-              {/* Membership Details Section */}
-              <div className="space-y-4 border rounded-lg p-4">
-                <h3 className="font-medium text-lg">Membership Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="membership-start-date">Membership Start Date</Label>
-                    <Input
-                      id="membership-start-date"
-                      type="date"
-                      {...registerAdvisor("membershipStartDate", { 
-                        required: "Membership start date is required" 
-                      })}
-                    />
-                    {errorsAdvisor.membershipStartDate && (
-                      <p className="text-sm text-destructive mt-1">{errorsAdvisor.membershipStartDate.message}</p>
-                    )}
-                  </div>
-                  <div>
-                    <Label htmlFor="annual-fee">Annual Fee (INR)</Label>
-                    <Input
-                      id="annual-fee"
-                      type="number"
-                      placeholder="Enter amount in INR"
-                      {...registerAdvisor("annualFee", { 
-                        required: "Annual fee is required",
-                        min: { value: 1, message: "Annual fee must be greater than 0" }
-                      })}
-                    />
-                    {errorsAdvisor.annualFee && (
-                      <p className="text-sm text-destructive mt-1">{errorsAdvisor.annualFee.message}</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
+            <div className="py-4 space-y-6">
               {/* Advisor Assignment Section */}
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {advisorCategories.map((category) => (
@@ -499,15 +462,16 @@ export default function Activation() {
                   Cancel
                 </Button>
                 <Button 
-                  type="submit"
+                  type="button"
                   className="bg-primary text-black"
                   disabled={!canActivate}
+                  onClick={onSubmitAdvisorAssignment}
                 >
                   <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Activate Membership
+                  {canActivate ? "Activate Membership" : "Assign More Advisors"}
                 </Button>
               </DialogFooter>
-            </form>
+            </div>
           </DialogContent>
         </Dialog>
 
