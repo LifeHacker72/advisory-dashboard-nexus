@@ -349,11 +349,21 @@ export function FRDDocument({ client }: FRDDocumentProps) {
         {/* Left Column */}
         <div className="space-y-3 h-full flex flex-col">
           {/* Advisor Assignment */}
-          <Card className="flex-shrink-0 h-[88px]">
+          <Card className={`flex-shrink-0 transition-all duration-300 ${showAllOverviewAdvisors ? 'h-auto' : 'h-[88px]'}`}>
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <User className="h-4 w-4" />
-                Advisors Assigned
+              <CardTitle className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <User className="h-4 w-4" />
+                  Advisors Assigned
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-xs"
+                  onClick={() => setShowEditAdvisorDialog(true)}
+                >
+                  Edit
+                </Button>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
