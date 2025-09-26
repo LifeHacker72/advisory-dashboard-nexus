@@ -47,8 +47,22 @@ const taskOptions = [
   "Document collection"
 ];
 
+// Mock different advisors for each vertical
+const getVerticalAdvisors = (vertical: string) => {
+  const advisorMap: { [key: string]: string[] } = {
+    "Financial Planning": ["Priya Sharma", "Vikram Singh"],
+    "Tax Planning": ["Rajesh Kumar", "Anita Patel"],
+    "Insurance": ["Meera Iyer", "Arjun Nair"],
+    "Credit Cards": ["Priya Sharma"],
+    "Banking & Compliance": ["Vikram Singh", "Anita Patel"],
+    "Estate Planning": ["Rajesh Kumar"],
+    "Others": ["Meera Iyer"]
+  };
+  return advisorMap[vertical] || ["Priya Sharma"];
+};
+
 export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) {
-  const [advisors] = useState(["Priya Sharma", "Rajesh Kumar"]); // Mock data
+  const [advisors] = useState(getVerticalAdvisors(vertical));
   const [tasks, setTasks] = useState<Task[]>([
     { id: "1", title: "Review investment portfolio", actionDate: new Date(2024, 8, 15), status: 'pending' },
     { id: "2", title: "Update insurance coverage", actionDate: new Date(2024, 8, 20), status: 'pending' }
@@ -191,7 +205,7 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
         {/* Left Column */}
         <div className="space-y-3 h-full flex flex-col">
           {/* Advisor Assignment */}
-          <Card className="flex-shrink-0">
+          <Card className="flex-shrink-0 h-[88px]">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4" />
@@ -199,7 +213,7 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-1">
                 {advisors.map((advisor, index) => (
                   <Badge key={index} variant="secondary" className="text-xs">{advisor}</Badge>
                 ))}

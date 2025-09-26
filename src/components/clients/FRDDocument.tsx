@@ -66,8 +66,8 @@ const taskOptions = [
 export function FRDDocument({ client }: FRDDocumentProps) {
   const [selectedSubsection, setSelectedSubsection] = useState<string | null>(null);
   
-  // Overview section state (same as vertical sections)
-  const [advisors] = useState(["Priya Sharma", "Rajesh Kumar"]);
+  // Overview section state (combined advisors from all verticals)
+  const [advisors] = useState(["Priya Sharma", "Rajesh Kumar", "Anita Patel", "Vikram Singh", "Meera Iyer", "Arjun Nair"]);
   const [tasks, setTasks] = useState<Task[]>([
     { id: "1", title: "Review investment portfolio", actionDate: new Date(2024, 8, 15), status: 'pending' },
     { id: "2", title: "Update insurance coverage", actionDate: new Date(2024, 8, 20), status: 'pending' }
@@ -226,16 +226,13 @@ export function FRDDocument({ client }: FRDDocumentProps) {
     
     return (
       <div className="h-[70vh] flex flex-col">
-        {/* Client Name */}
+        {/* Client Name with Vertical */}
         <div className="flex-shrink-0 mb-3">
-          <h3 className="text-lg font-semibold">{client.name}</h3>
+          <h3 className="text-lg font-semibold">{client.name} - {subsection?.title}</h3>
         </div>
 
-        {/* Vertical Sections - Horizontal Line - Show functionality above button */}
+        {/* Vertical Sections - Horizontal Line */}
         <div className="flex-shrink-0">
-          <div className="mb-2">
-            <h4 className="text-sm font-medium text-muted-foreground">{subsection?.title}</h4>
-          </div>
           <div className="flex gap-1 overflow-x-auto pb-1">
             {subsections.map((section) => {
               const Icon = section.icon;
@@ -337,7 +334,7 @@ export function FRDDocument({ client }: FRDDocumentProps) {
         {/* Left Column */}
         <div className="space-y-3 h-full flex flex-col">
           {/* Advisor Assignment */}
-          <Card className="flex-shrink-0">
+          <Card className="flex-shrink-0 h-[88px]">
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4" />
@@ -345,7 +342,7 @@ export function FRDDocument({ client }: FRDDocumentProps) {
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-1">
                 {advisors.map((advisor, index) => (
                   <Badge key={index} variant="secondary" className="text-xs">{advisor}</Badge>
                 ))}
