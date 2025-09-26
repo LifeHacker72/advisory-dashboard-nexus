@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Plus, X, CheckCircle2, User, ClipboardList } from "lucide-react";
+import { CalendarIcon, Plus, X, CheckCircle2, User, ClipboardList, Phone } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Client } from "@/types/client";
@@ -131,19 +131,19 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
   });
 
   return (
-    <div className="h-[60vh] flex flex-col space-y-4">
-      {/* Client Name and Vertical */}
-      <div className="flex-shrink-0">
+    <div className="h-[60vh] flex flex-col space-y-3">
+      {/* Fixed Header Area - Client Name, Vertical, and Back Button */}
+      <div className="flex-shrink-0 sticky top-0 bg-background z-10">
         <div className="flex items-center gap-2 mb-2">
           <Button variant="outline" size="sm" onClick={onBack}>← Back</Button>
           <h3 className="text-lg font-semibold">{client.name} - {vertical}</h3>
         </div>
       </div>
 
-      {/* Main Content Grid */}
-      <div className="flex-1 grid grid-cols-2 gap-4 min-h-0">
+      {/* Main Content Grid - Scrollable */}
+      <div className="flex-1 grid grid-cols-2 gap-3 min-h-0 overflow-y-auto">
         {/* Left Column */}
-        <div className="space-y-4 h-full">
+        <div className="space-y-3 h-fit">
           {/* Advisor Assignment */}
           <Card className="flex-shrink-0">
             <CardHeader className="pb-2">
@@ -162,7 +162,7 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
           </Card>
 
           {/* Tasks Section */}
-          <Card className="flex-1 min-h-0">
+          <Card className="min-h-[300px]">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-sm">
@@ -179,8 +179,8 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-hidden">
-              <div className="space-y-2 h-full overflow-y-auto">
+            <CardContent className="pt-0">
+              <div className="space-y-2 max-h-[200px] overflow-y-auto">
                 {tasks.map((task) => (
                   <div key={task.id} className="flex items-center justify-between p-2 border rounded text-sm">
                     <div className="flex-1">
@@ -287,9 +287,37 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
         </div>
 
         {/* Right Column */}
-        <div className="space-y-4 h-full">
+        <div className="space-y-3 h-fit">
+          {/* Call Statistics - Compact horizontal layout */}
+          <Card className="flex-shrink-0">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xs font-medium flex items-center gap-1">
+                <Phone className="h-3 w-3 text-blue-600" />
+                Call Statistics
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <div className="text-lg font-bold">{stats.totalCalls}</div>
+                  <p className="text-xs text-muted-foreground">Calls</p>
+                </div>
+                <div>
+                  <div className="text-lg font-bold">{format(stats.lastCallDate, "dd MMM")}</div>
+                  <p className="text-xs text-muted-foreground">Last Call</p>
+                </div>
+                <div>
+                  <div className={`text-lg font-bold ${stats.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
+                    {stats.daysSinceLastCall}d
+                  </div>
+                  <p className="text-xs text-muted-foreground">Since</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Agenda Items */}
-          <Card className="flex-1 min-h-0">
+          <Card className="min-h-[300px]">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2 text-sm">
@@ -306,8 +334,8 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-hidden">
-              <div className="space-y-2 h-full overflow-y-auto">
+            <CardContent className="pt-0">
+              <div className="space-y-2 max-h-[200px] overflow-y-auto">
                 {sortedAgendaItems.map((item) => (
                   <div key={item.id} className="flex items-center gap-2 p-2 border rounded text-sm">
                     <Checkbox
@@ -362,29 +390,6 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
-
-          {/* Stats Section */}
-          <Card className="flex-shrink-0">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Call Statistics</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex gap-4 text-sm">
-                <div className="text-center">
-                  <p className="font-medium">{stats.totalCalls}</p>
-                  <p className="text-xs text-muted-foreground">Calls</p>
-                </div>
-                <div className="text-center">
-                  <p className="font-medium">{format(stats.lastCallDate, "dd MMM")}</p>
-                  <p className="text-xs text-muted-foreground">Last Call</p>
-                </div>
-                <div className="text-center">
-                  <p className="font-medium">{stats.daysSinceLastCall}d</p>
-                  <p className="text-xs text-muted-foreground">Since</p>
-                </div>
-              </div>
             </CardContent>
           </Card>
         </div>

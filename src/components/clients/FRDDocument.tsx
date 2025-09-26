@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   TrendingUp, Shield, CreditCard, Building2, 
-  Scale, FileText, MoreHorizontal, ChevronRight 
+  Scale, FileText, MoreHorizontal, ChevronRight, Phone 
 } from "lucide-react";
 import { format } from "date-fns";
 import { Client } from "@/types/client";
@@ -70,9 +70,9 @@ export function FRDDocument({ client }: FRDDocumentProps) {
     const subsection = subsections.find(s => s.id === selectedSubsection);
     
     return (
-      <div className="space-y-4">
-        {/* Other subsections as tabs */}
-        <div className="border-b">
+      <div className="space-y-3">
+        {/* Fixed Tabs Header */}
+        <div className="border-b sticky top-0 bg-background z-10 pb-2">
           <Tabs value={selectedSubsection} onValueChange={setSelectedSubsection}>
             <TabsList className="grid w-full grid-cols-7 h-8">
               {subsections.map((subsection) => (
@@ -84,51 +84,58 @@ export function FRDDocument({ client }: FRDDocumentProps) {
           </Tabs>
         </div>
 
-        {/* Expanded subsection view */}
-        <FRDSubsection
-          client={client}
-          vertical={subsection?.title || ""}
-          onBack={() => setSelectedSubsection(null)}
-        />
+        {/* Scrollable Subsection Content */}
+        <div className="overflow-y-auto">
+          <FRDSubsection
+            client={client}
+            vertical={subsection?.title || ""}
+            onBack={() => setSelectedSubsection(null)}
+          />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-[70vh] flex flex-col space-y-4">
+    <div className="h-[70vh] flex flex-col space-y-3">
       {/* Client Name */}
       <div className="flex-shrink-0">
         <h3 className="text-lg font-semibold">{client.name}</h3>
       </div>
 
       {/* Main Content Grid */}
-      <div className="flex-1 grid grid-cols-2 gap-4 min-h-0">
+      <div className="flex-1 grid grid-cols-2 gap-3 min-h-0">
         {/* Left Column */}
-        <div className="space-y-4 h-full">
-          {/* Stats Box */}
+        <div className="space-y-3 h-full flex flex-col">
+          {/* Call Statistics - Compact like summary view */}
           <Card className="flex-shrink-0">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Call Statistics</CardTitle>
+              <CardTitle className="text-xs font-medium flex items-center gap-1">
+                <Phone className="h-3 w-3 text-blue-600" />
+                Call Statistics
+              </CardTitle>
             </CardHeader>
             <CardContent className="pt-0">
-              <div className="flex gap-4 text-sm">
-                <div className="text-center">
-                  <p className="font-medium">{cumulativeStats.totalCalls}</p>
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div>
+                  <div className="text-lg font-bold">{cumulativeStats.totalCalls}</div>
                   <p className="text-xs text-muted-foreground">Calls</p>
                 </div>
-                <div className="text-center">
-                  <p className="font-medium">{format(cumulativeStats.lastCallDate, "dd MMM")}</p>
+                <div>
+                  <div className="text-lg font-bold">{format(cumulativeStats.lastCallDate, "dd MMM")}</div>
                   <p className="text-xs text-muted-foreground">Last Call</p>
                 </div>
-                <div className="text-center">
-                  <p className="font-medium">{cumulativeStats.daysSinceLastCall}d</p>
+                <div>
+                  <div className={`text-lg font-bold ${cumulativeStats.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
+                    {cumulativeStats.daysSinceLastCall}d
+                  </div>
                   <p className="text-xs text-muted-foreground">Since</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Tasks Box - placeholder for future implementation */}
+          {/* Recent Tasks */}
           <Card className="flex-1 min-h-0">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">Recent Tasks</CardTitle>
@@ -140,9 +147,9 @@ export function FRDDocument({ client }: FRDDocumentProps) {
         </div>
 
         {/* Right Column */}
-        <div className="space-y-4 h-full">
-          {/* Active Agenda Items */}
-          <Card className="flex-1 min-h-0">
+        <div className="space-y-3 h-full flex flex-col">
+          {/* Active Agenda Items - 60% height */}
+          <Card className="flex-[3] min-h-0">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-green-600">Active Agenda ({activeAgendaItems.length})</CardTitle>
             </CardHeader>
@@ -161,8 +168,8 @@ export function FRDDocument({ client }: FRDDocumentProps) {
             </CardContent>
           </Card>
 
-          {/* Completed Agenda Items */}
-          <Card className="flex-1 min-h-0">
+          {/* Completed Agenda Items - 40% height */}
+          <Card className="flex-[2] min-h-0">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm text-muted-foreground">Completed ({completedAgendaItems.length})</CardTitle>
             </CardHeader>
@@ -197,8 +204,8 @@ export function FRDDocument({ client }: FRDDocumentProps) {
                 variant="outline"
                 size="sm"
                 className={cn(
-                  "h-auto p-2 flex-shrink-0 min-w-[120px]",
-                  hasHighTasks && "border-red-500 border-2",
+                  "h-auto p-2 flex-shrink-0 min-w-[100px]",
+                  hasHighTasks && "border-red-500",
                   hasTasks && !hasHighTasks && "border-orange-400"
                 )}
                 onClick={() => setSelectedSubsection(subsection.id)}
