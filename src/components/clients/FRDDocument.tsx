@@ -1,16 +1,36 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   TrendingUp, Shield, CreditCard, Building2, 
-  Scale, FileText, MoreHorizontal, ChevronRight, Phone, User 
+  Scale, FileText, MoreHorizontal, ChevronRight, Phone, User,
+  CalendarIcon, Plus, X, CheckCircle2, ClipboardList
 } from "lucide-react";
 import { format } from "date-fns";
 import { Client } from "@/types/client";
 import { FRDSubsection } from "./FRDSubsection";
 import { cn } from "@/lib/utils";
+
+interface Task {
+  id: string;
+  title: string;
+  actionDate: Date;
+  status: 'pending' | 'completed';
+}
+
+interface AgendaItem {
+  id: string;
+  title: string;
+  completed: boolean;
+}
 
 interface FRDDocumentProps {
   client: Client;
@@ -28,8 +48,41 @@ const subsections = [
   { id: "others", title: "Others", icon: MoreHorizontal, color: "bg-gray-500" }
 ];
 
+// Mock data for task options
+const taskOptions = [
+  "Review investment portfolio",
+  "Update insurance coverage", 
+  "Tax planning consultation",
+  "Estate planning review",
+  "Retirement planning discussion",
+  "Credit score analysis",
+  "Banking relationship optimization",
+  "Financial goal reassessment",
+  "Risk assessment update",
+  "Document collection"
+];
+
 export function FRDDocument({ client }: FRDDocumentProps) {
   const [selectedSubsection, setSelectedSubsection] = useState<string | null>(null);
+  
+  // Overview section state (same as vertical sections)
+  const [advisors] = useState(["Priya Sharma", "Rajesh Kumar"]);
+  const [tasks, setTasks] = useState<Task[]>([
+    { id: "1", title: "Review investment portfolio", actionDate: new Date(2024, 8, 15), status: 'pending' },
+    { id: "2", title: "Update insurance coverage", actionDate: new Date(2024, 8, 20), status: 'pending' }
+  ]);
+  const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([
+    { id: "1", title: "Gather current investment statements", completed: true },
+    { id: "2", title: "Review risk tolerance", completed: false },
+    { id: "3", title: "Discuss retirement timeline", completed: false }
+  ]);
+  
+  // Form state for adding items
+  const [showAddTask, setShowAddTask] = useState(false);
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDate, setNewTaskDate] = useState<Date>();
+  const [showAddAgenda, setShowAddAgenda] = useState(false);
+  const [newAgendaTitle, setNewAgendaTitle] = useState("");
 
   // Mock data for cumulative stats and agenda items
   const cumulativeStats = {
@@ -38,16 +91,64 @@ export function FRDDocument({ client }: FRDDocumentProps) {
     daysSinceLastCall: 8
   };
 
-  const allAgendaItems = [
-    { id: "1", title: "Review investment portfolio", vertical: "Financial Planning", completed: false },
-    { id: "2", title: "Update insurance coverage", vertical: "Insurance", completed: false },
-    { id: "3", title: "File ITR for FY 2023-24", vertical: "Tax Planning", completed: true },
-    { id: "4", title: "Optimize credit card usage", vertical: "Credit Cards", completed: false },
-    { id: "5", title: "Estate planning documents", vertical: "Estate Planning", completed: true }
-  ];
+  // Handler functions for overview section
+  const handleAddTask = () => {
+    if (newTaskTitle && newTaskDate) {
+      const newTask: Task = {
+        id: Date.now().toString(),
+        title: newTaskTitle,
+        actionDate: newTaskDate,
+        status: 'pending'
+      };
+      setTasks([...tasks, newTask]);
+      setNewTaskTitle("");
+      setNewTaskDate(undefined);
+      setShowAddTask(false);
+    }
+  };
 
-  const activeAgendaItems = allAgendaItems.filter(item => !item.completed);
-  const completedAgendaItems = allAgendaItems.filter(item => item.completed);
+  const handleAddAgendaItem = () => {
+    if (newAgendaTitle) {
+      const newItem: AgendaItem = {
+        id: Date.now().toString(),
+        title: newAgendaTitle,
+        completed: false
+      };
+      setAgendaItems([...agendaItems, newItem]);
+      setNewAgendaTitle("");
+      setShowAddAgenda(false);
+    }
+  };
+
+  const toggleAgendaItem = (id: string) => {
+    setAgendaItems(items =>
+      items.map(item =>
+        item.id === id ? { ...item, completed: !item.completed } : item
+      )
+    );
+  };
+
+  const removeTask = (id: string) => {
+    setTasks(tasks => tasks.filter(task => task.id !== id));
+  };
+
+  const removeAgendaItem = (id: string) => {
+    setAgendaItems(items => items.filter(item => item.id !== id));
+  };
+
+  const toggleTaskCompletion = (id: string) => {
+    setTasks(tasks =>
+      tasks.map(task =>
+        task.id === id ? { ...task, status: task.status === 'completed' ? 'pending' : 'completed' } : task
+      )
+    );
+  };
+
+  // Sort agenda items: active first, completed last
+  const sortedAgendaItems = [...agendaItems].sort((a, b) => {
+    if (a.completed === b.completed) return 0;
+    return a.completed ? 1 : -1;
+  });
 
   // Mock pending tasks per vertical for color coding
   const pendingTasks = {
@@ -107,7 +208,7 @@ export function FRDDocument({ client }: FRDDocumentProps) {
                     </div>
                     <div className="text-center min-w-0">
                       <div className="text-xs font-medium leading-tight truncate">{section.title}</div>
-                      {taskCount > 0 && (
+                      {taskCount > 0 && subsection.id !== "overview" && (
                         <div className="text-xs leading-tight text-red-400">{taskCount} pending</div>
                       )}
                     </div>
@@ -166,7 +267,7 @@ export function FRDDocument({ client }: FRDDocumentProps) {
                   </div>
                   <div className="text-center min-w-0">
                     <div className="text-xs font-medium leading-tight truncate">{subsection.title}</div>
-                    {taskCount > 0 && (
+                    {taskCount > 0 && subsection.id !== "overview" && (
                       <div className="text-xs leading-tight text-red-400">{taskCount} pending</div>
                     )}
                   </div>
@@ -177,12 +278,12 @@ export function FRDDocument({ client }: FRDDocumentProps) {
         </div>
       </div>
 
-      {/* Main Content Grid */}
+      {/* Main Content Grid - Same structure as vertical sections */}
       <div className="flex-1 grid grid-cols-2 gap-3 min-h-0">
         {/* Left Column */}
         <div className="space-y-3 h-full flex flex-col">
-          {/* Advisors Assigned */}
-          <Card className="flex-shrink-0">
+          {/* Advisor Assignment */}
+          <Card className="flex-shrink-0" style={{ height: '120px' }}>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2 text-sm">
                 <User className="h-4 w-4" />
@@ -191,12 +292,140 @@ export function FRDDocument({ client }: FRDDocumentProps) {
             </CardHeader>
             <CardContent className="pt-0">
               <div className="flex gap-2">
-                <Badge variant="secondary" className="text-xs">Priya Sharma</Badge>
-                <Badge variant="secondary" className="text-xs">Rajesh Kumar</Badge>
+                {advisors.map((advisor, index) => (
+                  <Badge key={index} variant="secondary" className="text-xs">{advisor}</Badge>
+                ))}
               </div>
             </CardContent>
           </Card>
 
+          {/* Tasks Section */}
+          <Card className="flex-1 min-h-0">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <ClipboardList className="h-4 w-4" />
+                  Tasks ({tasks.filter(t => t.status === 'pending').length} pending)
+                </CardTitle>
+                <Button 
+                  onClick={() => setShowAddTask(true)} 
+                  size="sm"
+                  className="h-6 px-2 text-xs"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-y-auto">
+              <div className="space-y-2">
+                {tasks.map((task) => (
+                  <div key={task.id} className="flex items-center justify-between p-2 border rounded text-sm">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          checked={task.status === 'completed'}
+                          onCheckedChange={() => toggleTaskCompletion(task.id)}
+                        />
+                        <span className={task.status === 'completed' ? 'line-through text-muted-foreground' : ''}>{task.title}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground ml-6">
+                        {format(task.actionDate, "dd MMM yyyy")}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => removeTask(task.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+                {tasks.length === 0 && (
+                  <p className="text-center text-muted-foreground py-4 text-sm">No tasks</p>
+                )}
+              </div>
+
+              {/* Add Task Form */}
+              {showAddTask && (
+                <div className="mt-3 p-3 border rounded bg-muted/50">
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-xs">Task</Label>
+                      <Select
+                        value={newTaskTitle}
+                        onValueChange={setNewTaskTitle}
+                      >
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Select task..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {taskOptions.map((option, index) => (
+                            <SelectItem key={index} value={option} className="text-xs">
+                              {option}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="custom" className="text-xs">Custom Task</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {newTaskTitle === "custom" && (
+                        <Input
+                          className="mt-2 h-8 text-xs"
+                          placeholder="Enter custom task..."
+                          onChange={(e) => setNewTaskTitle(e.target.value)}
+                        />
+                      )}
+                    </div>
+                    
+                    <div>
+                      <Label className="text-xs">Action Date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={cn(
+                              "w-full justify-start text-left font-normal h-8 text-xs",
+                              !newTaskDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-3 w-3" />
+                            {newTaskDate ? format(newTaskDate, "dd MMM") : "Pick date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={newTaskDate}
+                            onSelect={setNewTaskDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button onClick={handleAddTask} size="sm" className="h-7 text-xs">Add</Button>
+                      <Button 
+                        onClick={() => setShowAddTask(false)} 
+                        variant="outline" 
+                        size="sm"
+                        className="h-7 text-xs"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-3 h-full flex flex-col">
           {/* Call Statistics - Three separate boxes */}
           <div className="grid grid-cols-3 gap-2 flex-shrink-0">
             <Card className="p-3">
@@ -232,67 +461,79 @@ export function FRDDocument({ client }: FRDDocumentProps) {
             </Card>
           </div>
 
-          {/* Pending Tasks */}
-          <Card className="flex-1 min-h-0">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">Pending Tasks</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-y-auto">
-              <p className="text-xs text-muted-foreground">Task overview coming soon</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column */}
-        <div className="space-y-3 h-full flex flex-col">
-          {/* Agenda Items - Combined with toggles */}
+          {/* Agenda Items */}
           <Card className="flex-1 min-h-0">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-sm">Agenda Items</CardTitle>
-                <div className="flex gap-2">
-                  <Badge variant="secondary" className="text-xs">
-                    Active: {activeAgendaItems.length}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    Completed: {completedAgendaItems.length}
-                  </Badge>
-                </div>
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Agenda Items ({agendaItems.filter(item => !item.completed).length} active)
+                </CardTitle>
+                <Button 
+                  onClick={() => setShowAddAgenda(true)} 
+                  size="sm"
+                  className="h-6 px-2 text-xs"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add
+                </Button>
               </div>
             </CardHeader>
             <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-y-auto">
-              {/* Active Items */}
-              {activeAgendaItems.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="text-xs font-medium text-green-600 mb-2">Active</h4>
-                  <div className="space-y-2">
-                    {activeAgendaItems.map((item) => (
-                      <div key={item.id} className="flex justify-between items-center text-xs p-2 bg-green-50 rounded">
-                        <span>{item.title}</span>
-                        <Badge variant="outline" className="text-xs">{item.vertical}</Badge>
-                      </div>
-                    ))}
+              <div className="space-y-2">
+                {sortedAgendaItems.map((item) => (
+                  <div key={item.id} className="flex items-center gap-2 p-2 border rounded text-sm">
+                    <Checkbox
+                      checked={item.completed}
+                      onCheckedChange={() => toggleAgendaItem(item.id)}
+                    />
+                    <span className={cn(
+                      "flex-1",
+                      item.completed && "line-through text-muted-foreground"
+                    )}>
+                      {item.title}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => removeAgendaItem(item.id)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+                {agendaItems.length === 0 && (
+                  <p className="text-center text-muted-foreground py-4 text-sm">No agenda items</p>
+                )}
+              </div>
+
+              {/* Add Agenda Item Form */}
+              {showAddAgenda && (
+                <div className="mt-3 p-3 border rounded bg-muted/50">
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-xs">Agenda Item</Label>
+                      <Input
+                        value={newAgendaTitle}
+                        onChange={(e) => setNewAgendaTitle(e.target.value)}
+                        placeholder="Enter agenda item..."
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={handleAddAgendaItem} size="sm" className="h-7 text-xs">Add</Button>
+                      <Button 
+                        onClick={() => setShowAddAgenda(false)} 
+                        variant="outline" 
+                        size="sm"
+                        className="h-7 text-xs"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              )}
-              
-              {/* Completed Items */}
-              {completedAgendaItems.length > 0 && (
-                <div>
-                  <h4 className="text-xs font-medium text-muted-foreground mb-2">Completed</h4>
-                  <div className="space-y-2">
-                    {completedAgendaItems.map((item) => (
-                      <div key={item.id} className="flex justify-between items-center text-xs p-2 bg-muted/30 rounded">
-                        <span className="line-through text-muted-foreground">{item.title}</span>
-                        <Badge variant="outline" className="text-xs">{item.vertical}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {activeAgendaItems.length === 0 && completedAgendaItems.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-4">No agenda items</p>
               )}
             </CardContent>
           </Card>
