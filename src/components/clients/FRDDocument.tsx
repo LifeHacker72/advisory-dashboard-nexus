@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   TrendingUp, Shield, CreditCard, Building2, 
-  Scale, FileText, MoreHorizontal, ChevronRight, Phone 
+  Scale, FileText, MoreHorizontal, ChevronRight, Phone, User 
 } from "lucide-react";
 import { format } from "date-fns";
 import { Client } from "@/types/client";
@@ -181,6 +181,22 @@ export function FRDDocument({ client }: FRDDocumentProps) {
       <div className="flex-1 grid grid-cols-2 gap-3 min-h-0">
         {/* Left Column */}
         <div className="space-y-3 h-full flex flex-col">
+          {/* Advisors Assigned */}
+          <Card className="flex-shrink-0">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <User className="h-4 w-4" />
+                Advisors Assigned
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex gap-2">
+                <Badge variant="secondary" className="text-xs">Priya Sharma</Badge>
+                <Badge variant="secondary" className="text-xs">Rajesh Kumar</Badge>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Call Statistics - Three separate boxes */}
           <div className="grid grid-cols-3 gap-2 flex-shrink-0">
             <Card className="p-3">

@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Plus, X, CheckCircle2, User, ClipboardList, Phone } from "lucide-react";
+import { CalendarIcon, Plus, X, CheckCircle2, User, ClipboardList, Phone, FileText, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Client } from "@/types/client";
@@ -288,30 +288,40 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
 
         {/* Right Column */}
         <div className="space-y-3 h-full flex flex-col">
-          {/* Call Statistics - Match height with Advisors */}
-          <Card className="flex-shrink-0" style={{ height: '120px' }}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Call Statistics</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex items-center gap-4">
-                <div className="text-center">
-                  <div className="text-xl font-bold">{stats.totalCalls}</div>
-                  <p className="text-xs text-muted-foreground">Calls</p>
+          {/* Call Statistics - Three separate boxes */}
+          <div className="grid grid-cols-3 gap-2 flex-shrink-0">
+            <Card className="p-3">
+              <div className="flex items-center gap-2">
+                <Phone className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <div className="text-lg font-bold">{stats.totalCalls}</div>
+                  <p className="text-xs text-muted-foreground">Calls Completed</p>
                 </div>
-                <div className="text-center">
+              </div>
+            </Card>
+            
+            <Card className="p-3">
+              <div className="flex items-center gap-2">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <div>
                   <div className="text-lg font-bold">{format(stats.lastCallDate, "dd MMM")}</div>
-                  <p className="text-xs text-muted-foreground">Last Call</p>
+                  <p className="text-xs text-muted-foreground">Last Call Date</p>
                 </div>
-                <div className="text-center">
+              </div>
+            </Card>
+            
+            <Card className="p-3">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <div>
                   <div className={`text-lg font-bold ${stats.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
                     {stats.daysSinceLastCall}d
                   </div>
-                  <p className="text-xs text-muted-foreground">Since</p>
+                  <p className="text-xs text-muted-foreground">Days Since</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </Card>
+          </div>
 
           {/* Agenda Items */}
           <Card className="flex-1 min-h-0">
