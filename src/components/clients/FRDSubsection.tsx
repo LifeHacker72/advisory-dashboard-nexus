@@ -164,9 +164,9 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
     }
   };
 
-  // Mock stats data
+  // Mock stats data for this specific vertical
   const stats = {
-    totalCalls: 8,
+    totalCalls: 8, // Specific to this vertical
     lastCallDate: new Date(2024, 8, 15),
     daysSinceLastCall: 11
   };
@@ -379,35 +379,29 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
         <div className="space-y-3 h-full flex flex-col">
           {/* Call Statistics - Three separate boxes with same height as advisors */}
           <div className="grid grid-cols-3 gap-2 flex-shrink-0">
-            <Card className="p-3 h-[120px] flex items-center">
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <div className="text-lg font-bold">{stats.totalCalls}</div>
-                  <p className="text-xs text-muted-foreground">Calls Completed</p>
-                </div>
+            <Card className="flex items-center justify-center h-[88px]">
+              <div className="text-center">
+                <Phone className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                <div className="text-lg font-bold">{stats.totalCalls}</div>
+                <p className="text-xs text-muted-foreground">Calls Completed</p>
               </div>
             </Card>
             
-            <Card className="p-3 h-[120px] flex items-center">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <div className="text-lg font-bold">{format(stats.lastCallDate, "dd MMM")}</div>
-                  <p className="text-xs text-muted-foreground">Last Call Date</p>
-                </div>
+            <Card className="flex items-center justify-center h-[88px]">
+              <div className="text-center">
+                <FileText className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                <div className="text-lg font-bold">{format(stats.lastCallDate, "dd MMM")}</div>
+                <p className="text-xs text-muted-foreground">Last Call Date</p>
               </div>
             </Card>
             
-            <Card className="p-3 h-[120px] flex items-center">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                <div>
-                  <div className={`text-lg font-bold ${stats.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
-                    {stats.daysSinceLastCall}d
-                  </div>
-                  <p className="text-xs text-muted-foreground">Days Since</p>
+            <Card className="flex items-center justify-center h-[88px]">
+              <div className="text-center">
+                <TrendingUp className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                <div className={`text-lg font-bold ${stats.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
+                  {stats.daysSinceLastCall}d
                 </div>
+                <p className="text-xs text-muted-foreground">Days Since</p>
               </div>
             </Card>
           </div>
