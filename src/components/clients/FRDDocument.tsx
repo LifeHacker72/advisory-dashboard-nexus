@@ -24,6 +24,8 @@ interface Task {
   title: string;
   actionDate: Date;
   status: 'pending' | 'completed';
+  agendaItemId?: string;
+  vertical: string;
 }
 
 interface AgendaItem {
@@ -44,7 +46,7 @@ const subsections = [
   { id: "tax", title: "Tax Planning", icon: FileText, color: "bg-green-500" },
   { id: "insurance", title: "Insurance", icon: Shield, color: "bg-red-500" },
   { id: "credit", title: "Credit Cards", icon: CreditCard, color: "bg-purple-500" },
-  { id: "banking", title: "Banking & Compliance", icon: Building2, color: "bg-orange-500" },
+  { id: "banking", title: "Banking ++", icon: Building2, color: "bg-orange-500" },
   { id: "estate", title: "Estate Planning", icon: Scale, color: "bg-indigo-500" },
   { id: "others", title: "Others", icon: MoreHorizontal, color: "bg-gray-500" }
 ];
@@ -68,9 +70,10 @@ export function FRDDocument({ client }: FRDDocumentProps) {
   
   // Overview section state (combined advisors from all verticals)
   const [advisors] = useState(["Priya Sharma", "Rajesh Kumar", "Anita Patel", "Vikram Singh", "Meera Iyer", "Arjun Nair"]);
+  const [showAllAdvisors, setShowAllAdvisors] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([
-    { id: "1", title: "Review investment portfolio", actionDate: new Date(2024, 8, 15), status: 'pending' },
-    { id: "2", title: "Update insurance coverage", actionDate: new Date(2024, 8, 20), status: 'pending' }
+    { id: "1", title: "Review investment portfolio", actionDate: new Date(2024, 8, 15), status: 'pending', vertical: "Financial Planning" },
+    { id: "2", title: "Update insurance coverage", actionDate: new Date(2024, 8, 20), status: 'pending', vertical: "Insurance" }
   ]);
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([
     { id: "1", title: "Gather current investment statements", completed: true, date: new Date(2024, 8, 10) },
@@ -92,8 +95,14 @@ export function FRDDocument({ client }: FRDDocumentProps) {
   const [editingAgenda, setEditingAgenda] = useState<string | null>(null);
   const [editTaskTitle, setEditTaskTitle] = useState("");
   const [editTaskDate, setEditTaskDate] = useState<Date>();
+  const [editTaskAgendaItem, setEditTaskAgendaItem] = useState("");
+  const [editTaskVertical, setEditTaskVertical] = useState("");
   const [editAgendaTitle, setEditAgendaTitle] = useState("");
   const [editAgendaDate, setEditAgendaDate] = useState<Date>();
+  
+  // New task form states
+  const [newTaskAgendaItem, setNewTaskAgendaItem] = useState("");
+  const [newTaskVertical, setNewTaskVertical] = useState("");
 
   // Mock data for cumulative stats from all verticals combined
   const cumulativeStats = {
@@ -109,7 +118,8 @@ export function FRDDocument({ client }: FRDDocumentProps) {
         id: Date.now().toString(),
         title: newTaskTitle,
         actionDate: newTaskDate,
-        status: 'pending'
+        status: 'pending',
+        vertical: 'Overview'
       };
       setTasks([...tasks, newTask]);
       setNewTaskTitle("");
@@ -153,20 +163,24 @@ export function FRDDocument({ client }: FRDDocumentProps) {
     setEditingTask(task.id);
     setEditTaskTitle(task.title);
     setEditTaskDate(task.actionDate);
+    setEditTaskAgendaItem(task.agendaItemId || "");
+    setEditTaskVertical(task.vertical);
   };
 
   const saveTaskEdit = () => {
-    if (editingTask && editTaskTitle && editTaskDate) {
+    if (editingTask && editTaskTitle && editTaskDate && editTaskVertical) {
       setTasks(tasks =>
         tasks.map(task =>
           task.id === editingTask
-            ? { ...task, title: editTaskTitle, actionDate: editTaskDate }
+            ? { ...task, title: editTaskTitle, actionDate: editTaskDate, agendaItemId: editTaskAgendaItem, vertical: editTaskVertical }
             : task
         )
       );
       setEditingTask(null);
       setEditTaskTitle("");
       setEditTaskDate(undefined);
+      setEditTaskAgendaItem("");
+      setEditTaskVertical("");
     }
   };
 
@@ -343,9 +357,19 @@ export function FRDDocument({ client }: FRDDocumentProps) {
             </CardHeader>
             <CardContent className="pt-0">
               <div className="flex flex-wrap gap-1">
-                {advisors.map((advisor, index) => (
+                {(showAllAdvisors ? advisors : advisors.slice(0, 3)).map((advisor, index) => (
                   <Badge key={index} variant="secondary" className="text-xs">{advisor}</Badge>
                 ))}
+                {advisors.length > 3 && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-5 px-2 text-xs"
+                    onClick={() => setShowAllAdvisors(!showAllAdvisors)}
+                  >
+                    {showAllAdvisors ? 'Less' : `+${advisors.length - 3} more`}
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -372,41 +396,110 @@ export function FRDDocument({ client }: FRDDocumentProps) {
               <div className="space-y-2">
                 {tasks.map((task) => (
                   <div key={task.id} className="p-2 border rounded text-sm">
-                    {editingTask === task.id ? (
-                      <div className="space-y-2">
-                        <Input
-                          value={editTaskTitle}
-                          onChange={(e) => setEditTaskTitle(e.target.value)}
-                          className="h-8 text-xs"
-                        />
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className={cn(
-                                "w-full justify-start text-left font-normal h-8 text-xs",
-                                !editTaskDate && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-3 w-3" />
-                              {editTaskDate ? format(editTaskDate, "dd MMM yyyy") : "Pick date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={editTaskDate}
-                              onSelect={setEditTaskDate}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <div className="flex gap-2">
-                          <Button onClick={saveTaskEdit} size="sm" className="h-6 text-xs">Save</Button>
-                          <Button onClick={() => setEditingTask(null)} variant="outline" size="sm" className="h-6 text-xs">Cancel</Button>
-                        </div>
-                      </div>
+                     {editingTask === task.id ? (
+                       <div className="space-y-3">
+                         <div className="grid grid-cols-3 gap-2">
+                           <div>
+                             <Label className="text-xs">Task</Label>
+                             <Select
+                               value={editTaskTitle}
+                               onValueChange={setEditTaskTitle}
+                             >
+                               <SelectTrigger className="h-8 text-xs">
+                                 <SelectValue placeholder="Select task..." />
+                               </SelectTrigger>
+                               <SelectContent>
+                                 {taskOptions.map((option, index) => (
+                                   <SelectItem key={index} value={option} className="text-xs">
+                                     {option}
+                                   </SelectItem>
+                                 ))}
+                                 <SelectItem value="custom" className="text-xs">Add Manual Task</SelectItem>
+                               </SelectContent>
+                             </Select>
+                             {editTaskTitle === "custom" && (
+                               <Input
+                                 className="mt-1 h-8 text-xs"
+                                 placeholder="Enter custom task..."
+                                 onChange={(e) => setEditTaskTitle(e.target.value)}
+                               />
+                             )}
+                           </div>
+                           
+                           <div>
+                             <Label className="text-xs">Action Date</Label>
+                             <Popover>
+                               <PopoverTrigger asChild>
+                                 <Button
+                                   variant="outline"
+                                   size="sm"
+                                   className={cn(
+                                     "w-full justify-start text-left font-normal h-8 text-xs",
+                                     !editTaskDate && "text-muted-foreground"
+                                   )}
+                                 >
+                                   <CalendarIcon className="mr-2 h-3 w-3" />
+                                   {editTaskDate ? format(editTaskDate, "dd MMM") : "Pick date"}
+                                 </Button>
+                               </PopoverTrigger>
+                               <PopoverContent className="w-auto p-0">
+                                 <Calendar
+                                   mode="single"
+                                   selected={editTaskDate}
+                                   onSelect={setEditTaskDate}
+                                   initialFocus
+                                 />
+                               </PopoverContent>
+                             </Popover>
+                           </div>
+
+                           <div>
+                             <Label className="text-xs">Agenda Item</Label>
+                             <Select
+                               value={editTaskAgendaItem}
+                               onValueChange={setEditTaskAgendaItem}
+                             >
+                               <SelectTrigger className="h-8 text-xs">
+                                 <SelectValue placeholder="Select agenda..." />
+                               </SelectTrigger>
+                               <SelectContent>
+                                 {agendaItems.map((item) => (
+                                   <SelectItem key={item.id} value={item.id} className="text-xs">
+                                     {item.title}
+                                   </SelectItem>
+                                 ))}
+                                 <SelectItem value="new" className="text-xs">Add New Agenda Item</SelectItem>
+                               </SelectContent>
+                             </Select>
+                           </div>
+                         </div>
+                         
+                         <div>
+                           <Label className="text-xs">Vertical</Label>
+                           <Select
+                             value={editTaskVertical}
+                             onValueChange={setEditTaskVertical}
+                           >
+                             <SelectTrigger className="h-8 text-xs">
+                               <SelectValue placeholder="Select vertical..." />
+                             </SelectTrigger>
+                             <SelectContent>
+                               <SelectItem value="Financial Planning" className="text-xs">Financial Planning</SelectItem>
+                               <SelectItem value="Tax Planning" className="text-xs">Tax Planning</SelectItem>
+                               <SelectItem value="Insurance" className="text-xs">Insurance</SelectItem>
+                               <SelectItem value="Credit Cards" className="text-xs">Credit Cards</SelectItem>
+                               <SelectItem value="Banking ++" className="text-xs">Banking ++</SelectItem>
+                               <SelectItem value="Estate Planning" className="text-xs">Estate Planning</SelectItem>
+                               <SelectItem value="Others" className="text-xs">Others</SelectItem>
+                             </SelectContent>
+                           </Select>
+                         </div>
+                         
+                         <div className="flex gap-2">
+                           <Button onClick={saveTaskEdit} size="sm" className="h-6 text-xs">Save</Button>
+                           <Button onClick={() => setEditingTask(null)} variant="outline" size="sm" className="h-6 text-xs">Cancel</Button>
+                         </div>
+                       </div>
                     ) : (
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
