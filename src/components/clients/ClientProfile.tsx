@@ -7,8 +7,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Client } from "@/types/client";
 import { ClientProfileHeader } from "./ClientProfileHeader";
-import { ClientBioSection } from "./ClientBioSection";
-import { ClientMetricsGrid } from "./ClientMetricsGrid";
+import { ClientSummaryView } from "./ClientSummaryView";
 import { ClientRecentBookings } from "./ClientRecentBookings";
 import { RiskProfileResponses } from "./RiskProfileResponses";
 import { AdvisoryAgreement } from "./AdvisoryAgreement";
@@ -30,9 +29,13 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
         <div className="flex flex-col h-full max-h-[90vh]">
           {/* Header without close button since Dialog already has one */}
           <div className="flex items-center gap-4 p-6 border-b">
-            <div>
+            <div className="flex-1">
               <h2 className="text-2xl font-bold">{client.name}</h2>
-              <p className="text-muted-foreground">{client.email}</p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
+                <span>{client.email}</span>
+                <span>•</span>
+                <span>{client.phone}</span>
+              </div>
             </div>
             <StatusBadge
               variant={
@@ -49,6 +52,7 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
             <TabsList className="mx-6 mt-4 w-fit flex-shrink-0">
               <TabsTrigger value="summary">Summary View</TabsTrigger>
+              <TabsTrigger value="bookings">Bookings</TabsTrigger>
               <TabsTrigger value="frd">FRD</TabsTrigger>
               <TabsTrigger value="notes">Meeting Notes</TabsTrigger>
               <TabsTrigger value="tasks">Pending Tasks</TabsTrigger>
@@ -58,9 +62,15 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
             <div className="flex-1 overflow-hidden min-h-0">
               <TabsContent value="summary" className="mt-0 h-full overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col">
                 <ScrollArea className="flex-1">
-                  <div className="p-6 space-y-6">
-                    <ClientBioSection />
-                    <ClientMetricsGrid client={client} />
+                  <div className="p-6">
+                    <ClientSummaryView client={client} />
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+
+              <TabsContent value="bookings" className="mt-0 h-full overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col">
+                <ScrollArea className="flex-1">
+                  <div className="p-6">
                     <ClientRecentBookings client={client} />
                   </div>
                 </ScrollArea>
