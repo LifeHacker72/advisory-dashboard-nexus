@@ -33,7 +33,7 @@ export function ClientProfileHeaderExtended({ client }: ClientProfileHeaderExten
       </div>
 
       {/* Availability */}
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 min-w-[200px]">
         <div className="flex items-center gap-1">
           <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Availability:</span>
           {!isEditingAvailability && (
@@ -52,7 +52,7 @@ export function ClientProfileHeaderExtended({ client }: ClientProfileHeaderExten
             <Input
               value={availability}
               onChange={(e) => setAvailability(e.target.value)}
-              className="text-xs h-7 w-32"
+              className="text-xs h-7 w-full"
             />
             <div className="flex gap-1">
               <Button onClick={() => setIsEditingAvailability(false)} size="sm" className="h-6 text-xs px-2">Save</Button>
@@ -65,7 +65,7 @@ export function ClientProfileHeaderExtended({ client }: ClientProfileHeaderExten
       </div>
 
       {/* Risk Profile */}
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 min-w-[120px]">
         <div className="flex items-center gap-1">
           <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Risk:</span>
           {!isEditingRiskProfile && (
@@ -82,7 +82,7 @@ export function ClientProfileHeaderExtended({ client }: ClientProfileHeaderExten
         {isEditingRiskProfile ? (
           <div className="space-y-2">
             <Select value={riskProfile} onValueChange={setRiskProfile}>
-              <SelectTrigger className="text-xs h-7 w-28">
+              <SelectTrigger className="text-xs h-7 w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -102,7 +102,7 @@ export function ClientProfileHeaderExtended({ client }: ClientProfileHeaderExten
       </div>
 
       {/* Return Date */}
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 min-w-[120px]">
         <div className="flex items-center gap-1">
           <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Return:</span>
           {!isEditingReturnDate && (
@@ -122,7 +122,7 @@ export function ClientProfileHeaderExtended({ client }: ClientProfileHeaderExten
               type="date"
               value={returnDate}
               onChange={(e) => setReturnDate(e.target.value)}
-              className="text-xs h-7 w-32"
+              className="text-xs h-7 w-full"
             />
             <div className="flex gap-1">
               <Button onClick={() => setIsEditingReturnDate(false)} size="sm" className="h-6 text-xs px-2">Save</Button>
