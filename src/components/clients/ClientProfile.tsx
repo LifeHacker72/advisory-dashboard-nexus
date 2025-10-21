@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Client } from "@/types/client";
-import { ClientProfileHeader } from "./ClientProfileHeader";
+import { ClientProfileHeaderExtended } from "./ClientProfileHeaderExtended";
 import { ClientSummaryView } from "./ClientSummaryView";
 import { ClientRecentBookings } from "./ClientRecentBookings";
 import { RiskProfileResponses } from "./RiskProfileResponses";
@@ -27,26 +27,7 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl max-h-[90vh] p-0 overflow-hidden">
         <div className="flex flex-col h-full max-h-[90vh]">
-          {/* Header without close button since Dialog already has one */}
-          <div className="flex items-center gap-4 p-6 border-b">
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold">{client.name}</h2>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground mt-1">
-                <span>{client.email}</span>
-                <span>•</span>
-                <span>{client.phone}</span>
-              </div>
-            </div>
-            <StatusBadge
-              variant={
-                client.subscriptionStatus === "active" ? "success" :
-                client.subscriptionStatus === "expired" ? "danger" :
-                "warning"
-              }
-            >
-              {client.subscriptionStatus.charAt(0).toUpperCase() + client.subscriptionStatus.slice(1)}
-            </StatusBadge>
-          </div>
+          <ClientProfileHeaderExtended client={client} />
 
           {/* Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden min-h-0">
