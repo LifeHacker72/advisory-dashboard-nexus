@@ -18,27 +18,27 @@ export function ClientBioSection() {
 
   return (
     <Card>
-      <CardHeader className="pb-4">
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">Client Bio</CardTitle>
+          <CardTitle className="text-base">Client Bio</CardTitle>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsEditingBio(!isEditingBio)}
-            className="h-8 w-8 p-0"
+            className="h-7 w-7 p-0"
           >
-            <Edit3 className="h-4 w-4" />
+            <Edit3 className="h-3.5 w-3.5" />
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         {isEditingBio ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Textarea
               value={clientBio}
               onChange={(e) => setClientBio(e.target.value)}
               placeholder="Enter client bio..."
-              className="min-h-[100px]"
+              className="min-h-[60px] text-sm"
             />
             <div className="space-y-2">
               <label className="text-sm font-medium">LinkedIn Profile</label>
@@ -56,7 +56,7 @@ export function ClientBioSection() {
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             <p className="text-sm leading-relaxed">{clientBio}</p>
             {linkedinProfile && (
               <a
@@ -65,7 +65,7 @@ export function ClientBioSection() {
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800"
               >
-                <ExternalLink className="h-4 w-4" />
+                <ExternalLink className="h-3.5 w-3.5" />
                 LinkedIn Profile
               </a>
             )}

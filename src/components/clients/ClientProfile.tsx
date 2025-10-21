@@ -62,7 +62,7 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
             <div className="flex-1 overflow-hidden min-h-0">
               <TabsContent value="summary" className="mt-0 h-full overflow-hidden m-0 data-[state=active]:flex data-[state=active]:flex-col">
                 <ScrollArea className="flex-1">
-                  <div className="p-6">
+                  <div className="p-4">
                     <ClientSummaryView client={client} />
                   </div>
                 </ScrollArea>
