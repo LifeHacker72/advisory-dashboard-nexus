@@ -53,57 +53,56 @@ export function ClientSummaryView({ client }: ClientSummaryViewProps) {
       <ClientMetricsGrid client={client} />
 
       {/* Information Grid Below */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Client Bio - Spans 2 columns */}
-        <div className="lg:col-span-2">
-          <ClientBioSection />
-        </div>
+      <div className="space-y-4">
+        {/* Client Bio - Full Width */}
+        <ClientBioSection />
 
-        {/* Risk Profile */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Risk Profile</CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditingRiskProfile(!isEditingRiskProfile)}
-                className="h-7 w-7 p-0"
-              >
-                <Edit3 className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isEditingRiskProfile ? (
-              <div className="space-y-3">
-                <Select value={riskProfile} onValueChange={setRiskProfile}>
-                  <SelectTrigger className="text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Conservative">Conservative</SelectItem>
-                    <SelectItem value="Moderate">Moderate</SelectItem>
-                    <SelectItem value="Aggressive">Aggressive</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="flex gap-2">
-                  <Button onClick={handleSaveRiskProfile} size="sm">Save</Button>
-                  <Button variant="outline" onClick={() => setIsEditingRiskProfile(false)} size="sm">Cancel</Button>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm font-medium">{riskProfile}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Availability & How to Contact - Spans 2 columns */}
-        <div className="lg:col-span-2">
+        {/* Risk Profile, Availability, Return Date - Single Row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Risk Profile */}
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Availability (IST) & How to Contact</CardTitle>
+                <CardTitle className="text-base">Risk Profile</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsEditingRiskProfile(!isEditingRiskProfile)}
+                  className="h-7 w-7 p-0"
+                >
+                  <Edit3 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {isEditingRiskProfile ? (
+                <div className="space-y-3">
+                  <Select value={riskProfile} onValueChange={setRiskProfile}>
+                    <SelectTrigger className="text-sm">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Conservative">Conservative</SelectItem>
+                      <SelectItem value="Moderate">Moderate</SelectItem>
+                      <SelectItem value="Aggressive">Aggressive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <div className="flex gap-2">
+                    <Button onClick={handleSaveRiskProfile} size="sm">Save</Button>
+                    <Button variant="outline" onClick={() => setIsEditingRiskProfile(false)} size="sm">Cancel</Button>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm font-medium">{riskProfile}</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Availability & How to Contact */}
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base">Availability & Contact</CardTitle>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -121,7 +120,7 @@ export function ClientSummaryView({ client }: ClientSummaryViewProps) {
                     value={availability}
                     onChange={(e) => setAvailability(e.target.value)}
                     placeholder="Enter availability and contact preferences..."
-                    className="min-h-[60px] text-sm"
+                    className="min-h-[50px] text-sm"
                   />
                   <div className="flex gap-2">
                     <Button onClick={handleSaveAvailability} size="sm">Save</Button>
@@ -129,63 +128,20 @@ export function ClientSummaryView({ client }: ClientSummaryViewProps) {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm leading-relaxed">{availability}</p>
+                <p className="text-sm leading-relaxed line-clamp-3">{availability}</p>
               )}
             </CardContent>
           </Card>
-        </div>
 
-        {/* Planned Return Date */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base">Return to India</CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setIsEditingReturnDate(!isEditingReturnDate)}
-                className="h-7 w-7 p-0"
-              >
-                <Edit3 className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isEditingReturnDate ? (
-              <div className="space-y-3">
-                <Input
-                  type="date"
-                  value={returnDate}
-                  onChange={(e) => setReturnDate(e.target.value)}
-                  className="text-sm"
-                />
-                <div className="flex gap-2">
-                  <Button onClick={handleSaveReturnDate} size="sm">Save</Button>
-                  <Button variant="outline" onClick={() => setIsEditingReturnDate(false)} size="sm">Cancel</Button>
-                </div>
-              </div>
-            ) : (
-              <p className="text-sm font-medium">
-                {new Date(returnDate).toLocaleDateString('en-US', { 
-                  year: 'numeric', 
-                  month: 'short', 
-                  day: 'numeric' 
-                })}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Important Notes - Spans 3 columns */}
-        <div className="lg:col-span-3">
+          {/* Planned Return Date */}
           <Card>
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-base">Important Notes</CardTitle>
+                <CardTitle className="text-base">Return to India</CardTitle>
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setIsEditingNotes(!isEditingNotes)}
+                  onClick={() => setIsEditingReturnDate(!isEditingReturnDate)}
                   className="h-7 w-7 p-0"
                 >
                   <Edit3 className="h-3.5 w-3.5" />
@@ -193,25 +149,66 @@ export function ClientSummaryView({ client }: ClientSummaryViewProps) {
               </div>
             </CardHeader>
             <CardContent>
-              {isEditingNotes ? (
+              {isEditingReturnDate ? (
                 <div className="space-y-3">
-                  <Textarea
-                    value={importantNotes}
-                    onChange={(e) => setImportantNotes(e.target.value)}
-                    placeholder="Enter important notes about the client..."
-                    className="min-h-[60px] text-sm"
+                  <Input
+                    type="date"
+                    value={returnDate}
+                    onChange={(e) => setReturnDate(e.target.value)}
+                    className="text-sm"
                   />
                   <div className="flex gap-2">
-                    <Button onClick={handleSaveNotes} size="sm">Save</Button>
-                    <Button variant="outline" onClick={() => setIsEditingNotes(false)} size="sm">Cancel</Button>
+                    <Button onClick={handleSaveReturnDate} size="sm">Save</Button>
+                    <Button variant="outline" onClick={() => setIsEditingReturnDate(false)} size="sm">Cancel</Button>
                   </div>
                 </div>
               ) : (
-                <p className="text-sm leading-relaxed">{importantNotes}</p>
+                <p className="text-sm font-medium">
+                  {new Date(returnDate).toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}
+                </p>
               )}
             </CardContent>
           </Card>
         </div>
+
+        {/* Important Notes - Full Width */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-base">Important Notes</CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditingNotes(!isEditingNotes)}
+                className="h-7 w-7 p-0"
+              >
+                <Edit3 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isEditingNotes ? (
+              <div className="space-y-3">
+                <Textarea
+                  value={importantNotes}
+                  onChange={(e) => setImportantNotes(e.target.value)}
+                  placeholder="Enter important notes about the client..."
+                  className="min-h-[80px] text-sm"
+                />
+                <div className="flex gap-2">
+                  <Button onClick={handleSaveNotes} size="sm">Save</Button>
+                  <Button variant="outline" onClick={() => setIsEditingNotes(false)} size="sm">Cancel</Button>
+                </div>
+              </div>
+            ) : (
+              <p className="text-sm leading-relaxed">{importantNotes}</p>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
