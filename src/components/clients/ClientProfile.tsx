@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/shared/StatusBadge";
 import { Client } from "@/types/client";
 import { ClientProfileHeaderExtended } from "./ClientProfileHeaderExtended";
@@ -26,6 +26,10 @@ export function ClientProfile({ client, isOpen, onClose }: ClientProfileProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl max-h-[90vh] p-0 overflow-hidden">
+        <DialogTitle className="sr-only">Client Profile - {client.name}</DialogTitle>
+        <DialogDescription className="sr-only">
+          View and manage detailed information about {client.name}
+        </DialogDescription>
         <div className="flex flex-col h-full max-h-[90vh]">
           <ClientProfileHeaderExtended client={client} />
 
