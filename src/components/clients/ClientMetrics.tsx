@@ -7,7 +7,7 @@ interface Client {
   email: string;
   phone: string;
   subscriptionDate: string;
-  subscriptionStatus: "active" | "expired" | "dormant";
+  subscriptionStatus: "active" | "expired" | "dormant" | "deadpooled" | "upForRenewal";
   daysSinceLastCall: number;
 }
 
@@ -20,10 +20,11 @@ export function ClientMetrics({ clients }: ClientMetricsProps) {
   const totalMembers = clients.length;
   const activeMembers = clients.filter(c => c.subscriptionStatus === "active").length;
   const expiredMembers = clients.filter(c => c.subscriptionStatus === "expired").length;
-  const dormantMembers = clients.filter(c => c.subscriptionStatus === "dormant").length;
+  const deadpooledMembers = clients.filter(c => c.subscriptionStatus === "deadpooled").length;
+  const upForRenewalMembers = clients.filter(c => c.subscriptionStatus === "upForRenewal").length;
 
   return (
-    <div className="grid gap-6 md:grid-cols-4">
+    <div className="grid gap-6 md:grid-cols-5">
       <Card className="glass-card">
         <CardHeader className="pb-2">
           <CardTitle>Total Members</CardTitle>
@@ -56,11 +57,21 @@ export function ClientMetrics({ clients }: ClientMetricsProps) {
 
       <Card className="glass-card">
         <CardHeader className="pb-2">
-          <CardTitle>Dormant</CardTitle>
-          <CardDescription>Inactive members</CardDescription>
+          <CardTitle>Deadpooled</CardTitle>
+          <CardDescription>Never expected to renew</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold text-amber-600">{dormantMembers}</div>
+          <div className="text-3xl font-bold text-muted-foreground">{deadpooledMembers}</div>
+        </CardContent>
+      </Card>
+
+      <Card className="glass-card bg-muted/30">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-muted-foreground">Up for Renewal</CardTitle>
+          <CardDescription>Expiring within 2 months</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-3xl font-bold text-muted-foreground">{upForRenewalMembers}</div>
         </CardContent>
       </Card>
     </div>

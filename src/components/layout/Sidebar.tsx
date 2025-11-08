@@ -25,18 +25,13 @@ type NavItem = {
 
 const navItems: NavItem[] = [
   {
-    title: "Dashboard",
-    path: "/",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Turtle Members",
+    title: "Members",
     path: "/clients",
     icon: Users,
     badge: 24,
   },
   {
-    title: "Turtle Advisors",
+    title: "Advisors",
     path: "/advisors",
     icon: UserCog,
   },

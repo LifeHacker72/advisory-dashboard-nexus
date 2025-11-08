@@ -5,6 +5,6 @@ export interface Client {
   email: string;
   phone: string;
   subscriptionDate: string;
-  subscriptionStatus: "active" | "expired" | "dormant";
+  subscriptionStatus: "active" | "expired" | "dormant" | "deadpooled" | "upForRenewal";
   daysSinceLastCall: number;
 }

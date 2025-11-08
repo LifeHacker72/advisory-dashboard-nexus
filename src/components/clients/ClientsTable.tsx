@@ -10,7 +10,7 @@ interface Client {
   email: string;
   phone: string;
   subscriptionDate: string;
-  subscriptionStatus: "active" | "expired" | "dormant";
+  subscriptionStatus: "active" | "expired" | "dormant" | "deadpooled" | "upForRenewal";
   daysSinceLastCall: number;
 }
 
@@ -26,6 +26,8 @@ export function ClientsTable({ clients, onViewClient, onEditClient }: ClientsTab
     { label: "Active", value: "active" },
     { label: "Expired", value: "expired" },
     { label: "Dormant", value: "dormant" },
+    { label: "Deadpooled", value: "deadpooled" },
+    { label: "Up for Renewal", value: "upForRenewal" },
   ];
 
   const sortOptions = [
@@ -52,10 +54,13 @@ export function ClientsTable({ clients, onViewClient, onEditClient }: ClientsTab
           variant={
             client.subscriptionStatus === "active" ? "success" :
             client.subscriptionStatus === "expired" ? "danger" :
+            client.subscriptionStatus === "upForRenewal" ? "warning" :
+            client.subscriptionStatus === "deadpooled" ? "default" :
             "warning"
           }
         >
-          {client.subscriptionStatus.charAt(0).toUpperCase() + client.subscriptionStatus.slice(1)}
+          {client.subscriptionStatus === "upForRenewal" ? "Up for Renewal" : 
+           client.subscriptionStatus.charAt(0).toUpperCase() + client.subscriptionStatus.slice(1)}
         </StatusBadge>
       ),
     },

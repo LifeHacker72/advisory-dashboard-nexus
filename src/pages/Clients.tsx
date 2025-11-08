@@ -97,7 +97,7 @@ export default function Clients() {
       <div className="space-y-6 animate-fade-in">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Turtle Members</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Members</h2>
             <p className="text-muted-foreground">
               Manage member subscriptions and track engagement.
             </p>
