@@ -208,6 +208,7 @@ export default function Bookings() {
           data={bookings}
           keyExtractor={(booking) => booking.id}
           searchPlaceholder="Search bookings..."
+          onRowClick={(booking) => handleEditClick(booking)}
         />
 
         {/* Add New Booking Dialog */}
