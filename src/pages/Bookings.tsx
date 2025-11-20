@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import DashboardLayout from "@/components/layout/Dashboard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import NewBookingForm from "@/components/bookings/NewBookingForm";
 
 interface Booking {
   id: number;
@@ -258,64 +258,14 @@ export default function Bookings() {
 
         {/* Add New Booking Dialog */}
         <Dialog open={openNewBooking} onOpenChange={setOpenNewBooking}>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add New Booking</DialogTitle>
               <DialogDescription>
                 Create a new meeting between a member and an advisor.
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="client" className="text-right">
-                  Member
-                </Label>
-                <Input id="client" placeholder="Search member..." className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="advisor" className="text-right">
-                  Advisor
-                </Label>
-                <Input id="advisor" placeholder="Search advisor..." className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="date" className="text-right">
-                  Date
-                </Label>
-                <Input id="date" type="datetime-local" className="col-span-3" />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="status" className="text-right">
-                  Status
-                </Label>
-                <Select defaultValue="upcoming">
-                  <SelectTrigger className="col-span-3">
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="upcoming">Upcoming</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                    <SelectItem value="no_show">No Show</SelectItem>
-                    <SelectItem value="rescheduled">Rescheduled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpenNewBooking(false)}>
-                Cancel
-              </Button>
-              <Button 
-                className="bg-primary text-black"
-                onClick={() => {
-                  console.log("New booking created");
-                  setOpenNewBooking(false);
-                }}
-              >
-                Create Booking
-              </Button>
-            </DialogFooter>
+            <NewBookingForm onClose={() => setOpenNewBooking(false)} />
           </DialogContent>
         </Dialog>
 
