@@ -138,44 +138,6 @@ export default function Bookings() {
         </StatusBadge>
       ),
     },
-    {
-      key: "records",
-      title: "Records",
-      render: (booking: Booking) => (
-        <span className={`font-medium ${
-          booking.records === "available" ? "text-success" : 
-          booking.records === "unavailable" ? "text-danger" : 
-          "text-muted-foreground"
-        }`}>
-          {booking.records === "available" ? "Available" : 
-           booking.records === "unavailable" ? "Unavailable" : 
-           "-"}
-        </span>
-      ),
-    },
-    {
-      key: "actions",
-      title: "Actions",
-      render: (booking: Booking) => (
-        <div className="flex gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => console.log("View records:", booking)}
-            disabled={booking.records === "-"}
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => handleEditClick(booking)}
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
-        </div>
-      ),
-    },
   ];
 
   return (
