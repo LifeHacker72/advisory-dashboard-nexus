@@ -114,13 +114,11 @@ export default function Bookings() {
       key: "client",
       title: "Member",
       sortable: true,
-      onClick: (booking: Booking) => console.log(`Filter by member: ${booking.client}`),
     },
     {
       key: "advisor",
       title: "Advisor",
       sortable: true,
-      onClick: (booking: Booking) => console.log(`Filter by advisor: ${booking.advisor}`),
     },
     {
       key: "date",
@@ -233,7 +231,10 @@ export default function Bookings() {
                 Update booking details for {selectedBooking?.client}.
               </DialogDescription>
             </DialogHeader>
-            <NewBookingForm onClose={() => setOpenEditBooking(false)} />
+            <NewBookingForm 
+              onClose={() => setOpenEditBooking(false)} 
+              initialData={selectedBooking}
+            />
           </DialogContent>
         </Dialog>
       </div>

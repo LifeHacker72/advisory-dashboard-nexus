@@ -83,15 +83,31 @@ const agendaOptions = [
 
 interface NewBookingFormProps {
   onClose: () => void;
+  initialData?: {
+    client: string;
+    advisor: string;
+    date: string;
+    status: string;
+  } | null;
 }
 
-export default function NewBookingForm({ onClose }: NewBookingFormProps) {
-  const [selectedMember, setSelectedMember] = useState<typeof mockMembers[0] | null>(null);
-  const [selectedAdvisor, setSelectedAdvisor] = useState<typeof mockAdvisors[0] | null>(null);
+export default function NewBookingForm({ onClose, initialData }: NewBookingFormProps) {
+  const [selectedMember, setSelectedMember] = useState<typeof mockMembers[0] | null>(
+    initialData ? mockMembers.find(m => m.name === initialData.client) || null : null
+  );
+  const [selectedAdvisor, setSelectedAdvisor] = useState<typeof mockAdvisors[0] | null>(
+    initialData ? mockAdvisors.find(a => a.name === initialData.advisor) || null : null
+  );
   const [agenda, setAgenda] = useState("");
-  const [meetingTitle, setMeetingTitle] = useState("");
-  const [date, setDate] = useState<Date>();
-  const [time, setTime] = useState("");
+  const [meetingTitle, setMeetingTitle] = useState(
+    initialData?.advisor ? `Meeting with ${initialData.advisor}` : ""
+  );
+  const [date, setDate] = useState<Date | undefined>(
+    initialData?.date ? new Date(initialData.date.split(" - ")[0]) : undefined
+  );
+  const [time, setTime] = useState(
+    initialData?.date ? initialData.date.split(" - ")[1] || "" : ""
+  );
   const [openMemberCombo, setOpenMemberCombo] = useState(false);
   const [openAdvisorCombo, setOpenAdvisorCombo] = useState(false);
   const [openAgendaCombo, setOpenAgendaCombo] = useState(false);
