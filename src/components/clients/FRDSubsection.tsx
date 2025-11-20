@@ -9,8 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { CalendarIcon, Plus, X, CheckCircle2, User, ClipboardList, Phone, FileText, TrendingUp, ChevronDown, ChevronRight } from "lucide-react";
+import { CalendarIcon, Plus, X, CheckCircle2, User, ClipboardList, Phone, FileText, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Client } from "@/types/client";
@@ -20,7 +19,7 @@ interface Task {
   title: string;
   actionDate: Date;
   status: 'pending' | 'completed';
-  agendaItemId: string;
+  agendaItemId?: string;
   vertical: string;
 }
 
@@ -68,19 +67,18 @@ const getVerticalAdvisors = (vertical: string) => {
 export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) {
   const [advisors] = useState(getVerticalAdvisors(vertical));
   const [showAllAdvisors, setShowAllAdvisors] = useState(false);
+  const [tasks, setTasks] = useState<Task[]>([
+    { id: "1", title: "Review investment portfolio", actionDate: new Date(2024, 8, 15), status: 'pending', vertical },
+    { id: "2", title: "Update insurance coverage", actionDate: new Date(2024, 8, 20), status: 'pending', vertical }
+  ]);
   const [agendaItems, setAgendaItems] = useState<AgendaItem[]>([
     { id: "1", title: "Gather current investment statements", completed: true, date: new Date(2024, 8, 10) },
     { id: "2", title: "Review risk tolerance", completed: false, date: new Date(2024, 8, 12) },
     { id: "3", title: "Discuss retirement timeline", completed: false, date: new Date(2024, 8, 14) }
   ]);
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: "1", title: "Review investment portfolio", actionDate: new Date(2024, 8, 15), status: 'pending', agendaItemId: "2", vertical },
-    { id: "2", title: "Update insurance coverage", actionDate: new Date(2024, 8, 20), status: 'pending', agendaItemId: "3", vertical }
-  ]);
-  const [expandedAgendaItems, setExpandedAgendaItems] = useState<string[]>(["2", "3"]);
   
   // New task form state
-  const [showAddTask, setShowAddTask] = useState<string | false>(false);
+  const [showAddTask, setShowAddTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDate, setNewTaskDate] = useState<Date>();
   const [showAddAgenda, setShowAddAgenda] = useState(false);
@@ -105,14 +103,13 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
   // Advisor state - editor dialog
   const [showEditAdvisorDialog, setShowEditAdvisorDialog] = useState(false);
 
-  const handleAddTask = (agendaItemId: string) => {
+  const handleAddTask = () => {
     if (newTaskTitle && newTaskDate) {
       const newTask: Task = {
         id: Date.now().toString(),
         title: newTaskTitle,
         actionDate: newTaskDate,
         status: 'pending',
-        agendaItemId,
         vertical
       };
       setTasks([...tasks, newTask]);
@@ -120,12 +117,6 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
       setNewTaskDate(undefined);
       setShowAddTask(false);
     }
-  };
-
-  const toggleAgendaItemExpansion = (id: string) => {
-    setExpandedAgendaItems(prev =>
-      prev.includes(id) ? prev.filter(itemId => itemId !== id) : [...prev, id]
-    );
   };
 
   const handleAddAgendaItem = () => {
@@ -168,7 +159,7 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
   };
 
   const saveTaskEdit = () => {
-    if (editingTask && editTaskTitle && editTaskDate && editTaskAgendaItem && editTaskVertical) {
+    if (editingTask && editTaskTitle && editTaskDate && editTaskVertical) {
       setTasks(tasks =>
         tasks.map(task =>
           task.id === editingTask
@@ -268,7 +259,275 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
             </CardContent>
           </Card>
 
-          {/* Agenda Items with Nested Tasks */}
+          {/* Tasks Section */}
+          <Card className="flex-1 min-h-0">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <ClipboardList className="h-4 w-4" />
+                  Tasks ({tasks.filter(t => t.status === 'pending').length} pending)
+                </CardTitle>
+                <Button 
+                  onClick={() => setShowAddTask(true)} 
+                  size="sm"
+                  className="h-6 px-2 text-xs"
+                >
+                  <Plus className="h-3 w-3 mr-1" />
+                  Add
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-y-auto">
+              <div className="space-y-2">
+                {tasks.map((task) => (
+                  <div key={task.id} className="p-2 border rounded text-sm">
+                     {editingTask === task.id ? (
+                       <div className="space-y-3">
+                         <div className="grid grid-cols-3 gap-2">
+                           <div>
+                             <Label className="text-xs">Task</Label>
+                             <Select
+                               value={editTaskTitle}
+                               onValueChange={setEditTaskTitle}
+                             >
+                               <SelectTrigger className="h-8 text-xs">
+                                 <SelectValue placeholder="Select task..." />
+                               </SelectTrigger>
+                               <SelectContent>
+                                 {taskOptions.map((option, index) => (
+                                   <SelectItem key={index} value={option} className="text-xs">
+                                     {option}
+                                   </SelectItem>
+                                 ))}
+                                 <SelectItem value="custom" className="text-xs">Add Manual Task</SelectItem>
+                               </SelectContent>
+                             </Select>
+                             {editTaskTitle === "custom" && (
+                               <Input
+                                 className="mt-1 h-8 text-xs"
+                                 placeholder="Enter custom task..."
+                                 onChange={(e) => setEditTaskTitle(e.target.value)}
+                               />
+                             )}
+                           </div>
+                           
+                           <div>
+                             <Label className="text-xs">Action Date</Label>
+                             <Popover>
+                               <PopoverTrigger asChild>
+                                 <Button
+                                   variant="outline"
+                                   size="sm"
+                                   className={cn(
+                                     "w-full justify-start text-left font-normal h-8 text-xs",
+                                     !editTaskDate && "text-muted-foreground"
+                                   )}
+                                 >
+                                   <CalendarIcon className="mr-2 h-3 w-3" />
+                                   {editTaskDate ? format(editTaskDate, "dd MMM") : "Pick date"}
+                                 </Button>
+                               </PopoverTrigger>
+                               <PopoverContent className="w-auto p-0">
+                                 <Calendar
+                                   mode="single"
+                                   selected={editTaskDate}
+                                   onSelect={setEditTaskDate}
+                                   initialFocus
+                                 />
+                               </PopoverContent>
+                             </Popover>
+                           </div>
+
+                           <div>
+                             <Label className="text-xs">Agenda Item</Label>
+                             <Select
+                               value={editTaskAgendaItem}
+                               onValueChange={setEditTaskAgendaItem}
+                             >
+                               <SelectTrigger className="h-8 text-xs">
+                                 <SelectValue placeholder="Select agenda..." />
+                               </SelectTrigger>
+                               <SelectContent>
+                                 {agendaItems.map((item) => (
+                                   <SelectItem key={item.id} value={item.id} className="text-xs">
+                                     {item.title}
+                                   </SelectItem>
+                                 ))}
+                                 <SelectItem value="new" className="text-xs">Add New Agenda Item</SelectItem>
+                               </SelectContent>
+                             </Select>
+                           </div>
+                         </div>
+                         
+                         <div>
+                           <Label className="text-xs">Vertical</Label>
+                           <Select
+                             value={editTaskVertical}
+                             onValueChange={setEditTaskVertical}
+                           >
+                             <SelectTrigger className="h-8 text-xs">
+                               <SelectValue placeholder="Select vertical..." />
+                             </SelectTrigger>
+                             <SelectContent>
+                               <SelectItem value="Financial Planning" className="text-xs">Financial Planning</SelectItem>
+                               <SelectItem value="Tax Planning" className="text-xs">Tax Planning</SelectItem>
+                               <SelectItem value="Insurance" className="text-xs">Insurance</SelectItem>
+                               <SelectItem value="Credit Cards" className="text-xs">Credit Cards</SelectItem>
+                               <SelectItem value="Banking ++" className="text-xs">Banking ++</SelectItem>
+                               <SelectItem value="Estate Planning" className="text-xs">Estate Planning</SelectItem>
+                               <SelectItem value="Others" className="text-xs">Others</SelectItem>
+                             </SelectContent>
+                           </Select>
+                         </div>
+                         
+                         <div className="flex gap-2">
+                           <Button onClick={saveTaskEdit} size="sm" className="h-6 text-xs">Save</Button>
+                           <Button onClick={() => setEditingTask(null)} variant="outline" size="sm" className="h-6 text-xs">Cancel</Button>
+                         </div>
+                       </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="font-medium">{task.title}</div>
+                          <p className="text-xs text-muted-foreground">
+                            {format(task.actionDate, "dd MMM yyyy")}
+                          </p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={() => startEditTask(task)}
+                          >
+                            <FileText className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={() => removeTask(task.id)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {tasks.length === 0 && (
+                  <p className="text-center text-muted-foreground py-4 text-sm">No tasks</p>
+                )}
+              </div>
+
+              {/* Add Task Form */}
+              {showAddTask && (
+                <div className="mt-3 p-3 border rounded bg-muted/50">
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-xs">Task</Label>
+                      <Select
+                        value={newTaskTitle}
+                        onValueChange={setNewTaskTitle}
+                      >
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Select task..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {taskOptions.map((option, index) => (
+                            <SelectItem key={index} value={option} className="text-xs">
+                              {option}
+                            </SelectItem>
+                          ))}
+                          <SelectItem value="custom" className="text-xs">Custom Task</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {newTaskTitle === "custom" && (
+                        <Input
+                          className="mt-2 h-8 text-xs"
+                          placeholder="Enter custom task..."
+                          onChange={(e) => setNewTaskTitle(e.target.value)}
+                        />
+                      )}
+                    </div>
+                    
+                    <div>
+                      <Label className="text-xs">Action Date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className={cn(
+                              "w-full justify-start text-left font-normal h-8 text-xs",
+                              !newTaskDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-3 w-3" />
+                            {newTaskDate ? format(newTaskDate, "dd MMM") : "Pick date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={newTaskDate}
+                            onSelect={setNewTaskDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button onClick={handleAddTask} size="sm" className="h-7 text-xs">Add</Button>
+                      <Button 
+                        onClick={() => setShowAddTask(false)} 
+                        variant="outline" 
+                        size="sm"
+                        className="h-7 text-xs"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-3 h-full flex flex-col">
+          {/* Call Statistics - Three separate boxes with same height as advisors */}
+          <div className="grid grid-cols-3 gap-2 flex-shrink-0">
+            <Card className="flex items-center justify-center h-[88px]">
+              <div className="text-center">
+                <Phone className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                <div className="text-lg font-bold">{stats.totalCalls}</div>
+                <p className="text-xs text-muted-foreground">Calls Completed</p>
+              </div>
+            </Card>
+            
+            <Card className="flex items-center justify-center h-[88px]">
+              <div className="text-center">
+                <FileText className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                <div className="text-lg font-bold">{format(stats.lastCallDate, "dd MMM")}</div>
+                <p className="text-xs text-muted-foreground">Last Call Date</p>
+              </div>
+            </Card>
+            
+            <Card className="flex items-center justify-center h-[88px]">
+              <div className="text-center">
+                <TrendingUp className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                <div className={`text-lg font-bold ${stats.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
+                  {stats.daysSinceLastCall}d
+                </div>
+                <p className="text-xs text-muted-foreground">Days Since</p>
+              </div>
+            </Card>
+          </div>
+
+          {/* Agenda Items */}
           <Card className="flex-1 min-h-0">
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
@@ -300,315 +559,87 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
             </CardHeader>
             <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-y-auto">
               <div className="space-y-2">
-                {sortedAgendaItems.map((item) => {
-                  const itemTasks = tasks.filter(t => t.agendaItemId === item.id);
-                  const isExpanded = expandedAgendaItems.includes(item.id);
-                  
-                  return (
-                    <Collapsible 
-                      key={item.id} 
-                      open={isExpanded}
-                      onOpenChange={() => toggleAgendaItemExpansion(item.id)}
-                    >
-                      <div className={cn(
-                        "border rounded",
-                        item.completed && "bg-green-50 border-green-200"
-                      )}>
-                        {editingAgenda === item.id ? (
-                          <div className="p-2 space-y-2">
-                            <Input
-                              value={editAgendaTitle}
-                              onChange={(e) => setEditAgendaTitle(e.target.value)}
-                              className="h-8 text-xs"
+                {sortedAgendaItems.map((item) => (
+                  <div key={item.id} className={cn(
+                    "p-2 border rounded text-sm",
+                    item.completed && "bg-green-50 border-green-200"
+                  )}>
+                    {editingAgenda === item.id ? (
+                      <div className="space-y-2">
+                        <Input
+                          value={editAgendaTitle}
+                          onChange={(e) => setEditAgendaTitle(e.target.value)}
+                          className="h-8 text-xs"
+                        />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={cn(
+                                "w-full justify-start text-left font-normal h-8 text-xs",
+                                !editAgendaDate && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-3 w-3" />
+                              {editAgendaDate ? format(editAgendaDate, "dd MMM yyyy") : "Pick date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={editAgendaDate}
+                              onSelect={setEditAgendaDate}
+                              initialFocus
                             />
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className={cn(
-                                    "w-full justify-start text-left font-normal h-8 text-xs",
-                                    !editAgendaDate && "text-muted-foreground"
-                                  )}
-                                >
-                                  <CalendarIcon className="mr-2 h-3 w-3" />
-                                  {editAgendaDate ? format(editAgendaDate, "dd MMM yyyy") : "Pick date"}
-                                </Button>
-                              </PopoverTrigger>
-                              <PopoverContent className="w-auto p-0">
-                                <Calendar
-                                  mode="single"
-                                  selected={editAgendaDate}
-                                  onSelect={setEditAgendaDate}
-                                  initialFocus
-                                />
-                              </PopoverContent>
-                            </Popover>
-                            <div className="flex gap-2">
-                              <Button onClick={saveAgendaEdit} size="sm" className="h-6 text-xs">Save</Button>
-                              <Button onClick={() => setEditingAgenda(null)} variant="outline" size="sm" className="h-6 text-xs">Cancel</Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <CollapsibleTrigger asChild>
-                              <div className="p-2 flex items-center justify-between cursor-pointer hover:bg-accent/50 text-sm">
-                                <div className="flex items-center gap-2 flex-1">
-                                  <Checkbox
-                                    checked={item.completed}
-                                    onCheckedChange={() => toggleAgendaItem(item.id)}
-                                    onClick={(e) => e.stopPropagation()}
-                                  />
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-2">
-                                      {isExpanded ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                                      <span className={cn(
-                                        "font-medium",
-                                        item.completed && "text-green-700"
-                                      )}>
-                                        {item.title}
-                                      </span>
-                                      {itemTasks.length > 0 && (
-                                        <Badge variant="secondary" className="text-xs h-4 px-1">
-                                          {itemTasks.length}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    <p className="text-xs text-muted-foreground ml-5">
-                                      {format(item.date, "dd MMM yyyy")}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => startEditAgenda(item)}
-                                  >
-                                    <FileText className="h-3 w-3" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-6 w-6 p-0"
-                                    onClick={() => removeAgendaItem(item.id)}
-                                  >
-                                    <X className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </CollapsibleTrigger>
-                            
-                            <CollapsibleContent>
-                              <div className="px-2 pb-2 ml-8 space-y-2 border-t mt-1 pt-2">
-                                {itemTasks.map((task) => (
-                                  <div key={task.id} className="p-2 border rounded bg-background text-sm">
-                                    {editingTask === task.id ? (
-                                      <div className="space-y-3">
-                                        <div>
-                                          <Label className="text-xs">Task</Label>
-                                          <Select
-                                            value={editTaskTitle}
-                                            onValueChange={setEditTaskTitle}
-                                          >
-                                            <SelectTrigger className="h-8 text-xs">
-                                              <SelectValue placeholder="Select task..." />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              {taskOptions.map((option, index) => (
-                                                <SelectItem key={index} value={option} className="text-xs">
-                                                  {option}
-                                                </SelectItem>
-                                              ))}
-                                              <SelectItem value="custom" className="text-xs">Custom Task</SelectItem>
-                                            </SelectContent>
-                                          </Select>
-                                          {editTaskTitle === "custom" && (
-                                            <Input
-                                              className="mt-1 h-8 text-xs"
-                                              placeholder="Enter custom task..."
-                                              onChange={(e) => setEditTaskTitle(e.target.value)}
-                                            />
-                                          )}
-                                        </div>
-                                        
-                                        <div>
-                                          <Label className="text-xs">Action Date</Label>
-                                          <Popover>
-                                            <PopoverTrigger asChild>
-                                              <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className={cn(
-                                                  "w-full justify-start text-left font-normal h-8 text-xs",
-                                                  !editTaskDate && "text-muted-foreground"
-                                                )}
-                                              >
-                                                <CalendarIcon className="mr-2 h-3 w-3" />
-                                                {editTaskDate ? format(editTaskDate, "dd MMM") : "Pick date"}
-                                              </Button>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0">
-                                              <Calendar
-                                                mode="single"
-                                                selected={editTaskDate}
-                                                onSelect={setEditTaskDate}
-                                                initialFocus
-                                              />
-                                            </PopoverContent>
-                                          </Popover>
-                                        </div>
-
-                                        <div>
-                                          <Label className="text-xs">Agenda Item</Label>
-                                          <Select
-                                            value={editTaskAgendaItem}
-                                            onValueChange={setEditTaskAgendaItem}
-                                          >
-                                            <SelectTrigger className="h-8 text-xs">
-                                              <SelectValue placeholder="Select agenda..." />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                              {agendaItems.map((agendaItem) => (
-                                                <SelectItem key={agendaItem.id} value={agendaItem.id} className="text-xs">
-                                                  {agendaItem.title}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-                                        
-                                        <div className="flex gap-2">
-                                          <Button onClick={saveTaskEdit} size="sm" className="h-6 text-xs">Save</Button>
-                                          <Button onClick={() => setEditingTask(null)} variant="outline" size="sm" className="h-6 text-xs">Cancel</Button>
-                                        </div>
-                                      </div>
-                                    ) : (
-                                      <div className="flex items-center justify-between">
-                                        <div className="flex-1">
-                                          <div className="font-medium text-xs">{task.title}</div>
-                                          <p className="text-xs text-muted-foreground">
-                                            {format(task.actionDate, "dd MMM yyyy")}
-                                          </p>
-                                        </div>
-                                        <div className="flex gap-1">
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-6 w-6 p-0"
-                                            onClick={() => startEditTask(task)}
-                                          >
-                                            <FileText className="h-3 w-3" />
-                                          </Button>
-                                          <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            className="h-6 w-6 p-0"
-                                            onClick={() => removeTask(task.id)}
-                                          >
-                                            <X className="h-3 w-3" />
-                                          </Button>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
-                                
-                                {/* Add Task Button for this agenda item */}
-                                {showAddTask === item.id ? (
-                                  <div className="p-2 border rounded bg-muted/50">
-                                    <div className="space-y-2">
-                                      <div>
-                                        <Label className="text-xs">Task</Label>
-                                        <Select
-                                          value={newTaskTitle}
-                                          onValueChange={setNewTaskTitle}
-                                        >
-                                          <SelectTrigger className="h-8 text-xs">
-                                            <SelectValue placeholder="Select task..." />
-                                          </SelectTrigger>
-                                          <SelectContent>
-                                            {taskOptions.map((option, index) => (
-                                              <SelectItem key={index} value={option} className="text-xs">
-                                                {option}
-                                              </SelectItem>
-                                            ))}
-                                            <SelectItem value="custom" className="text-xs">Custom Task</SelectItem>
-                                          </SelectContent>
-                                        </Select>
-                                        {newTaskTitle === "custom" && (
-                                          <Input
-                                            className="mt-1 h-8 text-xs"
-                                            placeholder="Enter custom task..."
-                                            onChange={(e) => setNewTaskTitle(e.target.value)}
-                                          />
-                                        )}
-                                      </div>
-                                      
-                                      <div>
-                                        <Label className="text-xs">Action Date</Label>
-                                        <Popover>
-                                          <PopoverTrigger asChild>
-                                            <Button
-                                              variant="outline"
-                                              size="sm"
-                                              className={cn(
-                                                "w-full justify-start text-left font-normal h-8 text-xs",
-                                                !newTaskDate && "text-muted-foreground"
-                                              )}
-                                            >
-                                              <CalendarIcon className="mr-2 h-3 w-3" />
-                                              {newTaskDate ? format(newTaskDate, "dd MMM") : "Pick date"}
-                                            </Button>
-                                          </PopoverTrigger>
-                                          <PopoverContent className="w-auto p-0">
-                                            <Calendar
-                                              mode="single"
-                                              selected={newTaskDate}
-                                              onSelect={setNewTaskDate}
-                                              initialFocus
-                                            />
-                                          </PopoverContent>
-                                        </Popover>
-                                      </div>
-
-                                      <div className="flex gap-2">
-                                        <Button onClick={() => handleAddTask(item.id)} size="sm" className="h-7 text-xs">Add</Button>
-                                        <Button 
-                                          onClick={() => {
-                                            setShowAddTask(false);
-                                            setNewTaskTitle("");
-                                            setNewTaskDate(undefined);
-                                          }} 
-                                          variant="outline" 
-                                          size="sm"
-                                          className="h-7 text-xs"
-                                        >
-                                          Cancel
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="h-7 w-full text-xs"
-                                    onClick={() => setShowAddTask(item.id)}
-                                  >
-                                    <Plus className="h-3 w-3 mr-1" />
-                                    Add Task
-                                  </Button>
-                                )}
-                              </div>
-                            </CollapsibleContent>
-                          </>
-                        )}
+                          </PopoverContent>
+                        </Popover>
+                        <div className="flex gap-2">
+                          <Button onClick={saveAgendaEdit} size="sm" className="h-6 text-xs">Save</Button>
+                          <Button onClick={() => setEditingAgenda(null)} variant="outline" size="sm" className="h-6 text-xs">Cancel</Button>
+                        </div>
                       </div>
-                    </Collapsible>
-                  );
-                })}
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 flex-1">
+                          <Checkbox
+                            checked={item.completed}
+                            onCheckedChange={() => toggleAgendaItem(item.id)}
+                          />
+                          <div className="flex-1">
+                            <div className={cn(
+                              "font-medium",
+                              item.completed && "text-green-700"
+                            )}>
+                              {item.title}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {format(item.date, "dd MMM yyyy")}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={() => startEditAgenda(item)}
+                          >
+                            <FileText className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={() => removeAgendaItem(item.id)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
                 {agendaItems.length === 0 && (
                   <p className="text-center text-muted-foreground py-4 text-sm">No agenda items</p>
                 )}
@@ -672,61 +703,6 @@ export function FRDSubsection({ client, vertical, onBack }: FRDSubsectionProps) 
                 </div>
               )}
             </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column */}
-        <div className="space-y-3 h-full flex flex-col">
-          {/* Call Statistics - Three separate boxes with same height as advisors */}
-          <div className="grid grid-cols-3 gap-2 flex-shrink-0">
-            <Card className="flex items-center justify-center h-[88px]">
-              <div className="text-center">
-                <Phone className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
-                <div className="text-lg font-bold">{stats.totalCalls}</div>
-                <p className="text-xs text-muted-foreground">Calls Completed</p>
-              </div>
-            </Card>
-            
-            <Card className="flex items-center justify-center h-[88px]">
-              <div className="text-center">
-                <FileText className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
-                <div className="text-lg font-bold">{format(stats.lastCallDate, "dd MMM")}</div>
-                <p className="text-xs text-muted-foreground">Last Call Date</p>
-              </div>
-            </Card>
-            
-            <Card className="flex items-center justify-center h-[88px]">
-              <div className="text-center">
-                <TrendingUp className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
-                <div className={`text-lg font-bold ${stats.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
-                  {stats.daysSinceLastCall}d
-                </div>
-                <p className="text-xs text-muted-foreground">Days Since</p>
-              </div>
-            </Card>
-          </div>
-
-          {/* Call Statistics Only */}
-          <Card className="flex-1 min-h-0 flex items-center justify-center">
-            <div className="text-center p-6">
-              <Phone className="h-8 w-8 text-muted-foreground mx-auto mb-3" />
-              <div className="space-y-4">
-                <div>
-                  <div className="text-3xl font-bold">{stats.totalCalls}</div>
-                  <p className="text-sm text-muted-foreground">Calls Completed</p>
-                </div>
-                <div>
-                  <div className="text-xl font-semibold">{format(stats.lastCallDate, "dd MMM yyyy")}</div>
-                  <p className="text-sm text-muted-foreground">Last Call Date</p>
-                </div>
-                <div>
-                  <div className={`text-xl font-semibold ${stats.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
-                    {stats.daysSinceLastCall} days
-                  </div>
-                  <p className="text-sm text-muted-foreground">Since Last Call</p>
-                </div>
-              </div>
-            </div>
           </Card>
         </div>
       </div>
