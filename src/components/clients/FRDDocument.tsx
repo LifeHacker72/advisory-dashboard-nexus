@@ -385,6 +385,216 @@ export function FRDDocument({ client }: FRDDocumentProps) {
             </CardContent>
           </Card>
 
+          {/* Agenda Items */}
+          <Card className="flex-1 min-h-0">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-sm">
+                  <CheckCircle2 className="h-4 w-4" />
+                  Agenda Items ({agendaItems.filter(item => !item.completed).length} active)
+                </CardTitle>
+                <div className="flex gap-2">
+                  <Select value={agendaFilter} onValueChange={(value: 'all' | 'completed' | 'pending') => setAgendaFilter(value)}>
+                    <SelectTrigger className="h-6 w-20 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all" className="text-xs">All</SelectItem>
+                      <SelectItem value="pending" className="text-xs">Pending</SelectItem>
+                      <SelectItem value="completed" className="text-xs">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button 
+                    onClick={() => setShowAddAgenda(true)} 
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                  >
+                    <Plus className="h-3 w-3 mr-1" />
+                    Add
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-y-auto">
+              <div className="space-y-2">
+                {sortedAgendaItems.map((item) => (
+                  <div key={item.id} className={cn(
+                    "p-2 border rounded text-sm",
+                    item.completed && "bg-green-50 border-green-200"
+                  )}>
+                    {editingAgenda === item.id ? (
+                      <div className="space-y-2">
+                        <Input
+                          value={editAgendaTitle}
+                          onChange={(e) => setEditAgendaTitle(e.target.value)}
+                          className="h-8 text-xs"
+                        />
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className={cn(
+                                "w-full justify-start text-left font-normal h-8 text-xs",
+                                !editAgendaDate && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-3 w-3" />
+                              {editAgendaDate ? format(editAgendaDate, "dd MMM yyyy") : "Pick date"}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={editAgendaDate}
+                              onSelect={setEditAgendaDate}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <div className="flex gap-2">
+                          <Button onClick={saveAgendaEdit} size="sm" className="h-6 text-xs">Save</Button>
+                          <Button onClick={() => setEditingAgenda(null)} variant="outline" size="sm" className="h-6 text-xs">Cancel</Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 flex-1">
+                          <Checkbox
+                            checked={item.completed}
+                            onCheckedChange={() => toggleAgendaItem(item.id)}
+                            className="h-4 w-4"
+                          />
+                          <div className="flex-1">
+                            <div className={cn(
+                              "font-medium",
+                              item.completed && "line-through text-muted-foreground"
+                            )}>
+                              {item.title}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {format(item.date, "dd MMM yyyy")}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={() => startEditAgenda(item)}
+                          >
+                            <FileText className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0"
+                            onClick={() => removeAgendaItem(item.id)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+                {sortedAgendaItems.length === 0 && (
+                  <p className="text-center text-muted-foreground py-4 text-sm">No agenda items</p>
+                )}
+              </div>
+
+              {/* Add Agenda Form */}
+              {showAddAgenda && (
+                <div className="mt-3 p-3 border rounded bg-muted/50">
+                  <div className="space-y-3">
+                    <div>
+                      <Label className="text-xs">Agenda Item</Label>
+                      <Input
+                        value={newAgendaTitle}
+                        onChange={(e) => setNewAgendaTitle(e.target.value)}
+                        className="h-8 text-xs"
+                        placeholder="Enter agenda item..."
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Date</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal h-8 text-xs",
+                              !newAgendaDate && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-3 w-3" />
+                            {newAgendaDate ? format(newAgendaDate, "dd MMM yyyy") : "Pick date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={newAgendaDate}
+                            onSelect={setNewAgendaDate}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button onClick={handleAddAgendaItem} size="sm" className="h-7 text-xs">Add</Button>
+                      <Button 
+                        onClick={() => {
+                          setShowAddAgenda(false);
+                          setNewAgendaTitle("");
+                          setNewAgendaDate(undefined);
+                        }} 
+                        variant="outline" 
+                        size="sm"
+                        className="h-7 text-xs"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column */}
+        <div className="space-y-3 h-full flex flex-col">
+          {/* Call Statistics - Three separate boxes with same height as advisors */}
+          <div className="grid grid-cols-3 gap-2 flex-shrink-0">
+            <Card className="flex items-center justify-center h-[88px]">
+              <div className="text-center">
+                <Phone className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                <div className="text-lg font-bold">{cumulativeStats.totalCalls}</div>
+                <p className="text-xs text-muted-foreground">Calls Completed</p>
+              </div>
+            </Card>
+            
+            <Card className="flex items-center justify-center h-[88px]">
+              <div className="text-center">
+                <FileText className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                <div className="text-lg font-bold">{format(cumulativeStats.lastCallDate, "dd MMM")}</div>
+                <p className="text-xs text-muted-foreground">Last Call Date</p>
+              </div>
+            </Card>
+            
+            <Card className="flex items-center justify-center h-[88px]">
+              <div className="text-center">
+                <TrendingUp className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                <div className={`text-lg font-bold ${cumulativeStats.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
+                  {cumulativeStats.daysSinceLastCall}d
+                </div>
+                <p className="text-xs text-muted-foreground">Days Since</p>
+              </div>
+            </Card>
+          </div>
+
           {/* Tasks Section */}
           <Card className="flex-1 min-h-0">
             <CardHeader className="pb-2">
@@ -565,7 +775,7 @@ export function FRDDocument({ client }: FRDDocumentProps) {
                               {option}
                             </SelectItem>
                           ))}
-                          <SelectItem value="custom" className="text-xs">Custom Task</SelectItem>
+                          <SelectItem value="custom" className="text-xs">Add Manual Task</SelectItem>
                         </SelectContent>
                       </Select>
                       {newTaskTitle === "custom" && (
@@ -576,21 +786,19 @@ export function FRDDocument({ client }: FRDDocumentProps) {
                         />
                       )}
                     </div>
-                    
                     <div>
                       <Label className="text-xs">Action Date</Label>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
-                            size="sm"
                             className={cn(
                               "w-full justify-start text-left font-normal h-8 text-xs",
                               !newTaskDate && "text-muted-foreground"
                             )}
                           >
                             <CalendarIcon className="mr-2 h-3 w-3" />
-                            {newTaskDate ? format(newTaskDate, "dd MMM") : "Pick date"}
+                            {newTaskDate ? format(newTaskDate, "dd MMM yyyy") : "Pick a date"}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0">
@@ -608,216 +816,6 @@ export function FRDDocument({ client }: FRDDocumentProps) {
                       <Button onClick={handleAddTask} size="sm" className="h-7 text-xs">Add</Button>
                       <Button 
                         onClick={() => setShowAddTask(false)} 
-                        variant="outline" 
-                        size="sm"
-                        className="h-7 text-xs"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right Column */}
-        <div className="space-y-3 h-full flex flex-col">
-          {/* Call Statistics - Three separate boxes with same height as advisors */}
-          <div className="grid grid-cols-3 gap-2 flex-shrink-0">
-            <Card className="flex items-center justify-center h-[88px]">
-              <div className="text-center">
-                <Phone className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
-                <div className="text-lg font-bold">{cumulativeStats.totalCalls}</div>
-                <p className="text-xs text-muted-foreground">Calls Completed</p>
-              </div>
-            </Card>
-            
-            <Card className="flex items-center justify-center h-[88px]">
-              <div className="text-center">
-                <FileText className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
-                <div className="text-lg font-bold">{format(cumulativeStats.lastCallDate, "dd MMM")}</div>
-                <p className="text-xs text-muted-foreground">Last Call Date</p>
-              </div>
-            </Card>
-            
-            <Card className="flex items-center justify-center h-[88px]">
-              <div className="text-center">
-                <TrendingUp className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
-                <div className={`text-lg font-bold ${cumulativeStats.daysSinceLastCall > 30 ? "text-red-600" : ""}`}>
-                  {cumulativeStats.daysSinceLastCall}d
-                </div>
-                <p className="text-xs text-muted-foreground">Days Since</p>
-              </div>
-            </Card>
-          </div>
-
-          {/* Agenda Items */}
-          <Card className="flex-1 min-h-0">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-4 w-4" />
-                  Agenda Items ({agendaItems.filter(item => !item.completed).length} active)
-                </CardTitle>
-                <div className="flex gap-2">
-                  <Select value={agendaFilter} onValueChange={(value: 'all' | 'completed' | 'pending') => setAgendaFilter(value)}>
-                    <SelectTrigger className="h-6 w-20 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all" className="text-xs">All</SelectItem>
-                      <SelectItem value="pending" className="text-xs">Pending</SelectItem>
-                      <SelectItem value="completed" className="text-xs">Completed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button 
-                    onClick={() => setShowAddAgenda(true)} 
-                    size="sm"
-                    className="h-6 px-2 text-xs"
-                  >
-                    <Plus className="h-3 w-3 mr-1" />
-                    Add
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0 h-[calc(100%-3rem)] overflow-y-auto">
-              <div className="space-y-2">
-                {sortedAgendaItems.map((item) => (
-                  <div key={item.id} className={cn(
-                    "p-2 border rounded text-sm",
-                    item.completed && "bg-green-50 border-green-200"
-                  )}>
-                    {editingAgenda === item.id ? (
-                      <div className="space-y-2">
-                        <Input
-                          value={editAgendaTitle}
-                          onChange={(e) => setEditAgendaTitle(e.target.value)}
-                          className="h-8 text-xs"
-                        />
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className={cn(
-                                "w-full justify-start text-left font-normal h-8 text-xs",
-                                !editAgendaDate && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-3 w-3" />
-                              {editAgendaDate ? format(editAgendaDate, "dd MMM yyyy") : "Pick date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0">
-                            <Calendar
-                              mode="single"
-                              selected={editAgendaDate}
-                              onSelect={setEditAgendaDate}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        <div className="flex gap-2">
-                          <Button onClick={saveAgendaEdit} size="sm" className="h-6 text-xs">Save</Button>
-                          <Button onClick={() => setEditingAgenda(null)} variant="outline" size="sm" className="h-6 text-xs">Cancel</Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 flex-1">
-                          <Checkbox
-                            checked={item.completed}
-                            onCheckedChange={() => toggleAgendaItem(item.id)}
-                          />
-                          <div className="flex-1">
-                            <div className={cn(
-                              "font-medium",
-                              item.completed && "text-green-700"
-                            )}>
-                              {item.title}
-                            </div>
-                            <p className="text-xs text-muted-foreground">
-                              {format(item.date, "dd MMM yyyy")}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0"
-                            onClick={() => startEditAgenda(item)}
-                          >
-                            <FileText className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0"
-                            onClick={() => removeAgendaItem(item.id)}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {agendaItems.length === 0 && (
-                  <p className="text-center text-muted-foreground py-4 text-sm">No agenda items</p>
-                )}
-              </div>
-
-              {/* Add Agenda Item Form */}
-              {showAddAgenda && (
-                <div className="mt-3 p-3 border rounded bg-muted/50">
-                  <div className="space-y-3">
-                    <div>
-                      <Label className="text-xs">Agenda Item</Label>
-                      <Input
-                        value={newAgendaTitle}
-                        onChange={(e) => setNewAgendaTitle(e.target.value)}
-                        placeholder="Enter agenda item..."
-                        className="h-8 text-xs"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Date</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className={cn(
-                              "w-full justify-start text-left font-normal h-8 text-xs",
-                              !newAgendaDate && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-3 w-3" />
-                            {newAgendaDate ? format(newAgendaDate, "dd MMM") : "Pick date"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={newAgendaDate}
-                            onSelect={setNewAgendaDate}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button onClick={handleAddAgendaItem} size="sm" className="h-7 text-xs">Add</Button>
-                      <Button 
-                        onClick={() => {
-                          setShowAddAgenda(false);
-                          setNewAgendaTitle("");
-                          setNewAgendaDate(undefined);
-                        }} 
                         variant="outline" 
                         size="sm"
                         className="h-7 text-xs"
