@@ -8,14 +8,10 @@ import {
   Dialog, 
   DialogContent, 
   DialogDescription, 
-  DialogFooter, 
   DialogHeader, 
   DialogTitle 
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import NewBookingForm from "@/components/bookings/NewBookingForm";
 
 interface Booking {
@@ -141,15 +137,19 @@ export default function Bookings() {
           {booking.status.charAt(0).toUpperCase() + booking.status.slice(1).replace("_", " ")}
         </StatusBadge>
       ),
-      onClick: (booking: Booking) => console.log(`Filter by status: ${booking.status}`),
     },
     {
       key: "records",
       title: "Records",
       render: (booking: Booking) => (
-        <span className={`${booking.status !== "completed" ? "text-muted-foreground" : ""}`}>
+        <span className={`font-medium ${
+          booking.records === "available" ? "text-success" : 
+          booking.records === "unavailable" ? "text-danger" : 
+          "text-muted-foreground"
+        }`}>
           {booking.records === "available" ? "Available" : 
-           booking.records === "unavailable" ? "Unavailable" : "-"}
+           booking.records === "unavailable" ? "Unavailable" : 
+           "-"}
         </span>
       ),
     },
@@ -157,27 +157,22 @@ export default function Bookings() {
       key: "actions",
       title: "Actions",
       render: (booking: Booking) => (
-        <div className="flex space-x-2">
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              handleEditClick(booking);
-            }}
-            className="h-8 w-8 p-0 inline-flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-          >
-            <Edit className="h-4 w-4" />
-            <span className="sr-only">Edit</span>
-          </button>
-          <button 
-            className="h-8 w-8 p-0 inline-flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground"
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log("View booking details", booking);
-            }}
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => console.log("View records:", booking)}
+            disabled={booking.records === "-"}
           >
             <Eye className="h-4 w-4" />
-            <span className="sr-only">View</span>
-          </button>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => handleEditClick(booking)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
         </div>
       ),
     },
@@ -185,18 +180,15 @@ export default function Bookings() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 animate-fade-in">
-        <div className="flex items-center justify-between">
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Bookings</h2>
+            <h1 className="text-3xl font-bold tracking-tight">Bookings</h1>
             <p className="text-muted-foreground">
-              Schedule and manage all member-advisor meetings.
+              Manage and schedule meetings with members and advisors
             </p>
           </div>
-          <Button 
-            className="bg-primary text-black" 
-            onClick={() => setOpenNewBooking(true)}
-          >
+          <Button onClick={() => setOpenNewBooking(true)}>
             <Plus className="mr-2 h-4 w-4" /> Add New Booking
           </Button>
         </div>
@@ -258,7 +250,7 @@ export default function Bookings() {
 
         {/* Add New Booking Dialog */}
         <Dialog open={openNewBooking} onOpenChange={setOpenNewBooking}>
-          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Add New Booking</DialogTitle>
               <DialogDescription>
@@ -271,96 +263,14 @@ export default function Bookings() {
 
         {/* Edit Booking Dialog */}
         <Dialog open={openEditBooking} onOpenChange={setOpenEditBooking}>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Edit Booking</DialogTitle>
               <DialogDescription>
-                Update booking details and status.
+                Update booking details for {selectedBooking?.client}.
               </DialogDescription>
             </DialogHeader>
-            {selectedBooking && (
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="edit-client" className="text-right">
-                    Member
-                  </Label>
-                  <Input 
-                    id="edit-client" 
-                    defaultValue={selectedBooking.client}
-                    className="col-span-3" 
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="edit-advisor" className="text-right">
-                    Advisor
-                  </Label>
-                  <Input 
-                    id="edit-advisor" 
-                    defaultValue={selectedBooking.advisor}
-                    className="col-span-3" 
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="edit-date" className="text-right">
-                    Date
-                  </Label>
-                  <Input 
-                    id="edit-date" 
-                    type="datetime-local"
-                    className="col-span-3" 
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="edit-status" className="text-right">
-                    Status
-                  </Label>
-                  <Select defaultValue={selectedBooking.status}>
-                    <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="upcoming">Upcoming</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                      <SelectItem value="no_show">No Show</SelectItem>
-                      <SelectItem value="rescheduled">Rescheduled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="edit-records" className="text-right">
-                    Records
-                  </Label>
-                  <Select 
-                    defaultValue={selectedBooking.records}
-                    disabled={selectedBooking.status !== "completed"}
-                  >
-                    <SelectTrigger className="col-span-3">
-                      <SelectValue placeholder="Select record status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="-">-</SelectItem>
-                      <SelectItem value="available">Available</SelectItem>
-                      <SelectItem value="unavailable">Unavailable</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setOpenEditBooking(false)}>
-                Cancel
-              </Button>
-              <Button 
-                className="bg-primary text-black"
-                onClick={() => {
-                  console.log("Booking updated");
-                  setOpenEditBooking(false);
-                }}
-              >
-                Save Changes
-              </Button>
-            </DialogFooter>
+            <NewBookingForm onClose={() => setOpenEditBooking(false)} />
           </DialogContent>
         </Dialog>
       </div>
